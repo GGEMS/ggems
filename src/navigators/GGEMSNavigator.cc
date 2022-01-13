@@ -58,13 +58,13 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator creating..." << GGendl;
 
-  position_xyz_.x = 0.0f;
-  position_xyz_.y = 0.0f;
-  position_xyz_.z = 0.0f;
+  position_xyz_.s[0] = 0.0f;
+  position_xyz_.s[1] = 0.0f;
+  position_xyz_.s[2] = 0.0f;
 
-  rotation_xyz_.x = 0.0f;
-  rotation_xyz_.y = 0.0f;
-  rotation_xyz_.z = 0.0f;
+  rotation_xyz_.s[0] = 0.0f;
+  rotation_xyz_.s[1] = 0.0f;
+  rotation_xyz_.s[2] = 0.0f;
 
   // Store the phantom navigator in phantom navigator manager
   GGEMSNavigatorManager::GetInstance().Store(this);
@@ -143,9 +143,9 @@ void GGEMSNavigator::SetDosimetryCalculator(GGEMSDosimetryCalculator* dosimetry_
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
   is_update_pos_ = true;
-  position_xyz_.x = DistanceUnit(position_x, unit);
-  position_xyz_.y = DistanceUnit(position_y, unit);
-  position_xyz_.z = DistanceUnit(position_z, unit);
+  position_xyz_.s[0] = DistanceUnit(position_x, unit);
+  position_xyz_.s[1] = DistanceUnit(position_y, unit);
+  position_xyz_.s[2] = DistanceUnit(position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -155,9 +155,9 @@ void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& posit
 void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   is_update_rot_ = true;
-  rotation_xyz_.x = AngleUnit(rx, unit);
-  rotation_xyz_.y = AngleUnit(ry, unit);
-  rotation_xyz_.z = AngleUnit(rz, unit);
+  rotation_xyz_.s[0] = AngleUnit(rx, unit);
+  rotation_xyz_.s[1] = AngleUnit(ry, unit);
+  rotation_xyz_.s[2] = AngleUnit(rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

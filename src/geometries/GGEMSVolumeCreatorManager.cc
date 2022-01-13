@@ -45,9 +45,9 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
 {
   GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "GGEMSVolumeCreatorManager creating..." << GGendl;
 
-  element_sizes_.x = 0.0f;
-  element_sizes_.y = 0.0f;
-  element_sizes_.z = 0.0f;
+  element_sizes_.s[0] = 0.0f;
+  element_sizes_.s[1] = 0.0f;
+  element_sizes_.s[2] = 0.0f;
 
   volume_dimensions_.x_ = 0;
   volume_dimensions_.y_ = 0;
@@ -92,9 +92,9 @@ void GGEMSVolumeCreatorManager::Clean(void)
 
 void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, std::string const& unit)
 {
-  element_sizes_.x = DistanceUnit(voxel_width, unit);
-  element_sizes_.y = DistanceUnit(voxel_height, unit);
-  element_sizes_.z = DistanceUnit(voxel_depth, unit);
+  element_sizes_.s[0] = DistanceUnit(voxel_width, unit);
+  element_sizes_.s[1] = DistanceUnit(voxel_height, unit);
+  element_sizes_.s[2] = DistanceUnit(voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ void GGEMSVolumeCreatorManager::CheckParameters(void) const
   }
 
   // Checking size of voxels
-  if (element_sizes_.x == 0.0f && element_sizes_.y == 0.0f && element_sizes_.z == 0.0f) {
+  if (element_sizes_.s[0] == 0.0f && element_sizes_.s[1] == 0.0f && element_sizes_.s[2] == 0.0f) {
     GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
   }
 

@@ -156,13 +156,18 @@ LICENSE
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
 #endif
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#ifdef _WIN32
 #pragma GCC diagnostic ignored "-Wreserved-identifier"
+#endif
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wcast-qual"

@@ -203,7 +203,7 @@ void GGEMSMHDImage::Write(T* image)
   out_header_stream << "ObjectType = Image" << std::endl;
   out_header_stream << "BinaryDataByteOrderMSB = False" << std::endl;
   out_header_stream << "NDims = 3" << std::endl;
-  out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
+  out_header_stream << "ElementSpacing = " << element_sizes_.s[0] << " " << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
   out_header_stream << "DimSize = " << dimensions_.x_ << " " << dimensions_.y_ << " " << dimensions_.z_ << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;

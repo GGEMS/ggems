@@ -219,7 +219,7 @@ void GGEMSSolid::SetPosition(GGfloat3 const& position_xyz)
 
   #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
-    opengl_solid_->SetPosition(position_xyz.x, position_xyz.y, position_xyz.z);
+    opengl_solid_->SetPosition(position_xyz.s[0], position_xyz.s[1], position_xyz.s[2]);
   #endif
 }
 

@@ -62,9 +62,9 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   );
 
   // Initialization of parameters
-  focal_spot_size_.x = std::numeric_limits<float>::min();
-  focal_spot_size_.y = std::numeric_limits<float>::min();
-  focal_spot_size_.z = std::numeric_limits<float>::min();
+  focal_spot_size_.s[0] = std::numeric_limits<float>::min();
+  focal_spot_size_.s[1] = std::numeric_limits<float>::min();
+  focal_spot_size_.s[2] = std::numeric_limits<float>::min();
 
   // Allocating memory for cdf and energy spectrum
   energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
@@ -454,9 +454,9 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, std::string 
 
 void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit)
 {
-  focal_spot_size_.x = DistanceUnit(width, unit);
-  focal_spot_size_.y = DistanceUnit(height, unit);
-  focal_spot_size_.z = DistanceUnit(depth, unit);
+  focal_spot_size_.s[0] = DistanceUnit(width, unit);
+  focal_spot_size_.s[1] = DistanceUnit(height, unit);
+  focal_spot_size_.s[2] = DistanceUnit(depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

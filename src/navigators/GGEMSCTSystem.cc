@@ -135,7 +135,7 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
   // rho = Hypotenuse
   // h = Apothem or source detector distance in our case
   // c = Half-distance of module in Y
-  GGfloat c = (static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.y)*0.5f;
+  GGfloat c = (static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.s[1])*0.5f;
   GGfloat rho = std::sqrt(source_detector_distance_*source_detector_distance_ + c*c);
   GGfloat alpha = 2.0f*std::asin(c/rho);
 
@@ -157,20 +157,20 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 
     for (GGsize i = 0; i < number_of_modules_xy_.x_; ++i) { // for X modules
       // Computing the Z position in global position (isocenter)
-      GGfloat global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.x*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
+      GGfloat global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.s[0]*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
 
       GGsize global_index = i+j*number_of_modules_xy_.x_;
 
       GGfloat3 rotation;
-      rotation.x = 0.0f;
-      rotation.y = 0.0f;
-      rotation.z = step_angle;
+      rotation.s[0] = 0.0f;
+      rotation.s[1] = 0.0f;
+      rotation.s[2] = step_angle;
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x + global_system_position_xyz_.x;
-      position.y = global_position_y + global_system_position_xyz_.y;
-      position.z = global_position_z + global_system_position_xyz_.z;
+      position.s[0] = global_position_x + global_system_position_xyz_.s[0];
+      position.s[1] = global_position_y + global_system_position_xyz_.s[1];
+      position.s[2] = global_position_z + global_system_position_xyz_.s[2];
       solids_[global_index]->SetPosition(position);
 
       // Rotation for OpenGL volume
@@ -192,23 +192,23 @@ void GGEMSCTSystem::InitializeFlatGeometry(void)
 
   // Consider flat geometry for CBCT configuration
   for (GGsize j = 0; j < number_of_modules_xy_.y_; ++j) { // Y modules
-    global_position_y = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.y*(static_cast<GGfloat>(j)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.y_)));
+    global_position_y = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.s[1]*(static_cast<GGfloat>(j)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.y_)));
     for (GGsize i = 0; i < number_of_modules_xy_.x_; ++i) { // X modules
-      global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.x*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
+      global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.s[0]*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
 
       GGsize global_index = i+j*number_of_modules_xy_.x_;
 
       // No rotation of module
       GGfloat3 rotation;
-      rotation.x = 0.0f;
-      rotation.y = 0.0f;
-      rotation.z = 0.0f;
+      rotation.s[0] = 0.0f;
+      rotation.s[1] = 0.0f;
+      rotation.s[2] = 0.0f;
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x + global_system_position_xyz_.x;
-      position.y = global_position_y + global_system_position_xyz_.y;
-      position.z = global_position_z + global_system_position_xyz_.z;
+      position.s[0] = global_position_x + global_system_position_xyz_.s[0];
+      position.s[1] = global_position_y + global_system_position_xyz_.s[1];
+      position.s[2] = global_position_z + global_system_position_xyz_.s[2];
       solids_[global_index]->SetPosition(position);
     }
   }
@@ -241,9 +241,9 @@ void GGEMSCTSystem::Initialize(void)
       number_of_detection_elements_inside_module_xyz_.x_,
       number_of_detection_elements_inside_module_xyz_.y_,
       number_of_detection_elements_inside_module_xyz_.z_,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.x,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.y,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.s[0],
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.s[1],
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.s[2],
       "HISTOGRAM"
     );
     solids_[i]->SetVisible(is_visible_);
@@ -273,9 +273,9 @@ void GGEMSCTSystem::Initialize(void)
   if (is_update_rot_) {
     for (GGsize i = 0; i < number_of_solids_; ++i) {
       solids_[i]->SetRotation(rotation_xyz_);
-      solids_[i]->SetXUpdateAngleOpenGL(rotation_xyz_.x);
-      solids_[i]->SetYUpdateAngleOpenGL(rotation_xyz_.y);
-      solids_[i]->SetZUpdateAngleOpenGL(rotation_xyz_.z);
+      solids_[i]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
+      solids_[i]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
+      solids_[i]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
     }
   }
 

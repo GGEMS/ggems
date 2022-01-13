@@ -49,7 +49,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 IF(WIN32)
   SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
 ELSE()
-  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
+  SET(COMPILER INTEL CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
 ENDIF()
 
 IF(COMPILER STREQUAL "CLANG")
@@ -99,7 +99,6 @@ IF(OPENGL_VISUALIZATION)
   SET(GLEW_USE_STATIC_LIBS TRUE) # Using GLEW in static, important for Python!!!
   FIND_PACKAGE(GLEW REQUIRED)
   FIND_PACKAGE(glm REQUIRED)
-  GET_FILENAME_COMPONENT(GLM_INCLUDE_DIR ${glm_DIR}/../../../include ABSOLUTE)
 ENDIF()
 
 #-------------------------------------------------------------------------------
@@ -180,7 +179,7 @@ IF(WIN32)
     STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS /EHsc /O3 /std:c++17 /W4 -Wno-deprecated-declarations /external:I${PROJECT_SOURCE_DIR}/include/externs /external:I${GLFW3_INCLUDE_DIR} /external:I${GLEW_INCLUDE_DIR} /external:I${OpenCL_INCLUDE_DIRS} /external:I${GLM_INCLUDE_DIR} -Xclang -Weverything -march=native -m64 -Wno-float-equal -Wno-reserved-macro-identifier -Wno-global-constructors -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-deprecated-copy-with-dtor -Wno-exit-time-destructors -Wundef -Wdouble-promotion -Wshadow -Wno-unused-parameter -Wconversion)
+    SET(CXX_FLAGS /EHsc /O3 /std:c++17 /W3 -Wno-deprecated-declarations -Xclang -march=native -m64 -Wundef -Wdouble-promotion -Wshadow -Wno-unused-parameter -Wconversion)
     SET(CXX_FLAGS_RELEASE /O3 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 
@@ -206,14 +205,15 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++17 -Wextra -Wall -Werror -m64 -march=native -Wno-unused-parameter)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
 
+  # Checking compiler for INTEL
   ELSEIF(COMPILER STREQUAL "INTEL")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Wextra -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
 
   # Otherwize error
   ELSE()
