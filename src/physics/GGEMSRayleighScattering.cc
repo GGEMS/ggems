@@ -91,7 +91,7 @@ GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energ
   }
 
   if (energy < 1e3f) { // 1 GeV
-    return static_cast<GGfloat>(1.0e-22 * LogLogInterpolation(
+    return static_cast<GGfloat>(1.0e-22f * LogLogInterpolation(
       energy,
       GGEMSRayleighTable::kCrossSection[pos-2], GGEMSRayleighTable::kCrossSection[pos-1],
       GGEMSRayleighTable::kCrossSection[pos], GGEMSRayleighTable::kCrossSection[pos+1]));

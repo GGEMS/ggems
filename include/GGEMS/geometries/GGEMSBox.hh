@@ -52,7 +52,7 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
     /*!
       \brief GGEMSBox destructor
     */
-    ~GGEMSBox(void);
+    ~GGEMSBox(void) override;
 
     /*!
       \fn GGEMSBox(GGEMSBox const& box) = delete

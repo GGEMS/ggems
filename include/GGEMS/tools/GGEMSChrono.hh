@@ -39,7 +39,7 @@
 typedef std::chrono::time_point<std::chrono::system_clock> ChronoTime; /*!< Alias to C++ chrono time */
 typedef std::chrono::duration<int64_t,std::nano> DurationNano; /*!< Alias to duration in nanosecond */
 
-#if __MINGW64__ || __clang__ || (_MSC_VER > 1800) || __GNUC__
+#if defined(__MINGW64__) || defined(__clang__) || defined(_MSC_VER) > 1800 || defined(__GNUC__)
 typedef std::chrono::milliseconds Ms;
 typedef std::chrono::seconds Secs;
 typedef std::chrono::minutes Mins;

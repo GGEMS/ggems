@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSRayleighScattering : public GGEMSEMProcess
     /*!
       \brief GGEMSRayleighScattering destructor
     */
-    ~GGEMSRayleighScattering(void);
+    ~GGEMSRayleighScattering(void) override;
 
     /*!
       \fn GGEMSRayleighScattering(GGEMSRayleighScattering const& rayleigh_scattering) = delete

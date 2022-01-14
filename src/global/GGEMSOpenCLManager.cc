@@ -71,15 +71,18 @@ void GGEMSOpenCLManager::Clean(void)
     delete d;
     d = nullptr;
   }
+  devices_.clear();
 
   // Freeing activated devices
   for (ComputingDevice& i : computing_devices_) i.Clean();
+  computing_devices_.clear();
 
   // Deleting kernel
   for (cl::Kernel* k : kernels_) {
     delete k;
     k = nullptr;
   }
+  kernels_.clear();
 
   GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaned!!!" << GGendl;
 }
@@ -637,6 +640,15 @@ void GGEMSOpenCLManager::PrintActivatedDevices(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenCLManager::AddBuildOption(std::string const& option)
+{
+  build_options_ += " " + option;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenCLManager::DeviceToActivate(std::string const& device_type, std::string const& device_vendor)
 {
   // Transform all parameters in lower caracters
@@ -656,7 +668,15 @@ void GGEMSOpenCLManager::DeviceToActivate(std::string const& device_type, std::s
 
   // Analyze all cases
   if (type == "all") { // Activating all available OpenCL devices
-    for (GGsize i = 0; i < devices_.size(); ++i) DeviceToActivate(i);
+    for (GGsize i = 0; i < devices_.size(); ++i) {
+      // Checking type of device, if different of GPU or CPU, the device will be ignored
+      if (GetDeviceType(i) != CL_DEVICE_TYPE_CPU && GetDeviceType(i) != CL_DEVICE_TYPE_GPU) {
+        GGwarn("GGEMSOpenCLManager", "DeviceToActivate", 0) << "One of your device(s) is not GPU or CPU and will be ignored" << GGendl;
+      }
+      else {
+        DeviceToActivate(i);
+      }
+    }
   }
   else if (type == "cpu") { // Activating all CPU devices
     for (GGsize i = 0; i < devices_.size(); ++i) {
@@ -780,8 +800,8 @@ void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
   }
 
   // Printing device balancing
-  for (GGsize i = 0; i < device_balancing_.size(); ++i) {
-    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(computing_devices_[i].index_) << ": " << device_balancing_[i]*100.0f << "%" << GGendl;
+  for (GGsize j = 0; j < device_balancing_.size(); ++j) {
+    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(computing_devices_[j].index_) << ": " << device_balancing_[j]*100.0f << "%" << GGendl;
   }
 }
 
@@ -969,8 +989,8 @@ void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGs
   GGint error = computing_devices_[thread_index].queue_->enqueueFillBuffer(*buffer, 0, 0, size, nullptr, &event);
 
   // Handling event
-  HandleEvent(event, "Cleaning buffer");
-
+  char message[] = "Cleaning buffer";
+  HandleEvent(event, message);
 
   CheckOpenCLError(error, "GGEMSOpenCLManager", "CleanBuffer");
 }
@@ -1010,7 +1030,6 @@ GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) con
   else {
     return number_of_elements + (work_group_size_ - number_of_elements%work_group_size_);
   }
-  return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1030,7 +1049,7 @@ void GGEMSOpenCLManager::HandleEvent(cl::Event& event, char* message)
 void GGEMSOpenCLManager::Callback(cl_event event, GGint event_command_exec_status, void* user_data)
 {
   if (event_command_exec_status != CL_COMPLETE) {
-    GGcout("GGEMSOpenCLManager", "Callback", 0) << (char*)user_data << ": error during operation!!!" << GGendl;
+    GGcout("GGEMSOpenCLManager", "Callback", 0) << static_cast<char*>(user_data) << ": error during operation!!!" << GGendl;
     clReleaseEvent(event);
   }
 }

@@ -19,6 +19,7 @@
 # Import all GGEMS C++ singletons
 from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
+from ggems_opengl import GGEMSOpenGLManager
 from ggems_ram import GGEMSRAMManager
 from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from ggems_systems import GGEMSCTSystem

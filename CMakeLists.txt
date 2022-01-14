@@ -33,20 +33,23 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
-# Setting the compiler type: 'CLANG' 'GCC' or 'CL'
-# Visual Studio: CL (Only on Windows) and by default on Windows
+# Setting the compiler type: 'CLANG', 'GCC', 'CL' (visual c++) or 'INTEL'
+# Visual Studio: CL (only on Windows) and by default on Windows
 # CC=cl
 # CXX=cl
-# GNU GCC: GCC (Validated on Unix and Windows) and by default on Unix
+# GNU GCC: GCC (only on Unix) and by default on Unix
 # CC=gcc
 # CXX=g++
 # LLVM CLANG: CLANG (Validated on Unix and Windows)
 # CC=clang
 # CXX=clang++
+# INTEL (based on LLVM): INTEL (Validated on Unix and Windows)
+# CC=icx
+# CXX=icx (Windows) icpx (Unix)
 IF(WIN32)
-  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, GCC")
+  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
 ELSE()
-  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
+  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
 ENDIF()
 
 IF(COMPILER STREQUAL "CLANG")
@@ -58,19 +61,45 @@ ELSEIF(COMPILER STREQUAL "CL")
 ELSEIF(COMPILER STREQUAL "GCC")
   SET(ENV{CC} "gcc")
   SET(ENV{CXX} "g++")
+ELSEIF(COMPILER STREQUAL "INTEL")
+  SET(ENV{CC} "icx")
+  IF(WIN32)
+    SET(ENV{CXX} "icx")
+  ELSE()
+    SET(ENV{CXX} "icpx")
+  ENDIF()
 ELSE()
   MESSAGE(FATAL_ERROR "Compiler name unknown!!! Options are CLANG, GCC or CL")
 ENDIF()
 
 #-------------------------------------------------------------------------------
 # Name of the project and define the language
-PROJECT(GGEMS VERSION 1.1 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
+PROJECT(GGEMS VERSION 1.2 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
+
+#-------------------------------------------------------------------------------
+# Give cmake-config directory to cmake
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-config")
 
 #-------------------------------------------------------------------------------
 # Find the OpenCL library and for OpenCL 1.2
+FIND_PACKAGE(CUDA REQUIRED)
+SET(OpenCL_ROOT "${CUDA_TOOLKIT_ROOT_DIR}")
 FIND_PACKAGE(OpenCL REQUIRED)
 IF(${OpenCL_VERSION_STRING} VERSION_GREATER "1.2")
   ADD_DEFINITIONS(-DCL_USE_DEPRECATED_OPENCL_1_2_APIS)
+ENDIF()
+
+#-------------------------------------------------------------------------------
+# Find libraries for OpenGL
+OPTION(OPENGL_VISUALIZATION "Using OpenGL for visualization" OFF)
+IF(OPENGL_VISUALIZATION)
+  ADD_DEFINITIONS(-DOPENGL_VISUALIZATION)
+  FIND_PACKAGE(GLFW3 REQUIRED)
+  FIND_PACKAGE(OpenGL REQUIRED)
+  SET(GLEW_USE_STATIC_LIBS TRUE) # Using GLEW in static, important for Python!!!
+  FIND_PACKAGE(GLEW REQUIRED)
+  FIND_PACKAGE(glm REQUIRED)
+  GET_FILENAME_COMPONENT(GLM_INCLUDE_DIR ${glm_DIR}/../../../include ABSOLUTE)
 ENDIF()
 
 #-------------------------------------------------------------------------------
@@ -79,16 +108,16 @@ SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options a
 SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 
 #-------------------------------------------------------------------------------
+# Setting the LOGO_PATH variable
+SET(LOGO_PATH ${PROJECT_SOURCE_DIR}/logo CACHE PATH "Path to the logo repository")
+
+#-------------------------------------------------------------------------------
 # Setting the OPENCL_KERNEL_PATH variable
 SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src/kernels CACHE PATH "Path to the OpenCL kernel repository")
 
 #-------------------------------------------------------------------------------
 # Setting the GGEMSHOME_PATH variable
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Path to the GGEMS project repository")
-
-#-------------------------------------------------------------------------------
-# Setting the PYTHON_MODULE_PATH variable
-SET(PYTHON_MODULE_PATH ${PROJECT_SOURCE_DIR}/python_module CACHE PATH "Path to the python module repository")
 
 #-------------------------------------------------------------------------------
 # Setting the maximum particles in OpenCL buffer
@@ -131,7 +160,7 @@ IF(WIN32)
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS -std=c++17 -Wextra -Wall -pedantic -m64 -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -fno-common -Wextra -Wall -Wundef -Wdouble-promotion -Wshadow -Wno-unused-parameter -Wconversion)
     SET(CXX_FLAGS_RELEASE -O3 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   
@@ -141,17 +170,19 @@ IF(WIN32)
     STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17)
-    SET(CXX_FLAGS_RELEASE /Ox ${CXX_FLAGS})
+    SET(CXX_FLAGS /EHsc /nologo /W3 /std:c++17)
+    SET(CXX_FLAGS_RELEASE /O2 /Ox ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 
-    ELSEIF(COMPILER STREQUAL "GCC")
-    STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-    STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+  # Checking compiler for Intel OneAPI
+  ELSEIF(COMPILER STREQUAL "INTEL")
+    STRING(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wextra -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
-    SET(CXX_FLAGS_RELEASE -O3 ${CXX_FLAGS})
-    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
+    SET(CXX_FLAGS /EHsc /O3 /std:c++17 /W3 /Qm64 /external:I${PROJECT_SOURCE_DIR}/include/externs /external:I${GLFW3_INCLUDE_DIR} /external:I${GLEW_INCLUDE_DIR} /external:I${OpenCL_INCLUDE_DIRS} /external:I${GLM_INCLUDE_DIR} -Wno-deprecated-declarations -Xclang -Wdouble-promotion -Wshadow -Wno-unused-parameter -Wconversion)
+    SET(CXX_FLAGS_RELEASE /O3 ${CXX_FLAGS})
+    SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 
   # Otherwize error
   ELSE()
@@ -175,11 +206,15 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Werror -Wextra -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+
+  # Checking compiler for INTEL
+  ELSEIF(COMPILER STREQUAL "INTEL")
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
 
   # Otherwize error
   ELSE()
@@ -195,11 +230,6 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Setup include directory for GGEMS
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
-INCLUDE_DIRECTORIES(SYSTEM ${OpenCL_INCLUDE_DIRS})
-
-#-------------------------------------------------------------------------------
-# Add link directory for OpenCL
-LINK_DIRECTORIES(${OpenCL_LIBRARY})
 
 #-------------------------------------------------------------------------------
 # Locate source files for GGEMS
@@ -214,6 +244,7 @@ FILE(GLOB source_ggems
   ${PROJECT_SOURCE_DIR}/src/maths/*.cc
   ${PROJECT_SOURCE_DIR}/src/materials/*.cc
   ${PROJECT_SOURCE_DIR}/src/io/*.cc
+  ${PROJECT_SOURCE_DIR}/src/graphics/*.cc
 )
 
 #-------------------------------------------------------------------------------
@@ -223,7 +254,11 @@ INCLUDE(GenerateExportHeader)
 #-------------------------------------------------------------------------------
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
-TARGET_LINK_LIBRARIES(ggems ${OpenCL_LIBRARY})
+IF(OPENGL_VISUALIZATION)
+  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL ${GLFW3_LIBRARY} OpenGL::GL OpenGL::GLU GLEW::glew_s glm::glm)
+ELSE()
+  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
+ENDIF()
 SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 
 #-------------------------------------------------------------------------------

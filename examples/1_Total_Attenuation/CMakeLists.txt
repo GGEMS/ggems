@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the 0_Cross_Sections example
+# CMakeLists.txt - Compile and build 1_Total_Attenuation
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>

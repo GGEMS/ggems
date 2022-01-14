@@ -39,6 +39,8 @@
 #include <unordered_map>
 
 #include "GGEMS/global/GGEMSConstants.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 
 __constant GGchar SOLID = 0; /*!< Solid state */
 __constant GGchar GAS = 1; /*!< Gas state */
@@ -70,6 +72,8 @@ struct GGEMS_EXPORT GGEMSSingleMaterial
 
 typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap; /*!< Unordered map with key : name of element, value the chemical element structure */
 typedef std::unordered_map<std::string, GGEMSSingleMaterial> MaterialUMap; /*!< Unordered map with key : name of the material, value the material */
+typedef std::unordered_map<std::string, GGEMSRGBColor> MaterialRGBColorUMap; /*!< Unordered map with key : name of the material, RGB color value */
+typedef std::unordered_map<std::string, bool> MaterialVisibleUMap; /*!< Unordered map with key : name of the material, true: visible, false: not visible */
 
 /*!
   \class GGEMSMaterialsDatabaseManager
@@ -176,7 +180,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       }
 
       return iter->second;
-    };
+    }
 
     /*!
       \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& chemical_element_name) const
@@ -196,7 +200,30 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       }
 
       return iter->second;
-    };
+    }
+
+    /*!
+      \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& material_name) const
+      \param material_name - name of the chemical element
+      \return the structure to a chemical element
+      \brief get the chemical element
+    */
+    inline GGEMSRGBColor GetMaterialRGBColor(std::string const& material_name) const
+    {
+      MaterialRGBColorUMap::const_iterator iter = material_rgb_colors_.find(material_name);
+
+      // Checking if the material exists
+      if (iter == material_rgb_colors_.end()) {
+        GGwarn("GGEMSRGBColor", "GetMaterialRGBColor", 0) << "Material RGB color not found for '" << material_name << "'. White color is selected by default" << GGendl;
+        GGEMSRGBColor color;
+        color.red_ = 1.0f;
+        color.green_ = 1.0f;
+        color.blue_ = 1.0f;
+        return color;
+      }
+
+      return iter->second;
+    }
 
     /*!
       \fn GGfloat GetRadiationLength(std::string const& material) const
@@ -222,7 +249,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       GGEMSChemicalElement const& chemical_element = GetChemicalElement(single_material.chemical_element_name_[index]);
 
       // return the atomic number density, the number could be higher than float!!! Double is used
-      GGdouble tmp_value_double = static_cast<GGdouble>(AVOGADRO) / chemical_element.molar_mass_M_ * single_material.density_ * single_material.mixture_f_[index];
+      GGdouble tmp_value_double = static_cast<GGdouble>(AVOGADRO) / static_cast<GGdouble>(chemical_element.molar_mass_M_) * static_cast<GGdouble>(single_material.density_) * static_cast<GGdouble>(single_material.mixture_f_[index]);
       return static_cast<GGfloat>(tmp_value_double);
     }
 
@@ -247,6 +274,12 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     void LoadChemicalElements(void);
 
     /*!
+      \fn void LoadMaterialRGBColors(void)
+      \brief load material RGB colors
+    */
+    void LoadMaterialRGBColors(void);
+
+    /*!
       \fn void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGint const& index_density_correction)
       \param element_name - Name of the element
       \param element_Z - Atomic number of the element
@@ -258,9 +291,20 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     */
     void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGint const& index_density_correction);
 
+    /*!
+      \fn void AddMaterialRGBColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \param material_name - name of material
+      \param red - red fraction
+      \param green - red fraction
+      \param blue - red fraction
+      \brief Adding material rgb color in GGEMS
+    */
+    void AddMaterialRGBColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue);
+
   private:
     MaterialUMap materials_; /*!< Map storing the GGEMS materials */
     ChemicalElementUMap chemical_elements_; /*!< Map storing GGEMS chemical elements */
+    MaterialRGBColorUMap material_rgb_colors_; /*!< Mapt storing RGB colors and material */
 };
 
 /*!

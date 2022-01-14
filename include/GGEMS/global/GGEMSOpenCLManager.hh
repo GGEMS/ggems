@@ -38,7 +38,7 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#if __GNUC__ >= 6 
+#if defined(__GNUC__) >= 6 
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 
@@ -163,6 +163,13 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief print infos about activated devices
     */
     void PrintActivatedDevices(void) const;
+
+    /*!
+      \fn void AddBuildOption(std::string const& option)
+      \param option - option to add to OpenCL compiler
+      \brief add a new option to OpenCL compiler
+    */
+    void AddBuildOption(std::string const& option);
 
     /*!
       \fn std::string GetDeviceName(GGsize const& device_index) const
@@ -553,7 +560,8 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGbool cons
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
 
   // Checking event status
-  HandleEvent(event, "Mapping buffer");
+  char message[] = "Mapping buffer";
+  HandleEvent(event, message);
 
   return ptr;
 }
@@ -574,7 +582,8 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
   CheckOpenCLError(computing_devices_[thread_index].queue_->enqueueUnmapMemObject(*device_ptr, host_ptr, nullptr, &event), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 
   // Checking event status
-  HandleEvent(event, "Unmapping buffer");
+  char message[] = "Unmapping buffer";
+  HandleEvent(event, message);
 }
 
 /*!
@@ -623,4 +632,4 @@ extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_man
 */
 extern "C" GGEMS_EXPORT void set_device_balancing_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_balancing);
 
-#endif // GUARD_GGEMS_GLOBAL_GGEMSOpenCLManager_HH
+#endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH

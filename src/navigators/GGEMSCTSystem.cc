@@ -108,15 +108,15 @@ void GGEMSCTSystem::CheckParameters(void) const
     GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
   }
 
-  if (source_isocenter_distance_ == 0.0f) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "For CT system, source isocenter distance (SID) has to be > 0.0 mm!!!";
-    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  }
-
   if (source_detector_distance_ == 0.0f) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "For CT system, source detector distance (SDD) has to be > 0.0 mm!!!";
+    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  }
+
+  if (source_isocenter_distance_ > source_detector_distance_) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Source isocenter distance must be inferior to source detector distance!!!";
     GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
   }
 
@@ -135,7 +135,7 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
   // rho = Hypotenuse
   // h = Apothem or source detector distance in our case
   // c = Half-distance of module in Y
-  GGfloat c = (static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.y)*0.5f;
+  GGfloat c = (static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.s[1])*0.5f;
   GGfloat rho = std::sqrt(source_detector_distance_*source_detector_distance_ + c*c);
   GGfloat alpha = 2.0f*std::asin(c/rho);
 
@@ -144,12 +144,12 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
   GGfloat oy = 0.0f;
 
   // Center of module P (px, py) is source detector distance minus source isocenter distance plus half size of module in Z (module referential)
-  GGfloat px = source_detector_distance_ - source_isocenter_distance_ + 0.5f*static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_)*size_of_detection_elements_xyz_.z;
+  GGfloat px = source_detector_distance_ - source_isocenter_distance_;
   GGfloat py = 0.0f;
 
   // Loop over each module in X and Y, and compute angle of each module in around Z
   for (GGsize j = 0; j < number_of_modules_xy_.y_; ++j) { // for Y modules
-    GGfloat step_angle = alpha * (static_cast<GGfloat>(j) + 0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.y_)));
+    GGfloat step_angle = alpha * (static_cast<GGfloat>(j) + 0.5f*(1.0f - static_cast<GGfloat>(number_of_modules_xy_.y_)));
 
     // Computing the X and Y positions in global position (isocenter)
     GGfloat global_position_x = (px-ox)*std::cos(step_angle) - (py-oy)*std::sin(step_angle) + ox;
@@ -157,17 +157,24 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 
     for (GGsize i = 0; i < number_of_modules_xy_.x_; ++i) { // for X modules
       // Computing the Z position in global position (isocenter)
-      GGfloat global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.x*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
+      GGfloat global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.s[0]*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
 
       GGsize global_index = i+j*number_of_modules_xy_.x_;
 
       GGfloat3 rotation;
-      rotation.x = 0.0f; rotation.y = 0.0f; rotation.z = step_angle;
+      rotation.s[0] = 0.0f;
+      rotation.s[1] = 0.0f;
+      rotation.s[2] = step_angle;
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
+      position.s[0] = global_position_x + global_system_position_xyz_.s[0];
+      position.s[1] = global_position_y + global_system_position_xyz_.s[1];
+      position.s[2] = global_position_z + global_system_position_xyz_.s[2];
       solids_[global_index]->SetPosition(position);
+
+      // Rotation for OpenGL volume
+      solids_[global_index]->SetZAngleOpenGL(step_angle);
     }
   }
 }
@@ -179,25 +186,29 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 void GGEMSCTSystem::InitializeFlatGeometry(void)
 {
     // Computing the X, Y and Z positions in global position (isocenter)
-  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_ + 0.5f*static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_)*size_of_detection_elements_xyz_.z;
+  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_;
   GGfloat global_position_y = 0.0f;
   GGfloat global_position_z = 0.0f;
 
   // Consider flat geometry for CBCT configuration
   for (GGsize j = 0; j < number_of_modules_xy_.y_; ++j) { // Y modules
-    global_position_y = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.y*(static_cast<GGfloat>(j)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.y_)));
+    global_position_y = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_)*size_of_detection_elements_xyz_.s[1]*(static_cast<GGfloat>(j)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.y_)));
     for (GGsize i = 0; i < number_of_modules_xy_.x_; ++i) { // X modules
-      global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.x*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
+      global_position_z = static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_)*size_of_detection_elements_xyz_.s[0]*(static_cast<GGfloat>(i)+0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.x_)));
 
       GGsize global_index = i+j*number_of_modules_xy_.x_;
 
       // No rotation of module
       GGfloat3 rotation;
-      rotation.x = 0.0f; rotation.y = 0.0f; rotation.z = 0.0f;
+      rotation.s[0] = 0.0f;
+      rotation.s[1] = 0.0f;
+      rotation.s[2] = 0.0f;
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
+      position.s[0] = global_position_x + global_system_position_xyz_.s[0];
+      position.s[1] = global_position_y + global_system_position_xyz_.s[1];
+      position.s[2] = global_position_z + global_system_position_xyz_.s[2];
       solids_[global_index]->SetPosition(position);
     }
   }
@@ -230,11 +241,15 @@ void GGEMSCTSystem::Initialize(void)
       number_of_detection_elements_inside_module_xyz_.x_,
       number_of_detection_elements_inside_module_xyz_.y_,
       number_of_detection_elements_inside_module_xyz_.z_,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.x,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.y,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.s[0],
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.s[1],
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.s[2],
       "HISTOGRAM"
     );
+    solids_[i]->SetVisible(is_visible_);
+    solids_[i]->SetMaterialName(materials_->GetMaterialName(0));
+    solids_[i]->SetCustomMaterialColor(custom_material_rgb_);
+    solids_[i]->SetMaterialVisible(material_visible_);
 
     // Enabling scatter if necessary
     if (is_scatter_) solids_[i]->EnableScatter();
@@ -242,7 +257,7 @@ void GGEMSCTSystem::Initialize(void)
     // Enabling tracking if necessary
     if (is_tracking_) solids_[i]->EnableTracking();
 
-    // // Initialize kernels
+    // Initialize kernels
     solids_[i]->Initialize(nullptr);
   }
 
@@ -258,6 +273,9 @@ void GGEMSCTSystem::Initialize(void)
   if (is_update_rot_) {
     for (GGsize i = 0; i < number_of_solids_; ++i) {
       solids_[i]->SetRotation(rotation_xyz_);
+      solids_[i]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
+      solids_[i]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
+      solids_[i]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
     }
   }
 
@@ -269,6 +287,10 @@ void GGEMSCTSystem::Initialize(void)
       solids_[i]->UpdateTransformationMatrix(j);
     }
   }
+
+  #ifdef OPENGL_VISUALIZATION
+  for (GGsize i = 0; i < number_of_solids_; ++i) solids_[i]->BuildOpenGL();
+  #endif
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -380,4 +402,49 @@ void set_threshold_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const thres
 void store_scatter_ggems_ct_system(GGEMSCTSystem* ct_system, bool const is_scatter)
 {
   ct_system->StoreScatter(is_scatter);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_visible_ggems_ct_system(GGEMSCTSystem* ct_system, bool const flag)
+{
+  ct_system->SetVisible(flag);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_visible_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, bool const flag)
+{
+  ct_system->SetMaterialVisible(material_name, flag);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue)
+{
+  ct_system->SetMaterialColor(material_name, red, green, blue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_color_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, char const* color_name)
+{
+  ct_system->SetMaterialColor(material_name, color_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_global_system_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const global_system_position_x, GGfloat const global_system_position_y, GGfloat const global_system_position_z, char const* unit)
+{
+  ct_system->SetGlobalSystemPosition(global_system_position_x, global_system_position_y, global_system_position_z, unit);
 }

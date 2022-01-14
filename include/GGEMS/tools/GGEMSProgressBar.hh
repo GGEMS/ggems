@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSProgressBar
     /*!
       \brief GGEMSProgressBar destructor
     */
-    ~GGEMSProgressBar(void){};
+    ~GGEMSProgressBar(void) {}
 
     /*!
       \fn GGEMSProgressBar(GGEMSProgressBar const& progress_bar) = delete

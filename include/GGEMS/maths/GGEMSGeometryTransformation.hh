@@ -100,7 +100,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
       \return the translation matrix
       \brief Return the translation matrix
     */
-    inline GGfloat44 GetMatrixTranslation(void) const {return matrix_translation_;};
+    inline GGfloat44 GetMatrixTranslation(void) const {return matrix_translation_;}
 
     /*!
       \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
@@ -123,7 +123,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
       \return the translation matrix
       \brief Return the translation matrix
     */
-    inline GGfloat44 GetMatrixRotation(void) const {return matrix_rotation_;};
+    inline GGfloat44 GetMatrixRotation(void) const {return matrix_rotation_;}
 
     /*!
       \fn void SetAxisTransformation(GGfloat33 const& axis)
@@ -133,20 +133,20 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     void SetAxisTransformation(GGfloat33 const& axis);
 
     /*!
-      \fn void SetAxisTransformation(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
-      \param m0 - Row 0 in the matrix 3x3 for local axis
-      \param m1 - Row 1 in the matrix 3x3 for local axis
-      \param m2 - Row 2 in the matrix 3x3 for local axis
+      \fn void SetAxisTransformation(GGfloat3 const& raw0, GGfloat3 const& raw1, GGfloat3 const& raw2)
+      \param raw0 - Row 0 in the matrix 3x3 for local axis
+      \param raw1 - Row 1 in the matrix 3x3 for local axis
+      \param raw2 - Row 2 in the matrix 3x3 for local axis
       \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
     */
-    void SetAxisTransformation(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2);
+    void SetAxisTransformation(GGfloat3 const& raw0, GGfloat3 const& raw1, GGfloat3 const& raw2);
 
     /*!
       \fn inline GGfloat44 GetMatrixOrthographicProjection(void) const
       \return the matrix of orthographic projection
       \brief return the matrix of orthographic projection
     */
-    inline GGfloat44 GetMatrixOrthographicProjection(void) const {return matrix_orthographic_projection_;};
+    inline GGfloat44 GetMatrixOrthographicProjection(void) const {return matrix_orthographic_projection_;}
 
     /*!
       \fn inline GGfloat3 GetPosition(void) const

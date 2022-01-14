@@ -47,11 +47,15 @@ GGEMSSystem::GGEMSSystem(std::string const& system_name)
   number_of_detection_elements_inside_module_xyz_.y_ = 0;
   number_of_detection_elements_inside_module_xyz_.z_ = 0;
 
-  size_of_detection_elements_xyz_.x = 0.0f;
-  size_of_detection_elements_xyz_.y = 0.0f;
-  size_of_detection_elements_xyz_.z = 0.0f;
+  size_of_detection_elements_xyz_.s[0] = 0.0f;
+  size_of_detection_elements_xyz_.s[1] = 0.0f;
+  size_of_detection_elements_xyz_.s[2] = 0.0f;
 
   is_scatter_ = false;
+
+  global_system_position_xyz_.s[0] = 0.0f;
+  global_system_position_xyz_.s[1] = 0.0f;
+  global_system_position_xyz_.s[2] = 0.0f;
 
   GGcout("GGEMSSystem", "GGEMSSystem", 3) << "GGEMSSystem created!!!" << GGendl;
 }
@@ -94,9 +98,9 @@ void GGEMSSystem::SetNumberOfDetectionElementsInsideModule(GGsize const& n_detec
 
 void GGEMSSystem::SetSizeOfDetectionElements(GGfloat const& detection_element_x, GGfloat const& detection_element_y, GGfloat const& detection_element_z, std::string const& unit)
 {
-  size_of_detection_elements_xyz_.x = DistanceUnit(detection_element_x, unit);
-  size_of_detection_elements_xyz_.y = DistanceUnit(detection_element_y, unit);
-  size_of_detection_elements_xyz_.z = DistanceUnit(detection_element_z, unit);
+  size_of_detection_elements_xyz_.s[0] = DistanceUnit(detection_element_x, unit);
+  size_of_detection_elements_xyz_.s[1] = DistanceUnit(detection_element_y, unit);
+  size_of_detection_elements_xyz_.s[2] = DistanceUnit(detection_element_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +110,17 @@ void GGEMSSystem::SetSizeOfDetectionElements(GGfloat const& detection_element_x,
 void GGEMSSystem::SetMaterialName(std::string const& material_name)
 {
   materials_->AddMaterial(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSystem::SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_z, std::string const& unit)
+{
+  global_system_position_xyz_.s[0] = DistanceUnit(global_system_position_x, unit);
+  global_system_position_xyz_.s[1] = DistanceUnit(global_system_position_y, unit);
+  global_system_position_xyz_.s[2] = DistanceUnit(global_system_position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +152,7 @@ void GGEMSSystem::CheckParameters(void) const
     GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
   }
 
-  if (size_of_detection_elements_xyz_.x == 0.0f || size_of_detection_elements_xyz_.y == 0.0f || size_of_detection_elements_xyz_.z == 0.0f) {
+  if (size_of_detection_elements_xyz_.s[0] == 0.0f || size_of_detection_elements_xyz_.s[1] == 0.0f || size_of_detection_elements_xyz_.s[2] == 0.0f) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "In system parameters, size of detection elements (local axis) has to be > 0.0 mm!!!";
     GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());

@@ -34,10 +34,11 @@
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
-
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/physics/GGEMSMuData.hh"
 #include "GGEMS/physics/GGEMSMuDataConstants.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,13 +58,13 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator creating..." << GGendl;
 
-  position_xyz_.x = 0.0f;
-  position_xyz_.y = 0.0f;
-  position_xyz_.z = 0.0f;
+  position_xyz_.s[0] = 0.0f;
+  position_xyz_.s[1] = 0.0f;
+  position_xyz_.s[2] = 0.0f;
 
-  rotation_xyz_.x = 0.0f;
-  rotation_xyz_.y = 0.0f;
-  rotation_xyz_.z = 0.0f;
+  rotation_xyz_.s[0] = 0.0f;
+  rotation_xyz_.s[1] = 0.0f;
+  rotation_xyz_.s[2] = 0.0f;
 
   // Store the phantom navigator in phantom navigator manager
   GGEMSNavigatorManager::GetInstance().Store(this);
@@ -77,6 +78,11 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   // Get the number of activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  is_visible_ = false;
+  custom_material_rgb_.clear();
+  material_visible_.clear();
+  mu_tables_ = nullptr;
 
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;
 }
@@ -149,9 +155,9 @@ void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& posit
 void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   is_update_rot_ = true;
-  rotation_xyz_.x = AngleUnit(rx, unit);
-  rotation_xyz_.y = AngleUnit(ry, unit);
-  rotation_xyz_.z = AngleUnit(rz, unit);
+  rotation_xyz_.s[0] = AngleUnit(rx, unit);
+  rotation_xyz_.s[1] = AngleUnit(ry, unit);
+  rotation_xyz_.s[2] = AngleUnit(rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,6 +196,65 @@ void GGEMSNavigator::EnableTLE(bool const& is_activated)
   if (is_activated) is_tle_ = 1;
   else is_tle_ = 0 ;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetVisible(bool const& is_visible)
+{
+  is_visible_ = is_visible;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+{
+  // Adding a custom color
+  GGEMSRGBColor rgb;
+  rgb.red_ = static_cast<GGfloat>(red) / 255.0f;
+  rgb.green_ = static_cast<GGfloat>(green) / 255.0f;
+  rgb.blue_ = static_cast<GGfloat>(blue) / 255.0f;
+
+  custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialColor(std::string const& material_name, std::string const& color_name)
+{
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
+  // Getting RGB color
+  GGfloat rgb_array[] = {0.0f, 0.0f, 0.0f};
+  opengl_manager.GetRGBColor(color_name, &rgb_array[0]);
+
+  // Storing color and material
+  GGEMSRGBColor rgb;
+  rgb.red_ = rgb_array[0];
+  rgb.green_ = rgb_array[1];
+  rgb.blue_ = rgb_array[2];
+  custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+  #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)
+{
+  material_visible_.insert(std::make_pair(material_name, is_material_visible));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSNavigator::CheckParameters(void) const
 {
@@ -270,12 +335,12 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelParticleSolidDistance(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelParticleSolidDistance(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *solid_data);
@@ -321,12 +386,12 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelProjectToSolid(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelProjectToSolid(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *solid_data);
@@ -381,13 +446,13 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid  and label (for GGEMSVoxelizedSolid) data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
-    cl::Buffer* label_data = solids_[s]->GetLabelData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
+    cl::Buffer* label_data = solids_[i]->GetLabelData(thread_index);
 
     // Get type of registered data and OpenCL buffer to data
-    std::string data_reg_type = solids_[s]->GetRegisteredDataType();
+    std::string data_reg_type = solids_[i]->GetRegisteredDataType();
 
     // Get buffers depending on mode of simulation
     // Histogram mode (for system, CT ...)
@@ -402,8 +467,8 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     cl::Buffer* mu_table_d = nullptr;
 
     if (data_reg_type == "HISTOGRAM") {
-      histogram = solids_[s]->GetHistogram(thread_index);
-      scatter_histogram = solids_[s]->GetScatterHistogram(thread_index);
+      histogram = solids_[i]->GetHistogram(thread_index);
+      scatter_histogram = solids_[i]->GetScatterHistogram(thread_index);
     }
     else if (data_reg_type == "DOSIMETRY") {
       dosimetry_params = dose_calculator_->GetDoseParams(thread_index);
@@ -417,33 +482,33 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     }
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelTrackThroughSolid(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelTrackThroughSolid(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *randoms);
     kernel->setArg(3, *solid_data);
-    if (!label_data) kernel->setArg(4, sizeof(cl_mem), NULL);
+    if (!label_data) kernel->setArg(4, sizeof(cl_mem), nullptr);
     else kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
     kernel->setArg(5, *cross_sections);
     kernel->setArg(6, *materials);
     kernel->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
       kernel->setArg(8, *histogram);
-      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), NULL);
+      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), nullptr);
       else kernel->setArg(9, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
       kernel->setArg(8, *dosimetry_params);
       kernel->setArg(9, *edep_tracking_dosimetry);
 
-      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), NULL);
+      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), nullptr);
       else kernel->setArg(10, *edep_squared_tracking_dosimetry);
 
-      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), NULL);
+      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), nullptr);
       else kernel->setArg(11, *hit_tracking_dosimetry);
-      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), NULL);
+      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), nullptr);
       else kernel->setArg(12, *photon_tracking_dosimetry);
-      if (!mu_table_d) kernel->setArg(13, sizeof(cl_mem), NULL);
+      if (!mu_table_d) kernel->setArg(13, sizeof(cl_mem), nullptr);
       else kernel->setArg(13, *mu_table_d);
       kernel->setArg(14, is_tle_);
     }
@@ -537,10 +602,10 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
 
     // Fill energy table with log scale
-    GGfloat slope = log(mu_table_device->E_max / mu_table_device->E_min);
+    GGfloat slope = logf(mu_table_device->E_max / mu_table_device->E_min);
     GGint i = 0;
     while (i < mu_table_device->nb_bins) {
-      mu_table_device->E_bins[i] = mu_table_device->E_min * exp(slope * ((GGfloat)i / ((GGfloat)mu_table_device->nb_bins-1)))*MeV;
+      mu_table_device->E_bins[i] = mu_table_device->E_min * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->nb_bins)-1.0f)))*MeV;
       ++i;
     }
 
@@ -550,7 +615,7 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     // For each material and energy bin compute mu and muen
     GGint imat = 0;
     GGint abs_index, E_index, mu_index_E;
-    GGint iZ, Z;
+    std::size_t iZ, Z;
     GGfloat energy, mu_over_rho, mu_en_over_rho, frac;
     while (imat < mu_table_device->nb_mat) {
       // for each energy bin
@@ -565,10 +630,10 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
         // For each element of the material
         mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
         iZ=0;
-        while (iZ < materials_device->number_of_chemical_elements_[ imat ]) {
+        while (iZ < materials_device->number_of_chemical_elements_[imat]) {
           // Get Z and mass fraction
-          Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[ imat ] + iZ];
-          frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[ imat ] + iZ];
+          Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[imat] + iZ];
+          frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[imat] + iZ];
 
           // Get energy index
           mu_index_E = GGEMSMuDataConstants::kMuIndexEnergy[Z];

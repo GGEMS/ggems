@@ -21,7 +21,13 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+  prog='dosimetry_photon.py',
+  description='-->> 4 - Dosimetry Example <<--',
+  epilog='',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+
 parser.add_argument('-d', '--device', required=False, type=str, default='all', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
 parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected")
 parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")

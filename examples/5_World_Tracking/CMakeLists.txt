@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build world tracking project
+# CMakeLists.txt - Compile and build 5_World_Tracking
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>

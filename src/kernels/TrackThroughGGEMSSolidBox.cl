@@ -225,6 +225,26 @@ kernel void track_through_ggems_solid_box(
         }
       }
       #endif
+
+      #ifdef OPENGL
+      if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
+        // Storing OpenGL index on OpenCL private memory
+        GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
+
+        // Checking if buffer is full
+        if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
+          // Getting global position
+          global_position = LocalToGlobalPosition(&solid_box_data->obb_geometry_.matrix_transformation_, &local_position);
+
+          primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.x;
+          primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.y;
+          primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.z;
+
+          // Storing final index
+          primary_particle->stored_particles_gl_[global_id] += 1;
+        }
+      }
+      #endif
     }
   } while (primary_particle->status_[global_id] == ALIVE);
 

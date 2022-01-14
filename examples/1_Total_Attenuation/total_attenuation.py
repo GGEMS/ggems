@@ -25,7 +25,12 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+  prog='total_attenuation.py',
+  description='-->> 1 - Total Attenuation Example <<--',
+  epilog='Example, computing total attenuation for water material: py total_attenuation.py -m Water',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 
 parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 parser.add_argument('-m', '--material', required=True, type=str, help="Set a material name")

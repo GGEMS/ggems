@@ -46,13 +46,10 @@
 #include "GGEMS/physics/GGEMSMuData.hh"
 #include "GGEMS/physics/GGEMSMuDataConstants.hh"
 
-
 class GGEMSSolid;
 class GGEMSMaterials;
 class GGEMSCrossSections;
 class GGEMSDosimetryCalculator;
-
-
 
 /*!
   \class GGEMSNavigator
@@ -200,7 +197,6 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void Initialize(void)
-      \return no returned value
     */
     virtual void Initialize(void);
 
@@ -243,17 +239,48 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     void EnableTLE(bool const& is_activated);
 
-
     /*!
       \fn void Init_Mu_Table(void)
       \brief Enable track length estimator (TLE) during particle navigation
     */
     void Init_Mu_Table(void);
 
+    /*!
+      \fn void SetVisible(bool const& is_visible)
+      \param is_visible - true if navigator is drawn using OpenGL
+      \brief set to true to draw navigator
+    */
+    void SetVisible(bool const& is_visible);
+
+    /*!
+      \fn void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \param material_name - material name
+      \param red - red part of RGB color
+      \param green - green part of RGB color
+      \param blue - blue part of RGB color
+      \brief set custom color for opengl volume
+    */
+    void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue);
+
+    /*!
+      \fn void SetMaterialColor(std::string const& material_name, std::string const& color_name)
+      \param material_name - material name
+      \param color_name - name of color from GGEMS color list
+      \brief set custom color for opengl volume
+    */
+    void SetMaterialColor(std::string const& material_name, std::string const& color_name);
+
+    /*!
+      \fn void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)
+      \param material_name - name of material
+      \param is_material_visible - flag drawing material
+      \brief set visibility of material for OpenGL
+    */
+    void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible);
+
   protected:
     /*!
       \fn void CheckParameters(void) const
-      \return no returned value
     */
     virtual void CheckParameters(void) const;
 
@@ -263,6 +290,7 @@ class GGEMS_EXPORT GGEMSNavigator
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
+
     GGsize navigator_id_; /*!< Index of the navigator */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
@@ -284,6 +312,11 @@ class GGEMS_EXPORT GGEMSNavigator
     GGsize number_activated_devices_; /*!< Number of activated device */
 
     cl::Buffer** mu_tables_; /*!< Buffer for the Mu Table */
+
+    // OpenGL
+    bool is_visible_; /*!< flag for opengl */
+    MaterialRGBColorUMap custom_material_rgb_; /*!< Custom color for material */
+    MaterialVisibleUMap material_visible_; /*!< list of flag to draw volume or not */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

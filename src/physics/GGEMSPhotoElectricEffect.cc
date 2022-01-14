@@ -87,12 +87,12 @@ GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& ener
 
   GGfloat aover_avo = ATOMIC_MASS_UNIT * static_cast<GGfloat>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];
 
-  GGfloat energy_inv = 1.0f / energy;
-  GGfloat energy_inv2 = energy_inv * energy_inv;
+  GGdouble energy_inv = 1.0 / static_cast<GGdouble>(energy);
+  GGdouble energy_inv2 = energy_inv * energy_inv;
 
   return static_cast<GGfloat>(
-    energy_inv * GGEMSSandiaTable::kSandiaTable[pos][1] * aover_avo * 0.160217648e-22 +
-    energy_inv2 * GGEMSSandiaTable::kSandiaTable[pos][2] * aover_avo * 0.160217648e-25 +
-    energy_inv * energy_inv2 * GGEMSSandiaTable::kSandiaTable[pos][3] * aover_avo * 0.160217648e-28 +
-    energy_inv2 * energy_inv2 * GGEMSSandiaTable::kSandiaTable[pos][4] * aover_avo * 0.160217648e-31);
+    energy_inv * static_cast<GGdouble>(GGEMSSandiaTable::kSandiaTable[pos][1]) * static_cast<GGdouble>(aover_avo) * 0.160217648e-22 +
+    energy_inv2 * static_cast<GGdouble>(GGEMSSandiaTable::kSandiaTable[pos][2]) * static_cast<GGdouble>(aover_avo) * 0.160217648e-25 +
+    energy_inv * energy_inv2 * static_cast<GGdouble>(GGEMSSandiaTable::kSandiaTable[pos][3]) * static_cast<GGdouble>(aover_avo) * 0.160217648e-28 +
+    energy_inv2 * energy_inv2 * static_cast<GGdouble>(GGEMSSandiaTable::kSandiaTable[pos][4]) * static_cast<GGdouble>(aover_avo) * 0.160217648e-31);
 }

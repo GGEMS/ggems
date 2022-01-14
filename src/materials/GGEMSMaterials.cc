@@ -176,7 +176,7 @@ void GGEMSMaterials::PrintInfos(void) const
         GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Z = " << static_cast<GGushort>(material_table_device->atomic_number_Z_[j+chemical_element_id]) << GGendl;
         GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table_device->mass_fraction_[j+chemical_element_id]/percent << " %" << GGendl;
         GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table_device->atomic_number_density_[j+chemical_element_id]/(mol/cm3) << " atom/cm3" << GGendl;
-        GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Element abundance = " << 100.0*material_table_device->atomic_number_density_[j+chemical_element_id]/material_table_device->number_of_atoms_by_volume_[i] << " %" << GGendl;
+        GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Element abundance = " << 100.0f*material_table_device->atomic_number_density_[j+chemical_element_id]/material_table_device->number_of_atoms_by_volume_[i] << " %" << GGendl;
       }
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Energy loss fluctuation data:" << GGendl;
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Mean electron excitation energy: " << BestEnergyUnit(material_table_device->mean_excitation_energy_[i]) << GGendl;

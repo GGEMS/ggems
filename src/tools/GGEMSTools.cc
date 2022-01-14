@@ -58,7 +58,7 @@ void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream, std::s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMisc::ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
+[[noreturn]] void GGEMSMisc::ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
 {
   std::ostringstream oss(std::ostringstream::out);
   oss << message;

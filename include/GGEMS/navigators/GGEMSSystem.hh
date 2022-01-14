@@ -52,7 +52,7 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     /*!
       \brief GGEMSSystem destructor
     */
-    virtual ~GGEMSSystem(void);
+    virtual ~GGEMSSystem(void) override;
 
     /*!
       \fn GGEMSSystem(GGEMSSystem const& system) = delete
@@ -100,24 +100,14 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void SetNumberOfDetectionElementsInsideModule(GGsize const& n_detection_element_x, GGsize const& n_detection_element_y, GGsize const& n_detection_element_z);
 
     /*!
-      \fn void SetSizeOfDetectionElements(GGfloat const& detection_element_x, GGfloat const& detection_element_y, GGfloat const& detection_element_z, std::string const& unit)
-      \param detection_element_x - Detection element in X axis
-      \param detection_element_y - Detection element in Y axis
-      \param detection_element_z - Detection element in Z axis
+      \fn void SetSizeOfDetectionElements(GGfloat const& size_of_detection_element_x, GGfloat const& size_of_detection_element_y, GGfloat const& size_of_detection_element_z, std::string const& unit)
+      \param size_of_detection_element_x - Detection element in X axis
+      \param size_of_detection_element_y - Detection element in Y axis
+      \param size_of_detection_element_z - Detection element in Z axis
       \param unit - unit of detection element
       \brief set the detection elements in each direction
     */
     void SetSizeOfDetectionElements(GGfloat const& size_of_detection_element_x, GGfloat const& size_of_detection_element_y, GGfloat const& size_of_detection_element_z, std::string const& unit = "mm");
-
-    /*!
-      \fn void SetGlobalPosition(GGfloat const& global_position_x, GGfloat const& global_position_y, GGfloat const& global_position_z, std::string const& unit = "mm")
-      \param global_position_x - global position of the system in X (global axis)
-      \param global_position_y - global position of the system in Y (global axis)
-      \param global_position_z - global position of the system in Z (global axis)
-      \param unit - distance unit
-      \brief set the global position of the system
-    */
-    void SetGlobalPosition(GGfloat const& global_position_x, GGfloat const& global_position_y, GGfloat const& global_position_z, std::string const& unit = "mm");
 
     /*!
       \fn void SetMaterialName(std::string const& material_name)
@@ -134,23 +124,34 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void StoreScatter(bool const& is_scatter);
 
     /*!
-      \fn void SaveResults(void)
+      \fn void SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_position_z, std::string const& unit = "mm")
+      \param global_system_position_x - global system position in X
+      \param global_system_position_y - global system position in Y
+      \param global_system_position_z - global system position in Z
+      \param unit - unit of the distance
+      \brief set the global system position in X, Y and Z
+    */
+    void SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_z, std::string const& unit = "mm");
+
+    /*!
+      \fn void SaveResults(void) override
       \brief save all results from solid
     */
-    void SaveResults(void);
+    void SaveResults(void) override;
 
   protected:
     /*!
-      \fn void CheckParameters(void) const
-      \return no returned value
+      \fn void CheckParameters(void) const override
+      \brief checking parameters
     */
-    virtual void CheckParameters(void) const;
+    virtual void CheckParameters(void) const override;
 
   protected:
     GGsize2 number_of_modules_xy_; /*!< Number of the detection modules */
     GGsize3 number_of_detection_elements_inside_module_xyz_; /*!< Number of virtual elements (X,Y,Z) in a module */
     GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
     bool is_scatter_; /*!< Boolean storing scatter infos */
+    GGfloat3 global_system_position_xyz_; /*!< Global position of the system in X, Y and Z */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

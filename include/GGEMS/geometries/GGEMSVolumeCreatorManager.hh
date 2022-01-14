@@ -126,11 +126,10 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
 
     /*!
       \fn GGsize3 GetVolumeDimensions() const
-      \param index - index of dimension x, y or z
       \return a 3d int with the dimenstion of the voxelized volume
       \brief dimensions of volume
     */
-    inline GGsize3 GetVolumeDimensions() const {return volume_dimensions_;};
+    inline GGsize3 GetVolumeDimensions() const {return volume_dimensions_;}
 
     /*!
       \fn void SetMaterial(std::string const& material)
@@ -151,7 +150,7 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
       \brief get the type of data
       \return the type of the data
     */
-    inline std::string GetDataType(void) const {return data_type_;};
+    inline std::string GetDataType(void) const {return data_type_;}
 
     /*!
       \fn cl::Buffer* GetVoxelizedVolume(void) const
@@ -361,7 +360,7 @@ extern "C" GGEMS_EXPORT void set_data_type_volume_creator_manager(GGEMSVolumeCre
 
 /*!
   \fn void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager)
-  \param source_manager - pointer on the singleton
+  \param volume_creator_manager - pointer on the singleton
   \brief Clean volume creator manager singleton
 */
 extern "C" GGEMS_EXPORT void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager);

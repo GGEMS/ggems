@@ -425,7 +425,7 @@ GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloa
   GGfloat ionpotlog = -1.0e-10f;
 
   //  calculate dE/dx for electrons
-  if (fabs(atomic_number - eZ) > 0.1f) {
+  if (fabsf(atomic_number - eZ) > 0.1f) {
     eZ = atomic_number;
     taul = Tlow/Mass;
     ionpot = 1.6e-5f*MeV * expf(0.9f*logf(eZ)) / Mass;
@@ -488,7 +488,7 @@ GGfloat GGEMSRangeCuts::ComputeLossPositron(GGuchar const& atomic_number, GGfloa
   GGfloat ionpotlog = -1.0e-10f;
 
   //  calculate dE/dx for electrons
-  if (fabs(atomic_number-Z) > 0.1f) {
+  if (fabsf(atomic_number-Z) > 0.1f) {
     Z = atomic_number;
     taul = Tlow/Mass;
     ionpot = 1.6e-5f*MeV * expf(0.9f*logf(Z))/Mass;
@@ -568,7 +568,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(GGfloat const& length_cut) cons
   GGfloat t3 = sqrtf(t1*t2);
   GGfloat r3 = range_table_material_->GetLossTableValue(t3);
 
-  while (fabs(1.0f - r3/length_cut) > epsilon) {
+  while (fabsf(1.0f - r3/length_cut) > epsilon) {
     if (length_cut <= r3) {
       t2 = t3;
     }

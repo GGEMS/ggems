@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSComptonScattering : public GGEMSEMProcess
     /*!
       \brief GGEMSComptonScattering destructor
     */
-    ~GGEMSComptonScattering(void);
+    ~GGEMSComptonScattering(void) override;
 
     /*!
       \fn GGEMSComptonScattering(GGEMSComptonScattering const& compton_scattering) = delete

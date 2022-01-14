@@ -293,9 +293,6 @@ Curium: d=13.51 g/cm3; n=1;
 Berkelium: d=14.0 g/cm3; n=1;
     +el: name=Berkelium    ; f=1.0
 
-Berkelium: d=14.0 g/cm3; n=1;
-    +el: name=Berkelium    ; f=1.0
-
 Californium: d=10.0 g/cm3; n=1;
     +el: name=Californium    ; f=1.0
 

@@ -114,9 +114,16 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 
   // Load voxelized phantom from MHD file and storing materials
   solids_[0]->Initialize(materials_);
+  solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
+  solids_[0]->SetMaterialVisible(material_visible_);
 
   // Perform rotation before position
-  if (is_update_rot_) solids_[0]->SetRotation(rotation_xyz_);
+  if (is_update_rot_) {
+    solids_[0]->SetRotation(rotation_xyz_);
+    solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
+    solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
+    solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
+  }
   if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
 
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
@@ -124,6 +131,11 @@ void GGEMSVoxelizedPhantom::Initialize(void)
     // Store the transformation matrix in solid object
     solids_[0]->UpdateTransformationMatrix(j);
   }
+
+  #ifdef OPENGL_VISUALIZATION
+  solids_[0]->SetVisible(is_visible_);
+  solids_[0]->BuildOpenGL();
+  #endif
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -190,4 +202,40 @@ void set_position_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phant
 void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
 {
   voxelized_phantom->SetRotation(rx, ry, rz, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_visible_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const flag)
+{
+  voxelized_phantom->SetVisible(flag);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_visible_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, bool const flag)
+{
+  voxelized_phantom->SetMaterialVisible(material_name, flag);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_color_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue)
+{
+  voxelized_phantom->SetMaterialColor(material_name, red, green, blue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_color_name_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, char const* color_name)
+{
+  voxelized_phantom->SetMaterialColor(material_name, color_name);
 }

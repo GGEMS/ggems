@@ -32,7 +32,7 @@
 #include <thread>
 
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #include <wincrypt.h>
 #else
 #include <unistd.h>
@@ -55,6 +55,10 @@ namespace {
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSProgressBar.hh"
+
+#ifdef OPENGL_VISUALIZATION
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -197,6 +201,10 @@ void GGEMS::Initialize(GGuint const& seed)
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  #endif
+
   // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
 
@@ -249,6 +257,33 @@ void GGEMS::Initialize(GGuint const& seed)
 
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
+  // If OpenGL is activated, initialize particles setting number of sources
+  #ifdef OPENGL_VISUALIZATION
+  if (opengl_manager.IsOpenGLActivated()) {
+    // Send a error message if more than 1 OpenGL are activated
+    if (opencl_manager.GetNumberOfActivatedDevice() > 1) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Many OpenCL devices are activated!!! For OpenGL visualization, only particles from first device will be displayed. Please, select only one device.";
+      GGEMSMisc::ThrowException("GGEMS", "Initialize", oss.str());
+    }
+
+    // Initializing buffers
+    opengl_manager.InitializeDisplayedParticles(source_manager.GetNumberOfSources());
+
+    // Checking number of displayed particles compared to simulated particles
+    std::size_t number_of_displayed_particles = static_cast<std::size_t>(opengl_manager.GetNumberOfDisplayedParticles());
+    for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
+      GGsize number_of_particles = source_manager.GetNumberOfParticles(i);
+      if (number_of_displayed_particles > number_of_particles) {
+        opengl_manager.SetNumberParticles(i, number_of_particles);
+      }
+      else {
+        opengl_manager.SetNumberParticles(i, number_of_displayed_particles);
+      }
+    }
+  }
+  #endif
+
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");
 }
@@ -261,6 +296,10 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 {
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  #endif
 
   // Printing progress bar
   mutex.lock();
@@ -296,11 +335,18 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 
         loop_counter++;
       } while (source_manager.IsAlive(thread_index) || loop_counter == max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
-    
+
       // Incrementing progress bar
       mutex.lock();
       ++progress_bar;
       mutex.unlock();
+
+      // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
+      #ifdef OPENGL_VISUALIZATION
+      if (opengl_manager.IsOpenGLActivated()) {
+        opengl_manager.CopyParticlePositionToOpenGL(i);
+      }
+      #endif
     }
   }
 
@@ -315,6 +361,13 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 void GGEMS::Run()
 {
   GGcout("GGEMS", "Run", 0) << "GGEMS simulation started" << GGendl;
+
+  // Checking number of source, if 0 stop run
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  if (source_manager.GetNumberOfSources() == 0) {
+    GGwarn("GGEMS", "Run", 0) << "No source defined. Run can not be executed!!!" << GGendl;
+    return;
+  }
 
   ChronoTime start_time = GGEMSChrono::Now();
 
@@ -348,6 +401,15 @@ void GGEMS::Run()
   GGcout("GGEMS", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
 
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
+
+  // Display OpenGL window
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  if (opengl_manager.IsOpenGLActivated()) {
+    opengl_manager.UploadParticleToOpenGL();
+    opengl_manager.Display();
+  }
+  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +425,7 @@ void GGEMS::PrintBanner(void) const
   std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
-  std::cout << "$ Welcome to GGEMS v1.1   https://ggems.fr $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.2   https://ggems.fr $" << std::endl;
   std::cout << "$ Copyright (c) GGEMS Team 2021            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
@@ -375,7 +437,7 @@ void GGEMS::PrintBanner(void) const
 
 GGEMS* create_ggems(void)
 {
-  return new(std::nothrow) GGEMS();
+  return new(std::nothrow) GGEMS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

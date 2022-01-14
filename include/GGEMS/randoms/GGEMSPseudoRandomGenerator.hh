@@ -106,7 +106,7 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
       \return pointer to OpenCL buffer storing random numbers
       \brief return the pointer to OpenCL buffer storing random numbers
     */
-    inline cl::Buffer* GetPseudoRandomNumbers(GGsize const& thread_index) const {return pseudo_random_numbers_[thread_index];};
+    inline cl::Buffer* GetPseudoRandomNumbers(GGsize const& thread_index) const {return pseudo_random_numbers_[thread_index];}
 
   private:
     /*!

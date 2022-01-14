@@ -167,10 +167,10 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
     GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "-------" << GGendl;
     GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Total RAM memory allocated: " << BestDigitalUnit(allocated_ram_[device_index]) << " / " << BestDigitalUnit(max_available_ram_[device_index]) << " (" << percent_allocated_RAM << "%)" << GGendl;
     GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Details: " << GGendl;
-    for (auto&& i : allocated_memories_[device_index]) {
-      float usage = static_cast<GGfloat>(i.second) * 100.0f / static_cast<GGfloat>(allocated_ram_[device_index]);
+    for (auto&& j : allocated_memories_[device_index]) {
+      GGfloat usage = static_cast<GGfloat>(j.second) * 100.0f / static_cast<GGfloat>(allocated_ram_[device_index]);
       if (allocated_ram_[device_index] == 0) usage = 0.0f;
-      GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << BestDigitalUnit(i.second) << " allocated (" << usage << "%)" << GGendl;
+      GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << j.first << "': " << BestDigitalUnit(j.second) << " allocated (" << usage << "%)" << GGendl;
     }
   }
 
