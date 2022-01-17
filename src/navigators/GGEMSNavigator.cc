@@ -477,7 +477,7 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
       edep_tracking_dosimetry = dose_calculator_->GetEdepBuffer(thread_index);
       edep_squared_tracking_dosimetry = dose_calculator_->GetEdepSquaredBuffer(thread_index);
       if (is_tle_){
-        mu_table_d = mu_tables_[thread_index] ;// TO TEST
+        mu_table_d = mu_tables_[thread_index];
       }
     }
 
@@ -555,7 +555,7 @@ void GGEMSNavigator::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGEMSMaterialTables*  material_table_device)
+void GGEMSNavigator::Init_Mu_Table(void)
 {
   GGcout("GGEMSNavigator", "Init_Mu_Table", 3) << "TLE activated!!!" << GGendl;
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -575,8 +575,8 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
 
       for (GGint j = 0; j < nb_energies; ++j) {
         energies[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
-        mu[index_table]       = GGEMSMuDataConstants::kMuData[index_data++];
-        mu_en[index_table]    = GGEMSMuDataConstants::kMuData[index_data++];
+        mu[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+        mu_en[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
 
         index_table++;
       }
@@ -594,18 +594,18 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     cl::Buffer* particle_cs = cross_sections_->GetCrossSections(d);
     GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), d);
 
-    mu_table_device->nb_mat = static_cast<GGint>(particle_cs_device->number_of_materials_);
-    mu_table_device->E_max = particle_cs_device->max_energy_;
-    mu_table_device->E_min = particle_cs_device->min_energy_;
-    mu_table_device->nb_bins = static_cast<GGint>(particle_cs_device->number_of_bins_);
+    mu_table_device->number_of_materials_ = static_cast<GGint>(particle_cs_device->number_of_materials_);
+    mu_table_device->energy_max_ = particle_cs_device->max_energy_;
+    mu_table_device->energy_min_ = particle_cs_device->min_energy_;
+    mu_table_device->number_of_bins_ = static_cast<GGint>(particle_cs_device->number_of_bins_);
 
     opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
 
     // Fill energy table with log scale
-    GGfloat slope = logf(mu_table_device->E_max / mu_table_device->E_min);
+    GGfloat slope = logf(mu_table_device->energy_max_ / mu_table_device->energy_min_);
     GGint i = 0;
-    while (i < mu_table_device->nb_bins) {
-      mu_table_device->E_bins[i] = mu_table_device->E_min * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->nb_bins)-1.0f)))*MeV;
+    while (i < mu_table_device->number_of_bins_) {
+      mu_table_device->energy_bins_[i] = mu_table_device->energy_min_ * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->number_of_bins_)-1.0f)))*MeV;
       ++i;
     }
 
@@ -617,15 +617,15 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     GGint abs_index, E_index, mu_index_E;
     std::size_t iZ, Z;
     GGfloat energy, mu_over_rho, mu_en_over_rho, frac;
-    while (imat < mu_table_device->nb_mat) {
+    while (imat < mu_table_device->number_of_materials_) {
       // for each energy bin
       i=0;
-      while (i < mu_table_device->nb_bins) {
+      while (i < mu_table_device->number_of_bins_) {
         // absolute index to store data within the table
-        abs_index = imat*mu_table_device->nb_bins + i;
+        abs_index = imat*mu_table_device->number_of_bins_ + i;
 
         // Energy value
-        energy = mu_table_device->E_bins[i];
+        energy = mu_table_device->energy_bins_[i];
 
         // For each element of the material
         mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
@@ -653,8 +653,8 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
         }
 
         // Store values
-        mu_table_device->mu[ abs_index ] = mu_over_rho * materials_device->density_of_material_[ imat ] / (g/cm3);
-        mu_table_device->mu_en[ abs_index ] = mu_en_over_rho * materials_device->density_of_material_[ imat ] / (g/cm3);
+        mu_table_device->mu_[ abs_index ] = mu_over_rho * materials_device->density_of_material_[ imat ] / (g/cm3);
+        mu_table_device->mu_en_[ abs_index ] = mu_en_over_rho * materials_device->density_of_material_[ imat ] / (g/cm3);
 
         ++i;
       } // E bin

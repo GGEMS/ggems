@@ -37,10 +37,10 @@
 
 void GGEMSChrono::DisplayTime(DurationNano const& duration, std::string const& displayed_text)
 {
-  #if defined(__MINGW64__) || defined(__clang__) || defined(_MSC_VER) > 1800 || defined(__GNUC__)
+  #if defined(__MINGW64__) || defined(__clang__) || _MSC_VER > 1800 || defined(__GNUC__)
   // Display the iteration time
   GGcout("GGEMSChrono", "DisplayTime", 0) << "Elapsed time (" << displayed_text << "): " << std::setfill( '0' ) << std::setw(2) << std::chrono::duration_cast<Hs>((duration)).count() << " hours " << std::setw(2) << std::chrono::duration_cast<Mins>((duration) % Hs(1)).count() << " mins " << std::setw(2) << std::chrono::duration_cast<Secs>((duration) % Mins(1) ).count() << " secs " << std::setw(3) << std::chrono::duration_cast<Ms>((duration) % Secs(1)).count() << " ms" << GGendl;
   #else
-  GGcout("Chrono", "DisplayTime", 0) << "Elapsed time (" << displayed_text << "): " << duration.count() / 1000000000.0f << "sec";
+  GGcout("Chrono", "DisplayTime", 0) << "Elapsed time (" << displayed_text << "): " << duration.count() / 1000000000.0f << "sec" << GGendl;
   #endif
 }

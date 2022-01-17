@@ -73,7 +73,7 @@ kernel void track_through_ggems_voxelized_solid(
   global GGDosiType* edep_squared_tracking,
   global GGint* hit_tracking,
   global GGint* photon_tracking,
-  global GGEMSMuMuEnData  *mu_d_table,
+  global GGEMSMuMuEnData* mu_d_table,
   GGint  is_tle_
   #endif
 )
@@ -272,14 +272,15 @@ kernel void track_through_ggems_voxelized_solid(
 
     #ifdef DOSIMETRY
     if (is_tle_){
-      GGint E_index  = BinarySearchLeft ( initial_energy, mu_d_table->E_bins, mu_d_table->nb_bins,0,0 );
+      GGint E_index = BinarySearchLeft (initial_energy, mu_d_table->energy_bins_, mu_d_table->number_of_bins_,0,0);
       GGfloat mu_en = 0.0f;
       if (E_index == 0) {
-        mu_en = mu_d_table->mu_en[ material_id*mu_d_table->nb_bins ];
+        mu_en = mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_];
       }
       else {
-        mu_en = LinearInterpolation( mu_d_table->E_bins[E_index-1],  mu_d_table->mu_en[material_id*mu_d_table->nb_bins + E_index-1],
-          mu_d_table->E_bins[E_index],    mu_d_table->mu_en[material_id*mu_d_table->nb_bins + E_index],
+        mu_en = LinearInterpolation(
+          mu_d_table->energy_bins_[E_index-1], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index-1],
+          mu_d_table->energy_bins_[E_index], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index],
           initial_energy);
       }
       GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1;

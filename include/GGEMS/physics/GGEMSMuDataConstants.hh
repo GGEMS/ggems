@@ -20,13 +20,13 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSMuData.hh
+  \file GGEMSMuDataConstants.hh
 
-  \brief
+  \brief Storing constant values for mu values
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
-  \author Mateo VILLA <ingmatvillaa@gmail.com	>
+  \author Mateo VILLA <ingmatvillaa@gmail.com>
 
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
@@ -41,8 +41,8 @@
 */
 namespace GGEMSMuDataConstants
 {
-  __constant GGint kMuNbElements = 92;
-  __constant GGint kMuNbEnergies = 3467;
+  __constant GGint kMuNbElements = 92; /*!< Number of mu elements */
+  __constant GGint kMuNbEnergies = 3467; /*!< Number of mu energies */
   __constant GGint kMuNbEnergyBins[93] = {0,
     25,25,25,25,25,25,25,25,25,25,28,28,27,27,27,27,27,27,27,
     27,27,27,27,27,27,27,27,30,30,36,36,36,35,35,35,35,34,34,35,
@@ -1104,7 +1104,7 @@ namespace GGEMSMuDataConstants
     2.00000e-01f,1.29800e+00f,6.74600e-01f,3.00000e-01f,5.19200e-01f,3.05000e-01f,4.00000e-01f,2.92200e-01f,1.73200e-01f,5.00000e-01f,
     1.97600e-01f,1.15200e-01f,6.00000e-01f,1.49000e-01f,8.49400e-02f,8.00000e-01f,1.01600e-01f,5.57400e-02f,1.00000e+00f,7.89600e-02f,
     4.24100e-02f
-  };
+  }; /*!< Mu data */
 }
 
 #endif
