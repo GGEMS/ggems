@@ -73,8 +73,7 @@ kernel void track_through_ggems_voxelized_solid(
   global GGDosiType* edep_squared_tracking,
   global GGint* hit_tracking,
   global GGint* photon_tracking,
-  global GGEMSMuMuEnData* mu_d_table,
-  GGint  is_tle_
+  global GGEMSMuMuEnData* mu_d_table
   #endif
 )
 {
@@ -89,7 +88,7 @@ kernel void track_through_ggems_voxelized_solid(
 
   // Checking status of particle
   if (primary_particle->status_[global_id] == DEAD) {
-    #ifdef GGEMS_TRACKING
+    #if defined(GGEMS_TRACKING)
     if (global_id == primary_particle->particle_tracking_id) {
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] ################################################################################\n");
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] The particle id %d is dead!!!\n", global_id);
@@ -161,12 +160,12 @@ kernel void track_through_ggems_voxelized_solid(
     if (distance_to_next_boundary <= next_interaction_distance) {
       next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
       next_discrete_process = TRANSPORTATION;
-      #ifdef DOSIMETRY
+      #if defined(DOSIMETRY)
       if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
       #endif
     }
 
-    #ifdef GGEMS_TRACKING
+    #if defined(GGEMS_TRACKING)
     if (global_id == primary_particle->particle_tracking_id) {
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] ################################################################################\n");
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Particle id: %d\n", global_id);
@@ -223,7 +222,7 @@ kernel void track_through_ggems_voxelized_solid(
     primary_particle->py_[global_id] = local_position.y;
     primary_particle->pz_[global_id] = local_position.z;
 
-    #ifdef DOSIMETRY
+    #if defined(DOSIMETRY)
     GGfloat initial_energy = primary_particle->E_[global_id];
     #endif
 
@@ -238,18 +237,16 @@ kernel void track_through_ggems_voxelized_solid(
         primary_particle->scatter_[global_id] = TRUE;
       }
 
-      #ifdef DOSIMETRY
-      if (!is_tle_) {
-        GGfloat edep = initial_energy - primary_particle->E_[global_id];
-        dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
-      }
+      #if defined(DOSIMETRY) && !defined(TLE)
+      GGfloat edep = initial_energy - primary_particle->E_[global_id];
+      dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
       #endif
 
       local_direction.x = primary_particle->dx_[global_id];
       local_direction.y = primary_particle->dy_[global_id];
       local_direction.z = primary_particle->dz_[global_id];
 
-      #ifdef OPENGL
+      #if defined(OPENGL)
       if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
         // Storing OpenGL index on OpenCL private memory
         GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
@@ -270,27 +267,26 @@ kernel void track_through_ggems_voxelized_solid(
       #endif
     }
 
-    #ifdef DOSIMETRY
-    if (is_tle_){
-      GGint E_index = BinarySearchLeft (initial_energy, mu_d_table->energy_bins_, mu_d_table->number_of_bins_,0,0);
-      GGfloat mu_en = 0.0f;
-      if (E_index == 0) {
-        mu_en = mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_];
-      }
-      else {
-        mu_en = LinearInterpolation(
-          mu_d_table->energy_bins_[E_index-1], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index-1],
-          mu_d_table->energy_bins_[E_index], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index],
-          initial_energy);
-      }
-      GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1;
-      dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+    #if defined(DOSIMETRY) && defined(TLE)
+    GGint E_index = BinarySearchLeft(initial_energy, mu_d_table->energy_bins_, mu_d_table->number_of_bins_, 0, 0);
+    GGfloat mu_en = 0.0f;
+    if (E_index == 0) {
+      mu_en = mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_];
     }
+    else {
+      mu_en = LinearInterpolation(
+        mu_d_table->energy_bins_[E_index-1], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index-1],
+        mu_d_table->energy_bins_[E_index], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index],
+        initial_energy
+      );
+    }
+    GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1f;
+    dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
     #endif
 
     // Apply threshold
     if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[material_id]) {
-      #ifdef DOSIMETRY
+      #if defined(DOSIMETRY)
       dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, primary_particle->E_[global_id], &local_position);
       #endif
       primary_particle->status_[global_id] = DEAD;

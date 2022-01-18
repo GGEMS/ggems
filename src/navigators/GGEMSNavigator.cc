@@ -193,8 +193,7 @@ void GGEMSNavigator::EnableTracking(void)
 
 void GGEMSNavigator::EnableTLE(bool const& is_activated)
 {
-  if (is_activated) is_tle_ = 1;
-  else is_tle_ = 0 ;
+  is_tle_ = is_activated;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -510,7 +509,6 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
       else kernel->setArg(12, *photon_tracking_dosimetry);
       if (!mu_table_d) kernel->setArg(13, sizeof(cl_mem), nullptr);
       else kernel->setArg(13, *mu_table_d);
-      kernel->setArg(14, is_tle_);
     }
 
     // Launching kernel
@@ -573,13 +571,13 @@ void GGEMSNavigator::Init_Mu_Table(void)
     GGint nb_energies = GGEMSMuDataConstants::kMuNbEnergyBins[i];
     mu_index[i] = index_table;
 
-      for (GGint j = 0; j < nb_energies; ++j) {
-        energies[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
-        mu[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
-        mu_en[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+    for (GGint j = 0; j < nb_energies; ++j) {
+      energies[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+      mu[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+      mu_en[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
 
-        index_table++;
-      }
+      index_table++;
+    }
   }
 
   // Loop over the device
@@ -641,8 +639,8 @@ void GGEMSNavigator::Init_Mu_Table(void)
 
           // Get mu an mu_en from interpolation
           if ( E_index == mu_index_E ) {
-            mu_over_rho += mu[ E_index ];
-            mu_en_over_rho += mu_en[ E_index ];
+            mu_over_rho += mu[E_index];
+            mu_en_over_rho += mu_en[E_index];
           }
           else
           {
@@ -653,8 +651,8 @@ void GGEMSNavigator::Init_Mu_Table(void)
         }
 
         // Store values
-        mu_table_device->mu_[ abs_index ] = mu_over_rho * materials_device->density_of_material_[ imat ] / (g/cm3);
-        mu_table_device->mu_en_[ abs_index ] = mu_en_over_rho * materials_device->density_of_material_[ imat ] / (g/cm3);
+        mu_table_device->mu_[abs_index] = mu_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
+        mu_table_device->mu_en_[abs_index] = mu_en_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
 
         ++i;
       } // E bin

@@ -308,7 +308,7 @@ class GGEMS_EXPORT GGEMSNavigator
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
     bool is_dosimetry_mode_; /*!< Boolean checking if dosimetry mode is activated */
-    GGint is_tle_;  /*!< Boolean checking if tle mode is activated */
+    bool is_tle_;  /*!< Boolean checking if tle mode is activated */
     GGsize number_activated_devices_; /*!< Number of activated device */
 
     cl::Buffer** mu_tables_; /*!< Buffer for the Mu Table */

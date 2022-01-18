@@ -43,8 +43,8 @@
 typedef struct GGEMSMuMuEnData_t
 {
   GGfloat energy_bins_[MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*! Number of energy bins */
-  GGfloat mu_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< Mu values for each material (n*k) */
-  GGfloat mu_en_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< Mu energy values for each material (n*k) */
+  GGfloat mu_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< linear attenuation coefficient values for each material (n*k) */
+  GGfloat mu_en_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< linear energy absorption values for each material (n*k) */
 
   GGint number_of_materials_; /*!< Number of materials : k */
   GGint number_of_bins_; /*!< Number of bins : n */

@@ -280,6 +280,13 @@ class GGEMS_EXPORT GGEMSSolid
     */
     void BuildOpenGL(void) const;
 
+    /*!
+      \fn void AddKernelOption(std::string const& option)
+      \param option - kernel option for OpenCL
+      \brief Add an additional option to OpenCL kernel
+    */
+    void AddKernelOption(std::string const& option);
+
   protected:
     /*!
       \fn void InitializeKernel(void)
