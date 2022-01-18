@@ -29,19 +29,16 @@
 */
 
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
-
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
-
 #include "GGEMS/materials/GGEMSMaterialTables.hh"
-
 #include "GGEMS/physics/GGEMSParticleCrossSections.hh"
-
 #include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
+#include "GGEMS/physics/GGEMSMuData.hh"
 
-#ifdef DOSIMETRY
+#if defined(DOSIMETRY)
 #include "GGEMS/navigators/GGEMSDoseRecording.hh"
 #include "GGEMS/physics/GGEMSMuData.hh"
 #endif
@@ -66,14 +63,14 @@ kernel void track_through_ggems_voxelized_solid(
   global GGuchar const* label_data,
   global GGEMSParticleCrossSections const* particle_cross_sections,
   global GGEMSMaterialTables const* materials,
+  global GGEMSMuMuEnData const* attenuations,
   GGfloat const threshold
   #ifdef DOSIMETRY
   ,global GGEMSDoseParams* dose_params,
   global GGDosiType* edep_tracking,
   global GGDosiType* edep_squared_tracking,
   global GGint* hit_tracking,
-  global GGint* photon_tracking,
-  global GGEMSMuMuEnData* mu_d_table
+  global GGint* photon_tracking
   #endif
 )
 {
@@ -268,15 +265,15 @@ kernel void track_through_ggems_voxelized_solid(
     }
 
     #if defined(DOSIMETRY) && defined(TLE)
-    GGint E_index = BinarySearchLeft(initial_energy, mu_d_table->energy_bins_, mu_d_table->number_of_bins_, 0, 0);
+    GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
     GGfloat mu_en = 0.0f;
     if (E_index == 0) {
-      mu_en = mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_];
+      mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];
     }
     else {
       mu_en = LinearInterpolation(
-        mu_d_table->energy_bins_[E_index-1], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index-1],
-        mu_d_table->energy_bins_[E_index], mu_d_table->mu_en_[material_id*mu_d_table->number_of_bins_ + E_index],
+        attenuations->energy_bins_[E_index-1], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index-1],
+        attenuations->energy_bins_[E_index], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index],
         initial_energy
       );
     }

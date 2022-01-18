@@ -29,7 +29,6 @@
   \author Mateo VILLA <ingmatvillaa@gmail.com>
 
   \author LaTIM, INSERM - U1101, Brest, FRANCE
-  \version 1.0
   \date Monday June 10, 2020
 */
 

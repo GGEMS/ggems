@@ -75,6 +75,9 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   // Allocation of cross sections including physics
   cross_sections_ = new GGEMSCrossSections();
 
+  // Allocation of attenuations
+  attenuations_ = new GGEMSAttenuations();
+
   // Get the number of activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
@@ -82,7 +85,6 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   is_visible_ = false;
   custom_material_rgb_.clear();
   material_visible_.clear();
-  mu_tables_ = nullptr;
 
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;
 }
@@ -111,16 +113,15 @@ GGEMSNavigator::~GGEMSNavigator(void)
   }
 
   if (cross_sections_) {
+    cross_sections_->Clean();
     delete cross_sections_;
     cross_sections_ = nullptr;
   }
 
-  if (mu_tables_) {
-    for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(mu_tables_[i], sizeof(GGEMSMuMuEnData), i);
-    }
-    delete[] mu_tables_;
-    mu_tables_ = nullptr;
+  if (attenuations_) {
+    attenuations_->Clean();
+    delete attenuations_;
+    attenuations_ = nullptr;
   }
 
   GGcout("GGEMSNavigator", "~GGEMSNavigator", 3) << "GGEMSNavigator erased!!!" << GGendl;
@@ -291,8 +292,8 @@ void GGEMSNavigator::Initialize(void)
   // Initialization of electromagnetic process and building cross section tables for each particles and materials
   cross_sections_->Initialize(materials_);
 
-  // Initialization of mu for materials
-  if (is_tle_) Init_Mu_Table();
+  // Initialization of attenuations
+  attenuations_->Initialize(cross_sections_, materials_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +437,9 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   // Getting OpenCL buffer for materials
   cl::Buffer* materials = materials_->GetMaterialTables(thread_index);
 
+  // Geetning OpenCL buffer for attenuations
+  cl::Buffer* attenuations = attenuations_->GetAttenuations(thread_index);
+
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
   GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
@@ -475,9 +479,6 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
       hit_tracking_dosimetry = dose_calculator_->GetHitTrackingBuffer(thread_index);
       edep_tracking_dosimetry = dose_calculator_->GetEdepBuffer(thread_index);
       edep_squared_tracking_dosimetry = dose_calculator_->GetEdepSquaredBuffer(thread_index);
-      if (is_tle_){
-        mu_table_d = mu_tables_[thread_index];
-      }
     }
 
     // Getting kernel, and setting parameters
@@ -490,25 +491,24 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     else kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
     kernel->setArg(5, *cross_sections);
     kernel->setArg(6, *materials);
-    kernel->setArg(7, threshold_);
+    kernel->setArg(7, *attenuations);
+    kernel->setArg(8, threshold_);
     if (data_reg_type == "HISTOGRAM") {
-      kernel->setArg(8, *histogram);
-      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), nullptr);
-      else kernel->setArg(9, *scatter_histogram);
+      kernel->setArg(9, *histogram);
+      if (!scatter_histogram) kernel->setArg(10, sizeof(cl_mem), nullptr);
+      else kernel->setArg(10, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
-      kernel->setArg(8, *dosimetry_params);
-      kernel->setArg(9, *edep_tracking_dosimetry);
+      kernel->setArg(9, *dosimetry_params);
+      kernel->setArg(10, *edep_tracking_dosimetry);
 
-      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), nullptr);
-      else kernel->setArg(10, *edep_squared_tracking_dosimetry);
+      if (!edep_squared_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), nullptr);
+      else kernel->setArg(11, *edep_squared_tracking_dosimetry);
 
-      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), nullptr);
-      else kernel->setArg(11, *hit_tracking_dosimetry);
-      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), nullptr);
-      else kernel->setArg(12, *photon_tracking_dosimetry);
-      if (!mu_table_d) kernel->setArg(13, sizeof(cl_mem), nullptr);
-      else kernel->setArg(13, *mu_table_d);
+      if (!hit_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), nullptr);
+      else kernel->setArg(12, *hit_tracking_dosimetry);
+      if (!photon_tracking_dosimetry) kernel->setArg(13, sizeof(cl_mem), nullptr);
+      else kernel->setArg(13, *photon_tracking_dosimetry);
     }
 
     // Launching kernel
@@ -553,112 +553,112 @@ void GGEMSNavigator::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigator::Init_Mu_Table(void)
-{
-  GGcout("GGEMSNavigator", "Init_Mu_Table", 3) << "TLE activated!!!" << GGendl;
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+// void GGEMSNavigator::Init_Mu_Table(void)
+// {
+//   GGcout("GGEMSNavigator", "Init_Mu_Table", 3) << "TLE activated!!!" << GGendl;
+//   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Load mu data from database
-  GGfloat* energies = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
-  GGfloat* mu = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
-  GGfloat* mu_en = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
-  GGint* mu_index = new GGint[GGEMSMuDataConstants::kMuNbElements];
+//   // Load mu data from database
+//   GGfloat* energies = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
+//   GGfloat* mu = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
+//   GGfloat* mu_en = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
+//   GGint* mu_index = new GGint[GGEMSMuDataConstants::kMuNbElements];
 
-  GGint index_table = 0;
-  GGint index_data = 0;
+//   GGint index_table = 0;
+//   GGint index_data = 0;
 
-  for (GGint i = 0; i <= GGEMSMuDataConstants::kMuNbElements; ++i) {
-    GGint nb_energies = GGEMSMuDataConstants::kMuNbEnergyBins[i];
-    mu_index[i] = index_table;
+//   for (GGint i = 0; i <= GGEMSMuDataConstants::kMuNbElements; ++i) {
+//     GGint nb_energies = GGEMSMuDataConstants::kMuNbEnergyBins[i];
+//     mu_index[i] = index_table;
 
-    for (GGint j = 0; j < nb_energies; ++j) {
-      energies[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
-      mu[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
-      mu_en[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+//     for (GGint j = 0; j < nb_energies; ++j) {
+//       energies[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+//       mu[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
+//       mu_en[index_table] = GGEMSMuDataConstants::kMuData[index_data++];
 
-      index_table++;
-    }
-  }
+//       index_table++;
+//     }
+//   }
 
-  // Loop over the device
-  mu_tables_ = new cl::Buffer*[number_activated_devices_];
-  for (GGsize d = 0; d < number_activated_devices_; ++d) {
-    // Allocating memory on OpenCL device
-    mu_tables_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMuMuEnData), d, CL_MEM_READ_WRITE, "GGEMSNavigator");
+//   // Loop over the device
+//   mu_tables_ = new cl::Buffer*[number_activated_devices_];
+//   for (GGsize d = 0; d < number_activated_devices_; ++d) {
+//     // Allocating memory on OpenCL device
+//     mu_tables_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMuMuEnData), d, CL_MEM_READ_WRITE, "GGEMSNavigator");
 
-    // Getting the OpenCL pointer on Mu tables
-    GGEMSMuMuEnData* mu_table_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMuMuEnData), d);
+//     // Getting the OpenCL pointer on Mu tables
+//     GGEMSMuMuEnData* mu_table_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMuMuEnData), d);
 
-    cl::Buffer* particle_cs = cross_sections_->GetCrossSections(d);
-    GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), d);
+//     cl::Buffer* particle_cs = cross_sections_->GetCrossSections(d);
+//     GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), d);
 
-    mu_table_device->number_of_materials_ = static_cast<GGint>(particle_cs_device->number_of_materials_);
-    mu_table_device->energy_max_ = particle_cs_device->max_energy_;
-    mu_table_device->energy_min_ = particle_cs_device->min_energy_;
-    mu_table_device->number_of_bins_ = static_cast<GGint>(particle_cs_device->number_of_bins_);
+//     mu_table_device->number_of_materials_ = static_cast<GGint>(particle_cs_device->number_of_materials_);
+//     mu_table_device->energy_max_ = particle_cs_device->max_energy_;
+//     mu_table_device->energy_min_ = particle_cs_device->min_energy_;
+//     mu_table_device->number_of_bins_ = static_cast<GGint>(particle_cs_device->number_of_bins_);
 
-    opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
+//     opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
 
-    // Fill energy table with log scale
-    GGfloat slope = logf(mu_table_device->energy_max_ / mu_table_device->energy_min_);
-    GGint i = 0;
-    while (i < mu_table_device->number_of_bins_) {
-      mu_table_device->energy_bins_[i] = mu_table_device->energy_min_ * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->number_of_bins_)-1.0f)))*MeV;
-      ++i;
-    }
+//     // Fill energy table with log scale
+//     GGfloat slope = logf(mu_table_device->energy_max_ / mu_table_device->energy_min_);
+//     GGint i = 0;
+//     while (i < mu_table_device->number_of_bins_) {
+//       mu_table_device->energy_bins_[i] = mu_table_device->energy_min_ * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->number_of_bins_)-1.0f)))*MeV;
+//       ++i;
+//     }
 
-    cl::Buffer* materials = materials_->GetMaterialTables(d);
-    GGEMSMaterialTables* materials_device =  opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(materials, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
+//     cl::Buffer* materials = materials_->GetMaterialTables(d);
+//     GGEMSMaterialTables* materials_device =  opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(materials, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
 
-    // For each material and energy bin compute mu and muen
-    GGint imat = 0;
-    GGint abs_index, E_index, mu_index_E;
-    std::size_t iZ, Z;
-    GGfloat energy, mu_over_rho, mu_en_over_rho, frac;
-    while (imat < mu_table_device->number_of_materials_) {
-      // for each energy bin
-      i=0;
-      while (i < mu_table_device->number_of_bins_) {
-        // absolute index to store data within the table
-        abs_index = imat*mu_table_device->number_of_bins_ + i;
+//     // For each material and energy bin compute mu and muen
+//     GGint imat = 0;
+//     GGint abs_index, E_index, mu_index_E;
+//     std::size_t iZ, Z;
+//     GGfloat energy, mu_over_rho, mu_en_over_rho, frac;
+//     while (imat < mu_table_device->number_of_materials_) {
+//       // for each energy bin
+//       i=0;
+//       while (i < mu_table_device->number_of_bins_) {
+//         // absolute index to store data within the table
+//         abs_index = imat*mu_table_device->number_of_bins_ + i;
 
-        // Energy value
-        energy = mu_table_device->energy_bins_[i];
+//         // Energy value
+//         energy = mu_table_device->energy_bins_[i];
 
-        // For each element of the material
-        mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
-        iZ=0;
-        while (iZ < materials_device->number_of_chemical_elements_[imat]) {
-          // Get Z and mass fraction
-          Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[imat] + iZ];
-          frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[imat] + iZ];
+//         // For each element of the material
+//         mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
+//         iZ=0;
+//         while (iZ < materials_device->number_of_chemical_elements_[imat]) {
+//           // Get Z and mass fraction
+//           Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[imat] + iZ];
+//           frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[imat] + iZ];
 
-          // Get energy index
-          mu_index_E = GGEMSMuDataConstants::kMuIndexEnergy[Z];
-          E_index = BinarySearchLeft(energy, energies, mu_index_E+GGEMSMuDataConstants::kMuNbEnergyBins[Z], 0, mu_index_E);
+//           // Get energy index
+//           mu_index_E = GGEMSMuDataConstants::kMuIndexEnergy[Z];
+//           E_index = BinarySearchLeft(energy, energies, mu_index_E+GGEMSMuDataConstants::kMuNbEnergyBins[Z], 0, mu_index_E);
 
-          // Get mu an mu_en from interpolation
-          if ( E_index == mu_index_E ) {
-            mu_over_rho += mu[E_index];
-            mu_en_over_rho += mu_en[E_index];
-          }
-          else
-          {
-            mu_over_rho += frac * LinearInterpolation(energies[E_index-1], mu[E_index-1], energies[E_index], mu[E_index], energy);
-            mu_en_over_rho += frac * LinearInterpolation(energies[E_index-1], mu_en[E_index-1], energies[E_index], mu_en[E_index], energy);
-          }
-          ++iZ;
-        }
+//           // Get mu an mu_en from interpolation
+//           if ( E_index == mu_index_E ) {
+//             mu_over_rho += mu[E_index];
+//             mu_en_over_rho += mu_en[E_index];
+//           }
+//           else
+//           {
+//             mu_over_rho += frac * LinearInterpolation(energies[E_index-1], mu[E_index-1], energies[E_index], mu[E_index], energy);
+//             mu_en_over_rho += frac * LinearInterpolation(energies[E_index-1], mu_en[E_index-1], energies[E_index], mu_en[E_index], energy);
+//           }
+//           ++iZ;
+//         }
 
-        // Store values
-        mu_table_device->mu_[abs_index] = mu_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
-        mu_table_device->mu_en_[abs_index] = mu_en_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
+//         // Store values
+//         mu_table_device->mu_[abs_index] = mu_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
+//         mu_table_device->mu_en_[abs_index] = mu_en_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
 
-        ++i;
-      } // E bin
-      ++imat;
-    }
-    opencl_manager.ReleaseDeviceBuffer(mu_tables_[d], mu_table_device, d);
-    opencl_manager.ReleaseDeviceBuffer(materials, materials_device, d);
-  }
-}
+//         ++i;
+//       } // E bin
+//       ++imat;
+//     }
+//     opencl_manager.ReleaseDeviceBuffer(mu_tables_[d], mu_table_device, d);
+//     opencl_manager.ReleaseDeviceBuffer(materials, materials_device, d);
+//   }
+// }

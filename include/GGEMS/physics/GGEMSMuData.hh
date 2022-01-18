@@ -22,14 +22,13 @@
 /*!
   \file GGEMSMuData.hh
 
-  \brief Structure storing the mu values for OpenCL device
+  \brief Structure storing the attenuation and energy-absorption coefficient values for OpenCL device
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author Mateo VILLA <ingmatvillaa@gmail.com>
 
   \author LaTIM, INSERM - U1101, Brest, FRANCE
-  \version 1.0
   \date Monday June 10, 2020
 */
 
@@ -43,8 +42,8 @@
 typedef struct GGEMSMuMuEnData_t
 {
   GGfloat energy_bins_[MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*! Number of energy bins */
-  GGfloat mu_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< linear attenuation coefficient values for each material (n*k) */
-  GGfloat mu_en_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< linear energy absorption values for each material (n*k) */
+  GGfloat mu_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< attenuation coefficient values for each material (n*k) */
+  GGfloat mu_en_[256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< energy-absorption coefficient for each material (n*k) */
 
   GGint number_of_materials_; /*!< Number of materials : k */
   GGint number_of_bins_; /*!< Number of bins : n */

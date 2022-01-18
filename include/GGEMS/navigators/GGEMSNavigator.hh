@@ -43,6 +43,7 @@
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+#include "GGEMS/physics/GGEMSAttenuations.hh"
 #include "GGEMS/physics/GGEMSMuData.hh"
 #include "GGEMS/physics/GGEMSMuDataConstants.hh"
 
@@ -240,12 +241,6 @@ class GGEMS_EXPORT GGEMSNavigator
     void EnableTLE(bool const& is_activated);
 
     /*!
-      \fn void Init_Mu_Table(void)
-      \brief Enable track length estimator (TLE) during particle navigation
-    */
-    void Init_Mu_Table(void);
-
-    /*!
       \fn void SetVisible(bool const& is_visible)
       \param is_visible - true if navigator is drawn using OpenGL
       \brief set to true to draw navigator
@@ -304,14 +299,13 @@ class GGEMS_EXPORT GGEMSNavigator
     GGsize number_of_solids_; /*!< Number of solids in navigator */
     GGEMSMaterials* materials_; /*!< Materials of phantom */
     GGEMSCrossSections* cross_sections_; /*!< Cross section table for process */
+    GGEMSAttenuations* attenuations_; /*!< Attenuation coefficients */
 
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
     bool is_dosimetry_mode_; /*!< Boolean checking if dosimetry mode is activated */
     bool is_tle_;  /*!< Boolean checking if tle mode is activated */
     GGsize number_activated_devices_; /*!< Number of activated device */
-
-    cl::Buffer** mu_tables_; /*!< Buffer for the Mu Table */
 
     // OpenGL
     bool is_visible_; /*!< flag for opengl */
