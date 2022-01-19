@@ -34,6 +34,7 @@
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
+#include "GGEMS/physics/GGEMSAttenuations.hh"
 
 #ifdef _WIN32
 #include "GGEMS/tools/GGEMSWinGetOpt.hh"
@@ -212,12 +213,19 @@ int main(int argc, char** argv)
     // Defining global parameters for cross-section building
     processes_manager.SetCrossSectionTableNumberOfBins(220); // Not exceed 2048 bins
     processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
-    processes_manager.SetCrossSectionTableMaximumEnergy(10.0f, "MeV");
+    processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
 
     // Add physical process and initialize it
     GGEMSCrossSections cross_sections;
     cross_sections.AddProcess(process_name, "gamma");
     cross_sections.Initialize(&materials);
+
+    // Get attenuation values
+    GGEMSAttenuations attenuations(&materials);
+    attenuations.Initialize(&cross_sections);
+
+    std::cout << "    Attenuation: " << attenuations.GetAttenuation(material_name, energy_MeV, "MeV") << " cm-1" << std::endl;
+    std::cout << "    Energy attenuation: " << attenuations.GetEnergyAttenuation(material_name, energy_MeV, "MeV") << " cm-1" << std::endl;
 
     std::cout << "At " << energy_MeV << " MeV, cross section is " << cross_sections.GetPhotonCrossSection(process_name, material_name, energy_MeV, "MeV") << " cm2.g-1" << std::endl;
 

@@ -33,6 +33,7 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/physics/GGEMSMuData.hh"
 
 class GGEMSMaterials;
 class GGEMSCrossSections;
@@ -45,9 +46,10 @@ class GGEMS_EXPORT GGEMSAttenuations
 {
   public:
     /*!
+      \param materials - activated materials for a specific phantom
       \brief GGEMSAttenuations constructor
     */
-    GGEMSAttenuations(void);
+    explicit GGEMSAttenuations(GGEMSMaterials* materials);
 
     /*!
       \brief GGEMSAttenuations destructor
@@ -83,12 +85,11 @@ class GGEMS_EXPORT GGEMSAttenuations
     GGEMSAttenuations& operator=(GGEMSAttenuations const&& attenuations) = delete;
 
     /*!
-      \fn void Initialize(GGEMSCrossSections const* cross_sections, GGEMSMaterials const* materials)
+      \fn void Initialize(GGEMSCrossSections const* cross_sections)
       \param cross_sections - stored cross sections for a specific navigator
-      \param materials - activated materials for a specific phantom
       \brief Initialize all the activated processes computing tables on OpenCL device
     */
-    void Initialize(GGEMSCrossSections const* cross_sections, GGEMSMaterials const* materials);
+    void Initialize(GGEMSCrossSections const* cross_sections);
 
     /*!
       \fn void Clean(void)
@@ -104,6 +105,33 @@ class GGEMS_EXPORT GGEMSAttenuations
     */
     inline cl::Buffer* GetAttenuations(GGsize const& thread_index) const {return mu_tables_[thread_index];}
 
+    /*!
+      \fn GGfloat GetAttenuation(std::string const& material_name, GGfloat const& energy, std::string const& unit) const
+      \param material_name - name of the material
+      \param energy - energy of particle
+      \param unit - unit in energy
+      \return attenuation in cm-1 for a material
+      \brief Get the attenuation coefficient value for a material for a specific energy
+    */
+    GGfloat GetAttenuation(std::string const& material_name, GGfloat const& energy, std::string const& unit) const;
+
+    /*!
+      \fn GGfloat GetEnergyAttenuation(std::string const& material_name, GGfloat const& energy, std::string const& unit) const
+      \param material_name - name of the material
+      \param energy - energy of particle
+      \param unit - unit in energy
+      \return energy attenuation in cm-1 for a material
+      \brief Get the energy attenuation coefficient value for a material for a specific energy
+    */
+    GGfloat GetEnergyAttenuation(std::string const& material_name, GGfloat const& energy, std::string const& unit) const;
+
+  private:
+    /*!
+      \fn void LoadAttenuationsOnHost(void)
+      \brief Load attenuations coefficients from OpenCL device to RAM. Optimization for python user
+    */
+    void LoadAttenuationsOnHost(void);
+
   private:
     GGsize number_activated_devices_; /*!< Number of activated device */
 
@@ -111,6 +139,8 @@ class GGEMS_EXPORT GGEMSAttenuations
     GGfloat* mu_; /*!< attenuation coefficients */
     GGfloat* mu_en_; /*!< energy-absorption coefficient */
     GGint* mu_index_; /*!< index of attenuation */
+    GGEMSMuMuEnData* attenuations_host_; /*!< Pointer storing attenuations coef. on host (RAM memory) */
+    GGEMSMaterials* materials_; /*!< pointer to materials */
 
     // OpenCL Buffer
     cl::Buffer** mu_tables_; /*<! attenuations coefficients on OpenCL device */
