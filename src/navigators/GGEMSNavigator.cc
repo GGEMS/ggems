@@ -73,10 +73,10 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   materials_ = new GGEMSMaterials();
 
   // Allocation of cross sections including physics
-  cross_sections_ = new GGEMSCrossSections();
+  cross_sections_ = new GGEMSCrossSections(materials_);
 
   // Allocation of attenuations
-  attenuations_ = new GGEMSAttenuations(materials_);
+  attenuations_ = new GGEMSAttenuations(materials_, cross_sections_);
 
   // Get the number of activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -289,10 +289,10 @@ void GGEMSNavigator::Initialize(void)
   materials_->Initialize();
 
   // Initialization of electromagnetic process and building cross section tables for each particles and materials
-  cross_sections_->Initialize(materials_);
+  cross_sections_->Initialize();
 
   // Initialization of attenuations
-  attenuations_->Initialize(cross_sections_);
+  attenuations_->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

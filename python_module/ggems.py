@@ -29,6 +29,7 @@ from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSC
 from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 from ggems_dosimetry import GGEMSDosimetryCalculator
 from ggems_profiler import GGEMSProfilerManager
+from ggems_attenuation import GGEMSAttenuations
 
 class GGEMS(object):
     """GGEMS class managing the simulation

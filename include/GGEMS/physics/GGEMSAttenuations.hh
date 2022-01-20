@@ -47,9 +47,10 @@ class GGEMS_EXPORT GGEMSAttenuations
   public:
     /*!
       \param materials - activated materials for a specific phantom
+      \param cross_sections - pointer to cross sections
       \brief GGEMSAttenuations constructor
     */
-    explicit GGEMSAttenuations(GGEMSMaterials* materials);
+    GGEMSAttenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections);
 
     /*!
       \brief GGEMSAttenuations destructor
@@ -85,11 +86,10 @@ class GGEMS_EXPORT GGEMSAttenuations
     GGEMSAttenuations& operator=(GGEMSAttenuations const&& attenuations) = delete;
 
     /*!
-      \fn void Initialize(GGEMSCrossSections const* cross_sections)
-      \param cross_sections - stored cross sections for a specific navigator
+      \fn void Initialize(void)
       \brief Initialize all the activated processes computing tables on OpenCL device
     */
-    void Initialize(GGEMSCrossSections const* cross_sections);
+    void Initialize(void);
 
     /*!
       \fn void Clean(void)
@@ -140,10 +140,56 @@ class GGEMS_EXPORT GGEMSAttenuations
     GGfloat* mu_en_; /*!< energy-absorption coefficient */
     GGint* mu_index_; /*!< index of attenuation */
     GGEMSMuMuEnData* attenuations_host_; /*!< Pointer storing attenuations coef. on host (RAM memory) */
-    GGEMSMaterials* materials_; /*!< pointer to materials */
+    GGEMSMaterials* materials_; /*!< Pointer to materials */
+    GGEMSCrossSections* cross_sections_; /*!< Pointer to physical cross sections */
 
     // OpenCL Buffer
     cl::Buffer** mu_tables_; /*<! attenuations coefficients on OpenCL device */
 };
+
+/*!
+  \fn GGEMSAttenuations* create_ggems_attenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections)
+  \param materials - pointer to materials
+  \param cross_sections - pointer to cross sections
+  \return the pointer on the singleton
+  \brief Get the GGEMSAttenuations pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSAttenuations* create_ggems_attenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections);
+
+/*!
+  \fn void initialize_ggems_attenuations(GGEMSAttenuations* attenuations)
+  \param attenuations - pointer on GGEMS attenuations
+  \brief Intialize the attenuation tables for materials
+*/
+extern "C" GGEMS_EXPORT void initialize_ggems_attenuations(GGEMSAttenuations* attenuations);
+
+/*!
+  \fn GGfloat get_mu_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit)
+  \param attenuations - pointer on GGEMS attenuations
+  \param material_name - name of the material
+  \param energy - energy of the particle
+  \param unit - unit in energy
+  \return attenuations value in cm-1
+  \brief get the attenuation value for a specific material and energy
+*/
+extern "C" GGEMS_EXPORT GGfloat get_mu_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit);
+
+/*!
+  \fn GGfloat get_mu_en_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit)
+  \param attenuations - pointer on GGEMS attenuations
+  \param material_name - name of the material
+  \param energy - energy of the particle
+  \param unit - unit in energy
+  \return energy attenuations absorption value in cm-1
+  \brief get the energy attenuation absorption value for a specific material and energy
+*/
+extern "C" GGEMS_EXPORT GGfloat get_mu_en_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit);
+
+/*!
+  \fn void clean_ggems_attenuations(GGEMSAttenuations* attenuations)
+  \param attenuations - pointer on GGEMS attenuations
+  \brief clean all attenuations on each OpenCL device
+*/
+extern "C" GGEMS_EXPORT void clean_ggems_attenuations(GGEMSAttenuations* attenuations);
 
 #endif

@@ -216,13 +216,13 @@ int main(int argc, char** argv)
     processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
 
     // Add physical process and initialize it
-    GGEMSCrossSections cross_sections;
+    GGEMSCrossSections cross_sections(&materials);
     cross_sections.AddProcess(process_name, "gamma");
-    cross_sections.Initialize(&materials);
+    cross_sections.Initialize();
 
     // Get attenuation values
-    GGEMSAttenuations attenuations(&materials);
-    attenuations.Initialize(&cross_sections);
+    GGEMSAttenuations attenuations(&materials, &cross_sections);
+    attenuations.Initialize();
 
     std::cout << "    Attenuation: " << attenuations.GetAttenuation(material_name, energy_MeV, "MeV") << " cm-1" << std::endl;
     std::cout << "    Energy attenuation: " << attenuations.GetEnergyAttenuation(material_name, energy_MeV, "MeV") << " cm-1" << std::endl;

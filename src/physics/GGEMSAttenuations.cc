@@ -38,7 +38,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSAttenuations::GGEMSAttenuations(GGEMSMaterials* materials)
+GGEMSAttenuations::GGEMSAttenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections)
 {
   GGcout("GGEMSAttenuations", "GGEMSAttenuations", 3) << "GGEMSAttenuations creating..." << GGendl;
 
@@ -53,6 +53,8 @@ GGEMSAttenuations::GGEMSAttenuations(GGEMSMaterials* materials)
   mu_index_ = new GGint[GGEMSMuDataConstants::kMuNbElements];
 
   materials_ = materials;
+  cross_sections_ = cross_sections;
+
   attenuations_host_ = new GGEMSMuMuEnData();
   mu_tables_ = nullptr;
 
@@ -137,7 +139,7 @@ void GGEMSAttenuations::Clean(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSAttenuations::Initialize(GGEMSCrossSections const* cross_sections)
+void GGEMSAttenuations::Initialize(void)
 {
   GGcout("GGEMSAttenuations", "Initialize", 1) << "Initializing attenuation tables..." << GGendl;
 
@@ -152,7 +154,7 @@ void GGEMSAttenuations::Initialize(GGEMSCrossSections const* cross_sections)
     // Getting the OpenCL pointer on Mu tables
     GGEMSMuMuEnData* mu_table_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMuMuEnData), d);
 
-    cl::Buffer* particle_cs = cross_sections->GetCrossSections(d);
+    cl::Buffer* particle_cs = cross_sections_->GetCrossSections(d);
     GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), d);
 
     mu_table_device->number_of_materials_ = static_cast<GGint>(particle_cs_device->number_of_materials_);
@@ -332,4 +334,49 @@ GGfloat GGEMSAttenuations::GetEnergyAttenuation(std::string const& material_name
   GGfloat energy_attenuation = LinearInterpolation(energy_a, energy_attenuation_a, energy_b, energy_attenuation_b, e_MeV);
 
   return energy_attenuation;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSAttenuations* create_ggems_attenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections)
+{
+  return new(std::nothrow) GGEMSAttenuations(materials, cross_sections);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void initialize_ggems_attenuations(GGEMSAttenuations* attenuations)
+{
+  attenuations->Initialize();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGfloat get_mu_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit)
+{
+  return attenuations->GetAttenuation(material_name, energy, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGfloat get_mu_en_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit)
+{
+  return attenuations->GetEnergyAttenuation(material_name, energy, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_ggems_attenuations(GGEMSAttenuations* attenuations)
+{
+  attenuations->Clean();
 }
