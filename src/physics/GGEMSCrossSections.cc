@@ -194,7 +194,7 @@ void GGEMSCrossSections::Initialize(void)
       #ifdef _WIN32
       strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials_->GetMaterialName(i)).c_str());
       #else
-      strcpy(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), (materials->GetMaterialName(i)).c_str());
+      strcpy(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), (materials_->GetMaterialName(i)).c_str());
       #endif
     }
 

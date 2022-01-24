@@ -47,7 +47,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 # CC=icx
 # CXX=icx (Windows) icpx (Unix)
 IF(WIN32)
-  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
+  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
 ELSE()
   SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
 ENDIF()
@@ -206,15 +206,15 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors -Wno-unused-parameter)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors -Wno-unused-parameter)
 
   # Checking compiler for INTEL
   ELSEIF(COMPILER STREQUAL "INTEL")
-    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors -Wno-unused-parameter)
 
   # Otherwize error
   ELSE()

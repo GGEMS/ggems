@@ -93,12 +93,12 @@ processes_manager.set_cross_section_table_energy_max(1000.0, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 6: Add physical processes and initialize them
-cross_sections = GGEMSCrossSections()
+cross_sections = GGEMSCrossSections(materials)
 for process_id in process_list:
   cross_sections.add_process(process_id, 'gamma')
 
 # Intialize cross section tables with previous materials
-cross_sections.initialize(materials)
+cross_sections.initialize()
 
 # Defining 1D X-axis buffer (energy in keV, from 10 keV to 1 MeV, and step of 1 keV)
 energy = np.arange(10, 1000, 0.1)

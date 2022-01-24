@@ -25,7 +25,7 @@ class GGEMSCrossSections(object):
         ggems_lib.create_ggems_cross_sections.argtypes = [ctypes.c_void_p]
         ggems_lib.create_ggems_cross_sections.restype = ctypes.c_void_p
 
-        ggems_lib.add_process_ggems_cross_sections.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.add_process_ggems_cross_sections.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
         ggems_lib.add_process_ggems_cross_sections.restype = ctypes.c_void_p
 
         ggems_lib.initialize_ggems_cross_sections.argtypes = [ctypes.c_void_p]
@@ -39,8 +39,8 @@ class GGEMSCrossSections(object):
 
         self.obj = ggems_lib.create_ggems_cross_sections(materials.obj)
 
-    def add_process(self, process_name, particle_name):
-        ggems_lib.add_process_ggems_cross_sections(self.obj, process_name.encode('ASCII'), particle_name.encode('ASCII'))
+    def add_process(self, process_name, particle_name, is_secondary=False):
+        ggems_lib.add_process_ggems_cross_sections(self.obj, process_name.encode('ASCII'), particle_name.encode('ASCII'), is_secondary)
 
     def initialize(self):
         ggems_lib.initialize_ggems_cross_sections(self.obj)

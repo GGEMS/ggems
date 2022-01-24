@@ -29,17 +29,14 @@
 */
 
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
-
 #include "GGEMS/geometries/GGEMSSolidBoxData.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
-
 #include "GGEMS/materials/GGEMSMaterialTables.hh"
-
 #include "GGEMS/physics/GGEMSParticleCrossSections.hh"
-
 #include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
+#include "GGEMS/physics/GGEMSMuData.hh"
 
 /*!
   \fn kernel void track_through_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram, global GGint* scatter_histogram)
@@ -63,6 +60,7 @@ kernel void track_through_ggems_solid_box(
   global GGuchar const* label_data,
   global GGEMSParticleCrossSections const* particle_cross_sections,
   global GGEMSMaterialTables const* materials,
+  global GGEMSMuMuEnData const* attenuations,
   GGfloat const threshold
   #ifdef HISTOGRAM
   ,global GGint* histogram,

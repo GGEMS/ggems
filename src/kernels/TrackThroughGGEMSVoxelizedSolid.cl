@@ -40,7 +40,6 @@
 
 #if defined(DOSIMETRY)
 #include "GGEMS/navigators/GGEMSDoseRecording.hh"
-#include "GGEMS/physics/GGEMSMuData.hh"
 #endif
 
 /*!
