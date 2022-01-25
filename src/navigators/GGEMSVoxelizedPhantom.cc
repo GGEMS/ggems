@@ -112,6 +112,9 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   // Enabling tracking if necessary
   if (is_tracking_) solids_[0]->EnableTracking();
 
+  // Enabling TLE
+  if (is_tle_) solids_[0]->AddKernelOption(" -DTLE");
+
   // Load voxelized phantom from MHD file and storing materials
   solids_[0]->Initialize(materials_);
   solids_[0]->SetCustomMaterialColor(custom_material_rgb_);

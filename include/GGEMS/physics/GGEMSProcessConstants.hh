@@ -58,6 +58,11 @@ __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*1.0f; /*!< Max energy
 #define MAX_CROSS_SECTION_TABLE_NUMBER_BINS 2048 /*!< Number of maximum bins in cross section table */
 __constant GGshort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
 
+// ATTENUATIONS
+__constant GGfloat ATTENUATION_ENERGY_MIN = 0.001f; /*!< Min energy for attenuation is 0.001 keV */
+__constant GGfloat ATTENUATION_ENERGY_MAX = 1.0f; /*!< Max energy for attenuation is 1 MeV */
+#define ATTENUATION_TABLE_NUMBER_BINS 220 /*!< Number of bins in attenuation table */
+
 // CUTS
 __constant GGfloat PHOTON_DISTANCE_CUT = 1.e-3f; /*!< Photon cut, 1 um */
 __constant GGfloat ELECTRON_DISTANCE_CUT = 1.e-3f; /*!< Electron cut, 1 um */

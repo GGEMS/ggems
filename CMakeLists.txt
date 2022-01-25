@@ -206,15 +206,15 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors -Wno-unused-parameter)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors -Wno-unused-parameter)
 
   # Checking compiler for INTEL
   ELSEIF(COMPILER STREQUAL "INTEL")
-    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -m64 -march=native -Wundef -Wdouble-promotion -Wshadow -Wconversion -fno-common -Wextra -Wall -pedantic -Wold-style-cast -pedantic-errors -Wno-unused-parameter)
 
   # Otherwize error
   ELSE()
