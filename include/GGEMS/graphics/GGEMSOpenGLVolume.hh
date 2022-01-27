@@ -37,8 +37,6 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
 class GGEMSMaterials;

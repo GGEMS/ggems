@@ -144,7 +144,7 @@ class GGEMS_EXPORT GGEMSAttenuations
     GGEMSCrossSections* cross_sections_; /*!< Pointer to physical cross sections */
 
     // OpenCL Buffer
-    cl::Buffer** mu_tables_; /*<! attenuations coefficients on OpenCL device */
+    cl::Buffer** mu_tables_; /*!< attenuations coefficients on OpenCL device */
 };
 
 /*!

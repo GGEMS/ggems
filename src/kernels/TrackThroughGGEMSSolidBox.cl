@@ -39,7 +39,7 @@
 #include "GGEMS/physics/GGEMSMuData.hh"
 
 /*!
-  \fn kernel void track_through_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram, global GGint* scatter_histogram)
+  \fn kernel void track_through_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, global GGEMSMuMuEnData const* attenuations, GGfloat const threshold, global GGint* histogram, global GGint* scatter_histogram)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -47,6 +47,7 @@
   \param label_data - pointer storing label of material (empty buffer here, 1 material only)
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
+  \param attenuations - pointer on attenuation values
   \param threshold - energy threshold
   \param histogram - pointer to buffer storing histogram
   \param scatter_histogram - pointer to buffer storing scatter histogram

@@ -39,7 +39,6 @@
 #include <unordered_map>
 
 #include "GGEMS/global/GGEMSConstants.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 
 __constant GGchar SOLID = 0; /*!< Solid state */
@@ -203,7 +202,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     }
 
     /*!
-      \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& material_name) const
+      \fn inline GGEMSRGBColor GetMaterialRGBColor(std::string const& material_name) const
       \param material_name - name of the chemical element
       \return the structure to a chemical element
       \brief get the chemical element

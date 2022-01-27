@@ -12,17 +12,13 @@
 
 #ifdef OPENGL_VISUALIZATION
 
-#include <sstream>
 #include <filesystem>
 
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 #include "GGEMS/graphics/GGEMSOpenGLAxis.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/graphics/GGEMSOpenGLParticles.hh"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"

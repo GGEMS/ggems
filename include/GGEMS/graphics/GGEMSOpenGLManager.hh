@@ -80,7 +80,7 @@ namespace GGEMSOpenGLColor
     {0.0f, 0.502f, 0.0f}, {0.502f, 0.0f, 0.502f}, {0.0f, 0.502f, 0.502f},
     // navy
     {0.0f, 0.0f, 0.502f}
-  };
+  }; /*!< default RGB colors */
 }
 
 /*!
@@ -341,7 +341,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void CompileShader(GLuint const& shader) const;
 
     /*!
-      \fn void SetMaterialColor(std::string const& particle_type, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \fn void SetParticleColor(std::string const& particle_type, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
       \param particle_type - material name
       \param red - red part of RGB color
       \param green - green part of RGB color
@@ -384,7 +384,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     void UpdateProjectionAndView(void);
 
-    /*
+    /*!
       \fn void SaveWindow(GLFWwindow* w)
       \param w - pointer to GLFW window
       \brief save window scene to a png file
@@ -507,7 +507,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
 
     // OpenGL timing
-    static GGdouble delta_time_; /*! Time between 2 frames */
+    static GGdouble delta_time_; /*!< Time between 2 frames */
 
     // OpenGL object to draw
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
@@ -560,7 +560,7 @@ extern "C" GGEMS_EXPORT void set_background_color_ggems_opengl_manager(GGEMSOpen
 extern "C" GGEMS_EXPORT void set_draw_axis_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis);
 
 /*!
-  \fn void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const& x_size, GGfloat const& y_size, GGfloat const& z_size, char const* unit)
+  \fn void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const x_size, GGfloat const y_size, GGfloat const z_size, char const* unit)
   \param opengl_manager - pointer on the singleton
   \param x_size - x world size
   \param y_size - y world size
@@ -573,6 +573,7 @@ extern "C" GGEMS_EXPORT void set_world_size_ggems_opengl_manager(GGEMSOpenGLMana
 /*!
   \fn void set_image_output_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
   \param opengl_manager - pointer on the singleton
+  \param output_path - output path
   \brief Initializing GGEMS OpenGL
 */
 extern "C" GGEMS_EXPORT void set_image_output_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path);

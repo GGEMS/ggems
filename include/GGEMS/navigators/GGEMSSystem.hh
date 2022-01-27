@@ -124,7 +124,7 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void StoreScatter(bool const& is_scatter);
 
     /*!
-      \fn void SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_position_z, std::string const& unit = "mm")
+      \fn void SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_z, std::string const& unit = "mm")
       \param global_system_position_x - global system position in X
       \param global_system_position_y - global system position in Y
       \param global_system_position_z - global system position in Z

@@ -37,14 +37,9 @@
 #define NAVIGATOR_NOT_INITIALIZED 0x100000000 /*!< value if OpenCL kernel is not compiled */
 
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
-
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
-
-#include "GGEMS/maths/GGEMSMatrixTypes.hh"
-
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/physics/GGEMSAttenuations.hh"
-#include "GGEMS/physics/GGEMSMuData.hh"
 #include "GGEMS/physics/GGEMSMuDataConstants.hh"
 
 class GGEMSSolid;
@@ -198,6 +193,7 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void Initialize(void)
+      \brief Initialize the navigator
     */
     virtual void Initialize(void);
 
@@ -235,7 +231,8 @@ class GGEMS_EXPORT GGEMSNavigator
     void EnableTracking(void);
 
     /*!
-      \fn void EnableTLE(void)
+      \fn void EnableTLE(bool const& is_activated)
+      \param is_activated - bool activating or not TLE
       \brief Enable track length estimator (TLE) during particle navigation
     */
     void EnableTLE(bool const& is_activated);
@@ -276,6 +273,7 @@ class GGEMS_EXPORT GGEMSNavigator
   protected:
     /*!
       \fn void CheckParameters(void) const
+      \brief check navigator parameters
     */
     virtual void CheckParameters(void) const;
 

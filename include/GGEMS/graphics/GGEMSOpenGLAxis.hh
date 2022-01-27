@@ -61,7 +61,7 @@ class GGEMS_EXPORT GGEMSOpenGLAxis
 
     /*!
       \fn GGEMSOpenGLAxis& operator=(GGEMSOpenGLAxis const& axis_volume) = delete
-      \param volume - reference on the GGEMS OpenGL volume
+      \param axis_volume - reference on the GGEMS OpenGL volume
       \brief Avoid assignement by reference
     */
     GGEMSOpenGLAxis& operator=(GGEMSOpenGLAxis const& axis_volume) = delete;
@@ -75,7 +75,7 @@ class GGEMS_EXPORT GGEMSOpenGLAxis
 
     /*!
       \fn GGEMSOpenGLAxis& operator=(GGEMSOpenGLAxis const&& axis_volume) = delete
-      \param volume - rvalue reference on the GGEMS OpenGL axis_volume
+      \param axis_volume - rvalue reference on the GGEMS OpenGL axis_volume
       \brief Avoid copy by rvalue reference
     */
     GGEMSOpenGLAxis& operator=(GGEMSOpenGLAxis const&& axis_volume) = delete;

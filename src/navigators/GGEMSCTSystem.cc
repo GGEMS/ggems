@@ -426,7 +426,7 @@ void set_material_visible_ggems_ct_system(GGEMSCTSystem* ct_system, char const* 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue)
+void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue)
 {
   ct_system->SetMaterialColor(material_name, red, green, blue);
 }

@@ -33,8 +33,8 @@
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
-#define MAXIMUM_DISPLAYED_PARTICLES 65536
-#define MAXIMUM_INTERACTIONS 32
+#define MAXIMUM_DISPLAYED_PARTICLES 65536 /*!< Number of maximum displayed particles for OpenGL */
+#define MAXIMUM_INTERACTIONS 32 /*!< Maximum interactions to display for OpenGL */
 
 __constant GGchar PRIMARY = 0; /*!< Primary particle */
 __constant GGchar GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */

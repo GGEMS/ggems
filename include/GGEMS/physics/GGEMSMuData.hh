@@ -41,7 +41,7 @@
 */
 typedef struct GGEMSMuMuEnData_t
 {
-  GGfloat energy_bins_[ATTENUATION_TABLE_NUMBER_BINS]; /*! Number of energy bins */
+  GGfloat energy_bins_[ATTENUATION_TABLE_NUMBER_BINS]; /*!< Number of energy bins */
   GGfloat mu_[256*ATTENUATION_TABLE_NUMBER_BINS]; /*!< attenuation coefficient values for each material (n*k) */
   GGfloat mu_en_[256*ATTENUATION_TABLE_NUMBER_BINS]; /*!< energy-absorption coefficient for each material (n*k) */
 
@@ -50,6 +50,6 @@ typedef struct GGEMSMuMuEnData_t
 
   GGfloat energy_min_; /*!< Minimum of energy */
   GGfloat energy_max_; /*!< Maximum of energy */
-} GGEMSMuMuEnData;
+} GGEMSMuMuEnData; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif

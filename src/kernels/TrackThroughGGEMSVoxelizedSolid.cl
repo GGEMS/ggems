@@ -43,7 +43,7 @@
 #endif
 
 /*!
-  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
+  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, global GGEMSMuMuEnData const* attenuations, GGfloat const threshold)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -51,6 +51,7 @@
   \param label_data - pointer storing label of material
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
+  \param attenuations - pointer on attenuation values
   \param threshold - energy threshold
   \brief OpenCL kernel tracking particles within voxelized solid
 */

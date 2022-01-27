@@ -81,7 +81,7 @@ class GGEMS_EXPORT GGEMSProgressBar
     GGEMSProgressBar& operator=(GGEMSProgressBar const&& progress_bar) = delete;
 
     /*!
-      \fn void restart(GGsize const expected_count)
+      \fn void Restart(GGsize const expected_count)
       \param expected_count - Number of the expected step
       \brief Restart the display
     */
@@ -89,6 +89,7 @@ class GGEMS_EXPORT GGEMSProgressBar
 
     /*!
       \fn GGEMSProgressBar& operator++(void)
+      \return reference to GGEMSProgressBar
       \brief Increment the display bar
     */
     GGEMSProgressBar& operator++(void);
@@ -101,8 +102,9 @@ class GGEMS_EXPORT GGEMSProgressBar
     void DisplayTic(void);
 
     /*!
-      \fn GGEMSProgressBar operator+=(GGsize const& increment)
+      \fn GGEMSProgressBar& operator+=(GGsize const& increment)
       \param increment - counter for the tic
+      \return reference to GGEMSProgressBar
       \brief Increment the display bar
     */
     GGEMSProgressBar& operator+=(GGsize const& increment);
