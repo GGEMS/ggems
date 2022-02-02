@@ -35,7 +35,7 @@
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 /*!
-  \namespace GGEMSMuData
+  \namespace GGEMSMuDataConstants
   \brief Namespace storing Mu Data informations
 */
 namespace GGEMSMuDataConstants

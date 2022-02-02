@@ -135,7 +135,7 @@ cbct_detector.save('data/projection')
 cbct_detector.store_scatter(True)
 cbct_detector.set_visible(True)
 cbct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
-# ct_detector.set_material_color('GOS', color_name='red') # Using registered color
+#cbct_detector.set_material_color('GOS', color_name='red') # Using registered color
 
 cbct_detector2 = GGEMSCTSystem('custom2')
 cbct_detector2.set_ct_type('flat')

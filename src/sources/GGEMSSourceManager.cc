@@ -155,8 +155,9 @@ void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking,
 
   // Checking number of source, if 0 kill the simulation
   if (number_of_sources_ == 0) {
-    GGwarn("GGEMSSourceManager", "Initialize", 0) << "You have not defined a source." << GGendl;
-    return;
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "No source defined!!!";
+    GGEMSMisc::ThrowException("GGEMSSourceManager", "Initialize", oss.str());
   }
 
   // Initialization of particle stack and random stack

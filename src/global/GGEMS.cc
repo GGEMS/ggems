@@ -334,7 +334,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
         navigator_manager.TrackThroughSolid(thread_index);
 
         loop_counter++;
-      } while (source_manager.IsAlive(thread_index) || loop_counter == max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+      } while (source_manager.IsAlive(thread_index) && loop_counter < max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
 
       // Incrementing progress bar
       mutex.lock();
@@ -361,13 +361,6 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 void GGEMS::Run()
 {
   GGcout("GGEMS", "Run", 0) << "GGEMS simulation started" << GGendl;
-
-  // Checking number of source, if 0 stop run
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  if (source_manager.GetNumberOfSources() == 0) {
-    GGwarn("GGEMS", "Run", 0) << "No source defined. Run can not be executed!!!" << GGendl;
-    return;
-  }
 
   ChronoTime start_time = GGEMSChrono::Now();
 
@@ -426,7 +419,7 @@ void GGEMS::PrintBanner(void) const
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
   std::cout << "$ Welcome to GGEMS v1.2   https://ggems.fr $" << std::endl;
-  std::cout << "$ Copyright (c) GGEMS Team 2021            $" << std::endl;
+  std::cout << "$ Copyright (c) GGEMS Team 2022            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
 }
