@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument('-d', '--device', required=False, type=str, default='0', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
-parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected")
+parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected. -b \"0.5;0.5\" means 50 %% of computation on device 0, and 50 %% of computation on device 1")
 parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
 parser.add_argument('-s', '--seed', required=False, type=int, default=777, help="Seed of pseudo generator number")
 parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")

@@ -146,7 +146,7 @@ point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
-# STEP 9: GGEMS simulation
+# STEP 8: GGEMS simulation
 ggems = GGEMS()
 ggems.opencl_verbose(True)
 ggems.material_database_verbose(False)
@@ -166,7 +166,7 @@ ggems.initialize(seed)
 ggems.run()
 
 # ------------------------------------------------------------------------------
-# STEP 10: Exit safely
+# STEP 9: Exit safely
 dosimetry.delete()
 ggems.delete()
 clean_safely()

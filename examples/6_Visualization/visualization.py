@@ -79,7 +79,7 @@ if is_gl:
   opengl_manager.set_displayed_particles(number_of_displayed_particles)
   opengl_manager.set_particle_color('gamma', 152, 251, 152)
   # opengl_manager.set_particle_color('gamma', color_name='red') # Using registered color
-  opengl_manager.initialize();
+  opengl_manager.initialize()
 
 # ------------------------------------------------------------------------------
 # STEP 3: Choosing an OpenCL device
