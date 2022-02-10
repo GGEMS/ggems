@@ -17,12 +17,15 @@ Features:
 * External X-ray source
 * Navigation in simple box volume or voxelized volume
 * Flat or curved detector for CBCT/CT application
+* OpenGL visualization
+* Dosimetry application (photon)
+* TLE (Track Length Estimator) method for dosimetry
 
 ## Requirements
 
 GGEMS is a multiplatform application using OpenCL.
 
-OpenCL v1.2 has to be installed on your system.
+OpenCL v1.2 or more must be installed on your system.
 
 Supported operating system:
 
