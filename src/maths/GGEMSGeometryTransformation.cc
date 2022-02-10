@@ -42,14 +42,14 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
   GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3) << "GGEMSGeometryTransformation creating..." << GGendl;
 
   // Initialize the position with min. float
-  position_.x = std::numeric_limits<float>::min();
-  position_.y = std::numeric_limits<float>::min();
-  position_.z = std::numeric_limits<float>::min();
+  position_.s[0] = std::numeric_limits<float>::min();
+  position_.s[1] = std::numeric_limits<float>::min();
+  position_.s[2] = std::numeric_limits<float>::min();
 
   // Initialize the rotation with min. float
-  rotation_.x = std::numeric_limits<float>::min();
-  rotation_.y = std::numeric_limits<float>::min();
-  rotation_.z = std::numeric_limits<float>::min();
+  rotation_.s[0] = std::numeric_limits<float>::min();
+  rotation_.s[1] = std::numeric_limits<float>::min();
+  rotation_.s[2] = std::numeric_limits<float>::min();
 
   // Initialize the local axis
   local_axis_ =
@@ -98,7 +98,7 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
     matrix_transformation_[i] = opencl_manager.Allocate(nullptr, sizeof(GGfloat44), i, CL_MEM_READ_WRITE, "GGEMSGeometryTransformation");
 
     // Initializing
-    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], sizeof(GGfloat44), i);
+    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), i);
 
     // Copying
     for (GGint j = 0; j < 4; ++j) {
@@ -143,16 +143,16 @@ GGEMSGeometryTransformation::~GGEMSGeometryTransformation()
 void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx, GGfloat const& ty, GGfloat const& tz)
 {
   // Fill the position buffer first
-  position_.x = tx;
-  position_.y = ty;
-  position_.z = tz;
+  position_.s[0] = tx;
+  position_.s[1] = ty;
+  position_.s[2] = tz;
 
   // Filling the translation matrix
   matrix_translation_ =
     {
-      {1.0f, 0.0f, 0.0f, position_.s0},
-      {0.0f, 1.0f, 0.0f, position_.s1},
-      {0.0f, 0.0f, 1.0f, position_.s2},
+      {1.0f, 0.0f, 0.0f, position_.s[0]},
+      {0.0f, 1.0f, 0.0f, position_.s[1]},
+      {0.0f, 0.0f, 1.0f, position_.s[2]},
       {0.0f, 0.0f, 0.0f, 1.0f}
     };
 
@@ -162,7 +162,7 @@ void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx, GGfloat cons
   // Setting translation on each device
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     // Get the pointer on device
-    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], sizeof(GGfloat44), i);
+    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), i);
 
     // Compute a temporary matrix then copy it on OpenCL device
     GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(&matrix_translation_, matrix_transformation_device);
@@ -186,7 +186,7 @@ void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx, GGfloat cons
 
 void GGEMSGeometryTransformation::SetTranslation(GGfloat3 const& txyz)
 {
-  SetTranslation(txyz.s0, txyz.s1, txyz.s2);
+  SetTranslation(txyz.s[0], txyz.s[1], txyz.s[2]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,9 +196,9 @@ void GGEMSGeometryTransformation::SetTranslation(GGfloat3 const& txyz)
 void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
 {
   // Filling the rotation buffer
-  rotation_.x = rx;
-  rotation_.y = ry;
-  rotation_.z = rz;
+  rotation_.s[0] = rx;
+  rotation_.s[1] = ry;
+  rotation_.s[2] = rz;
 
   // Definition of cosinus and sinus
   GGfloat cosinus = 0.0, sinus = 0.0;
@@ -250,7 +250,7 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     // Update the transformation matrix on OpenCL device
     // Get the pointer on device
-    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], sizeof(GGfloat44), i);
+    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), i);
 
     // // Compute a temporary matrix then copy it on OpenCL device
     GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(&matrix_rotation_, matrix_transformation_device);
@@ -274,20 +274,20 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
 
 void GGEMSGeometryTransformation::SetRotation(GGfloat3 const& rxyz)
 {
-  SetRotation(rxyz.s0, rxyz.s1, rxyz.s2);
+  SetRotation(rxyz.s[0], rxyz.s[1], rxyz.s[2]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
+void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat3 const& raw0, GGfloat3 const& raw1, GGfloat3 const& raw2)
 {
   SetAxisTransformation(
     {
-      {m0.s0, m0.s1, m0.s2},
-      {m1.s0, m1.s1, m1.s1},
-      {m2.s0, m2.s1, m2.s2}
+      {raw0.s[0], raw0.s[1], raw0.s[2]},
+      {raw1.s[0], raw1.s[1], raw1.s[2]},
+      {raw2.s[0], raw2.s[1], raw2.s[2]}
     }
   );
 }
@@ -320,7 +320,7 @@ void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat33 const& axis)
   // Setting translation on each device
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     // Initialize to 0
-    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], sizeof(GGfloat44), i);
+    GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), i);
 
     // Copy step
     for (GGint j = 0; j < 4; ++j) {

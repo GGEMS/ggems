@@ -137,9 +137,8 @@ void GGEMSNavigatorManager::Initialize(bool const& is_tracking) const
 
   // A navigator must be declared
   if (number_of_navigators_ == 0) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "A navigator (detector or phantom) has to be declared!!!";
-    GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
+    GGwarn("GGEMSNavigatorManager", "Initialize", 0) << "You have not defined a navigator (detector or phantom)." << GGendl;
+    return;
   }
 
   // Initialization of world

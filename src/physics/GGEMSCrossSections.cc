@@ -41,7 +41,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSCrossSections::GGEMSCrossSections(void)
+GGEMSCrossSections::GGEMSCrossSections(GGEMSMaterials* materials)
 {
   GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSCrossSections creating..." << GGendl;
 
@@ -63,6 +63,8 @@ GGEMSCrossSections::GGEMSCrossSections(void)
 
   // Useful to avoid memory transfer between host and OpenCL
   particle_cross_sections_host_ = new GGEMSParticleCrossSections();
+
+  materials_ = materials;
 
   GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSCrossSections created!!!" << GGendl;
 }
@@ -166,7 +168,7 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
+void GGEMSCrossSections::Initialize(void)
 {
   GGcout("GGEMSCrossSections", "Initialize", 1) << "Initializing cross section tables..." << GGendl;
 
@@ -183,21 +185,21 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
 
   // Initialize physics on each device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[j], sizeof(GGEMSParticleCrossSections), j);
+    GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), j);
 
     particle_cross_sections_device->number_of_bins_ = number_of_bins;
     particle_cross_sections_device->min_energy_ = min_energy;
     particle_cross_sections_device->max_energy_ = max_energy;
-    for (GGsize i = 0; i < materials->GetNumberOfMaterials(); ++i) {
+    for (GGsize i = 0; i < materials_->GetNumberOfMaterials(); ++i) {
       #ifdef _WIN32
-      strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials->GetMaterialName(i)).c_str());
+      strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials_->GetMaterialName(i)).c_str());
       #else
-      strcpy(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), (materials->GetMaterialName(i)).c_str());
+      strcpy(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), (materials_->GetMaterialName(i)).c_str());
       #endif
     }
 
     // Storing information from materials
-    particle_cross_sections_device->number_of_materials_ = static_cast<GGuchar>(materials->GetNumberOfMaterials());
+    particle_cross_sections_device->number_of_materials_ = static_cast<GGuchar>(materials_->GetNumberOfMaterials());
 
     // Filling energy table with log scale
     GGfloat slope = logf(max_energy/min_energy);
@@ -210,7 +212,7 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
 
     // Loop over the activated physic processes and building tables
     for (GGsize i = 0; i < number_of_activated_processes_; ++i)
-      em_processes_list_[i]->BuildCrossSectionTables(particle_cross_sections_[j], materials->GetMaterialTables(j), j);
+      em_processes_list_[i]->BuildCrossSectionTables(particle_cross_sections_[j], materials_->GetMaterialTables(j), j);
   }
 
   // Copy data from device to RAM memory (optimization for python users)
@@ -228,7 +230,7 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[0], sizeof(GGEMSParticleCrossSections), 0);
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), 0);
 
   particle_cross_sections_host_->number_of_bins_ = particle_cross_sections_device->number_of_bins_;
   particle_cross_sections_host_->number_of_materials_ = particle_cross_sections_device->number_of_materials_;
@@ -339,9 +341,9 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSCrossSections* create_ggems_cross_sections(void)
+GGEMSCrossSections* create_ggems_cross_sections(GGEMSMaterials* materials)
 {
-  return new(std::nothrow) GGEMSCrossSections;
+  return new(std::nothrow) GGEMSCrossSections(materials);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -357,16 +359,16 @@ void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char c
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_ggems_cross_sections(GGEMSCrossSections* cross_sections, GGEMSMaterials* materials)
+void initialize_ggems_cross_sections(GGEMSCrossSections* cross_sections)
 {
-  cross_sections->Initialize(materials);
+  cross_sections->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-float get_cs_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* material_name, GGfloat const energy, char const* unit)
+GGfloat get_cs_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* material_name, GGfloat const energy, char const* unit)
 {
   return cross_sections->GetPhotonCrossSection(process_name, material_name, energy, unit);
 }

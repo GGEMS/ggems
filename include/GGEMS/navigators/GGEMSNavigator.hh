@@ -37,10 +37,10 @@
 #define NAVIGATOR_NOT_INITIALIZED 0x100000000 /*!< value if OpenCL kernel is not compiled */
 
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
-
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
-
-#include "GGEMS/maths/GGEMSMatrixTypes.hh"
+#include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+#include "GGEMS/physics/GGEMSAttenuations.hh"
+#include "GGEMS/physics/GGEMSMuDataConstants.hh"
 
 class GGEMSSolid;
 class GGEMSMaterials;
@@ -193,7 +193,7 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void Initialize(void)
-      \return no returned value
+      \brief Initialize the navigator
     */
     virtual void Initialize(void);
 
@@ -230,10 +230,50 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     void EnableTracking(void);
 
+    /*!
+      \fn void EnableTLE(bool const& is_activated)
+      \param is_activated - bool activating or not TLE
+      \brief Enable track length estimator (TLE) during particle navigation
+    */
+    void EnableTLE(bool const& is_activated);
+
+    /*!
+      \fn void SetVisible(bool const& is_visible)
+      \param is_visible - true if navigator is drawn using OpenGL
+      \brief set to true to draw navigator
+    */
+    void SetVisible(bool const& is_visible);
+
+    /*!
+      \fn void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \param material_name - material name
+      \param red - red part of RGB color
+      \param green - green part of RGB color
+      \param blue - blue part of RGB color
+      \brief set custom color for opengl volume
+    */
+    void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue);
+
+    /*!
+      \fn void SetMaterialColor(std::string const& material_name, std::string const& color_name)
+      \param material_name - material name
+      \param color_name - name of color from GGEMS color list
+      \brief set custom color for opengl volume
+    */
+    void SetMaterialColor(std::string const& material_name, std::string const& color_name);
+
+    /*!
+      \fn void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)
+      \param material_name - name of material
+      \param is_material_visible - flag drawing material
+      \brief set visibility of material for OpenGL
+    */
+    void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible);
+
   protected:
     /*!
       \fn void CheckParameters(void) const
-      \return no returned value
+      \brief check navigator parameters
     */
     virtual void CheckParameters(void) const;
 
@@ -243,6 +283,7 @@ class GGEMS_EXPORT GGEMSNavigator
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
+
     GGsize navigator_id_; /*!< Index of the navigator */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
@@ -256,12 +297,18 @@ class GGEMS_EXPORT GGEMSNavigator
     GGsize number_of_solids_; /*!< Number of solids in navigator */
     GGEMSMaterials* materials_; /*!< Materials of phantom */
     GGEMSCrossSections* cross_sections_; /*!< Cross section table for process */
+    GGEMSAttenuations* attenuations_; /*!< Attenuation coefficients */
 
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
     bool is_dosimetry_mode_; /*!< Boolean checking if dosimetry mode is activated */
-
+    bool is_tle_;  /*!< Boolean checking if tle mode is activated */
     GGsize number_activated_devices_; /*!< Number of activated device */
+
+    // OpenGL
+    bool is_visible_; /*!< flag for opengl */
+    MaterialRGBColorUMap custom_material_rgb_; /*!< Custom color for material */
+    MaterialVisibleUMap material_visible_; /*!< list of flag to draw volume or not */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

@@ -61,7 +61,7 @@ class GGEMS_EXPORT GGEMSProfilerItem
     /*!
       \brief GGEMSProfilerItem destructor
     */
-    ~GGEMSProfilerItem(void) {;}
+    ~GGEMSProfilerItem(void) {}
 
     /*!
       \fn GGEMSProfilerItem(GGEMSProfilerItem const& profiler_item) = delete

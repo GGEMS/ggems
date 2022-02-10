@@ -124,7 +124,7 @@ GGfloat GGEMSLogEnergyTable::GetLossTableValue(GGfloat const& energy) const
 
 GGsize GGEMSLogEnergyTable::FindBinLocation(GGfloat const& energy) const
 {
-  GGsize bin = static_cast<GGsize>(log(energy) / bin_width_ - base_bin_);
+  GGsize bin = static_cast<GGsize>(logf(energy) / bin_width_ - base_bin_);
 
   if (bin + 2 > number_of_nodes_) {
     bin = number_of_nodes_ - 2;

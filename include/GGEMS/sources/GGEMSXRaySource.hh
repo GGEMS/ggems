@@ -49,7 +49,7 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     /*!
       \brief GGEMSXRaySource destructor
     */
-    ~GGEMSXRaySource(void);
+    ~GGEMSXRaySource(void) override;
 
     /*!
       \fn GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete

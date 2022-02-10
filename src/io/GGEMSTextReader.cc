@@ -132,9 +132,9 @@ void GGEMSTextReader::SkipComment(std::ifstream& stream, std::string& line, char
 {
   // If first caracter = comment -> it's a comment and get the next line
   while (1) {
-    if (line[line.find_first_not_of("\t ")] == comment) {
-      std::getline(stream, line);
-    }
+    std::size_t pos = line.find_first_not_of("\t ");
+    if (pos == std::string::npos) break;
+    else if (line[pos] == comment) std::getline(stream, line);
     else break;
   }
 }

@@ -45,6 +45,9 @@ class GGEMSDosimetryCalculator(object):
         ggems_lib.dose_uncertainty_dosimetry_calculator.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.dose_uncertainty_dosimetry_calculator.restype = ctypes.c_void_p
 
+        ggems_lib.dose_tle_navigator.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.dose_tle_navigator.restype = ctypes.c_void_p
+
         ggems_lib.delete_dosimetry_calculator.argtypes = [ctypes.c_void_p]
         ggems_lib.delete_dosimetry_calculator.restype = ctypes.c_void_p
 
@@ -85,6 +88,9 @@ class GGEMSDosimetryCalculator(object):
 
     def uncertainty(self, activate):
         ggems_lib.dose_uncertainty_dosimetry_calculator(self.obj, activate)
+
+    def set_tle(self, activate):
+        ggems_lib.dose_tle_navigator(self.obj, activate)
 
     def scale_factor(self, scale):
         ggems_lib.scale_factor_dosimetry_calculator(self.obj, scale)

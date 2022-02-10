@@ -29,24 +29,21 @@
 */
 
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
-
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
-
 #include "GGEMS/materials/GGEMSMaterialTables.hh"
-
 #include "GGEMS/physics/GGEMSParticleCrossSections.hh"
-
 #include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
+#include "GGEMS/physics/GGEMSMuData.hh"
 
-#ifdef DOSIMETRY
+#if defined(DOSIMETRY)
 #include "GGEMS/navigators/GGEMSDoseRecording.hh"
 #endif
 
 /*!
-  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
+  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, global GGEMSMuMuEnData const* attenuations, GGfloat const threshold)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -54,6 +51,7 @@
   \param label_data - pointer storing label of material
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
+  \param attenuations - pointer on attenuation values
   \param threshold - energy threshold
   \brief OpenCL kernel tracking particles within voxelized solid
 */
@@ -65,6 +63,7 @@ kernel void track_through_ggems_voxelized_solid(
   global GGuchar const* label_data,
   global GGEMSParticleCrossSections const* particle_cross_sections,
   global GGEMSMaterialTables const* materials,
+  global GGEMSMuMuEnData const* attenuations,
   GGfloat const threshold
   #ifdef DOSIMETRY
   ,global GGEMSDoseParams* dose_params,
@@ -86,7 +85,7 @@ kernel void track_through_ggems_voxelized_solid(
 
   // Checking status of particle
   if (primary_particle->status_[global_id] == DEAD) {
-    #ifdef GGEMS_TRACKING
+    #if defined(GGEMS_TRACKING)
     if (global_id == primary_particle->particle_tracking_id) {
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] ################################################################################\n");
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] The particle id %d is dead!!!\n", global_id);
@@ -158,12 +157,12 @@ kernel void track_through_ggems_voxelized_solid(
     if (distance_to_next_boundary <= next_interaction_distance) {
       next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
       next_discrete_process = TRANSPORTATION;
-      #ifdef DOSIMETRY
+      #if defined(DOSIMETRY)
       if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
       #endif
     }
 
-    #ifdef GGEMS_TRACKING
+    #if defined(GGEMS_TRACKING)
     if (global_id == primary_particle->particle_tracking_id) {
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] ################################################################################\n");
       printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Particle id: %d\n", global_id);
@@ -220,11 +219,12 @@ kernel void track_through_ggems_voxelized_solid(
     primary_particle->py_[global_id] = local_position.y;
     primary_particle->pz_[global_id] = local_position.z;
 
+    #if defined(DOSIMETRY)
+    GGfloat initial_energy = primary_particle->E_[global_id];
+    #endif
+
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
-      #ifdef DOSIMETRY
-      GGfloat edep = primary_particle->E_[global_id];
-      #endif
 
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
 
@@ -234,19 +234,56 @@ kernel void track_through_ggems_voxelized_solid(
         primary_particle->scatter_[global_id] = TRUE;
       }
 
-      #ifdef DOSIMETRY
-      edep -= primary_particle->E_[global_id];
+      #if defined(DOSIMETRY) && !defined(TLE)
+      GGfloat edep = initial_energy - primary_particle->E_[global_id];
       dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
       #endif
 
       local_direction.x = primary_particle->dx_[global_id];
       local_direction.y = primary_particle->dy_[global_id];
       local_direction.z = primary_particle->dz_[global_id];
+
+      #if defined(OPENGL)
+      if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
+        // Storing OpenGL index on OpenCL private memory
+        GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
+
+        // Checking if buffer is full
+        if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
+          // Getting global position
+          global_position = LocalToGlobalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &local_position);
+
+          primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.x;
+          primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.y;
+          primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.z;
+
+          // Storing final index
+          primary_particle->stored_particles_gl_[global_id] += 1;
+        }
+      }
+      #endif
     }
+
+    #if defined(DOSIMETRY) && defined(TLE)
+    GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
+    GGfloat mu_en = 0.0f;
+    if (E_index == 0) {
+      mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];
+    }
+    else {
+      mu_en = LinearInterpolation(
+        attenuations->energy_bins_[E_index-1], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index-1],
+        attenuations->energy_bins_[E_index], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index],
+        initial_energy
+      );
+    }
+    GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1f;
+    dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+    #endif
 
     // Apply threshold
     if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[material_id]) {
-      #ifdef DOSIMETRY
+      #if defined(DOSIMETRY)
       dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, primary_particle->E_[global_id], &local_position);
       #endif
       primary_particle->status_[global_id] = DEAD;

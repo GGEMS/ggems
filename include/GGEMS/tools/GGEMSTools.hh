@@ -65,7 +65,7 @@ namespace GGEMSMisc
     \param message - Message to print for the exception
     \brief Throw a C++ exception
   */
-  void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message);
+  [[noreturn]] void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message);
 }
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH

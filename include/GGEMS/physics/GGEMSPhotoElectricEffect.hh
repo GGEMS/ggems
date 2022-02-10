@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSPhotoElectricEffect : public GGEMSEMProcess
     /*!
       \brief GGEMSPhotoElectricEffect destructor
     */
-    ~GGEMSPhotoElectricEffect(void);
+    ~GGEMSPhotoElectricEffect(void) override;
 
     /*!
       \fn GGEMSPhotoElectricEffect(GGEMSPhotoElectricEffect const& photoelectric_effect) = delete

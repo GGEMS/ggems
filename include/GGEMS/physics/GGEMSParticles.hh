@@ -97,7 +97,7 @@ class GGEMS_EXPORT GGEMSParticles
       \return pointer to OpenCL buffer storing particles
       \brief return the pointer to OpenCL buffer storing particles
     */
-    inline cl::Buffer* GetPrimaryParticles(GGsize const& thread_index) const {return primary_particles_[thread_index];};
+    inline cl::Buffer* GetPrimaryParticles(GGsize const& thread_index) const {return primary_particles_[thread_index];}
 
     /*!
       \fn void SetNumberOfParticles(GGsize const& thread_index, GGsize const& number_of_particles)
@@ -113,7 +113,7 @@ class GGEMS_EXPORT GGEMSParticles
       \return number of particles currently activated in OpenCL buffer
       \brief Get the number of particles on activated device
     */
-    inline GGsize GetNumberOfParticles(GGsize const& thread_index) const {return number_of_particles_[thread_index];};
+    inline GGsize GetNumberOfParticles(GGsize const& thread_index) const {return number_of_particles_[thread_index];}
 
     /*!
       \fn bool IsAlive(GGsize const& thread_index) const

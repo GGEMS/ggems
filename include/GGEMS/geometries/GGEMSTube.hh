@@ -52,7 +52,7 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolume
     /*!
       \brief GGEMSTube destructor
     */
-    ~GGEMSTube(void);
+    ~GGEMSTube(void) override;
 
     /*!
       \fn GGEMSTube(GGEMSTube const& tube) = delete

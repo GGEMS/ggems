@@ -21,12 +21,19 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+  prog='dosimetry_photon.py',
+  description='-->> 4 - Dosimetry Example <<--',
+  epilog='',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+
 parser.add_argument('-d', '--device', required=False, type=str, default='all', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
 parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected")
 parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
 parser.add_argument('-s', '--seed', required=False, type=int, default=777, help="Seed of pseudo generator number")
 parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
+parser.add_argument('-t', '--tle', required=False, action='store_true', help="Activating TLE method")
 
 args = parser.parse_args()
 
@@ -36,6 +43,7 @@ verbosity_level = args.verbose
 number_of_particles = args.nparticles
 device_balancing = args.balance
 seed = args.seed
+is_tle = args.tle
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
@@ -103,6 +111,7 @@ dosimetry.set_output_basename('data/dosimetry')
 dosimetry.set_dosel_size(0.5, 0.5, 0.5, 'mm')
 dosimetry.water_reference(False)
 dosimetry.minimum_density(0.1, 'g/cm3')
+dosimetry.set_tle(is_tle)
 
 dosimetry.uncertainty(True)
 dosimetry.photon_tracking(True)
@@ -137,7 +146,7 @@ point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
-# STEP 9: GGEMS simulation
+# STEP 8: GGEMS simulation
 ggems = GGEMS()
 ggems.opencl_verbose(True)
 ggems.material_database_verbose(False)
@@ -157,8 +166,8 @@ ggems.initialize(seed)
 ggems.run()
 
 # ------------------------------------------------------------------------------
-# STEP 10: Exit safely
+# STEP 9: Exit safely
 dosimetry.delete()
 ggems.delete()
-opencl_manager.clean()
+clean_safely()
 exit()

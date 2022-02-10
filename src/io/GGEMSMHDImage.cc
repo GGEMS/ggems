@@ -48,9 +48,9 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "GGEMSMHDImage creating..." << GGendl;
 
 
-  element_sizes_.x = 0.0f;
-  element_sizes_.y = 0.0f;
-  element_sizes_.z = 0.0f;
+  element_sizes_.s[0] = 0.0f;
+  element_sizes_.s[1] = 0.0f;
+  element_sizes_.s[2] = 0.0f;
 
   dimensions_.x_ = 0;
   dimensions_.y_ = 0;
@@ -139,7 +139,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, sizeof(GGEMSVoxelizedSolidData), thread_index);
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), thread_index);
 
   // Getting output directory
   std::size_t found_dir = image_mhd_header_filename.find_last_of("/\\");
@@ -163,12 +163,12 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
 
     // Compare key and store data if valid
     if (!kKey.compare("DimSize")) {
-      iss >> solid_data_device->number_of_voxels_xyz_.x >> solid_data_device->number_of_voxels_xyz_.y >> solid_data_device->number_of_voxels_xyz_.z;
+      iss >> solid_data_device->number_of_voxels_xyz_.s[0] >> solid_data_device->number_of_voxels_xyz_.s[1] >> solid_data_device->number_of_voxels_xyz_.s[2];
       // Computing number of voxels
-      solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_.x * solid_data_device->number_of_voxels_xyz_.y * solid_data_device->number_of_voxels_xyz_.z;
+      solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_.s[0] * solid_data_device->number_of_voxels_xyz_.s[1] * solid_data_device->number_of_voxels_xyz_.s[2];
     }
     else if (!kKey.compare("ElementSpacing")) {
-      iss >> solid_data_device->voxel_sizes_xyz_.x >> solid_data_device->voxel_sizes_xyz_.y >> solid_data_device->voxel_sizes_xyz_.z;
+      iss >> solid_data_device->voxel_sizes_xyz_.s[0] >> solid_data_device->voxel_sizes_xyz_.s[1] >> solid_data_device->voxel_sizes_xyz_.s[2];
     }
     else if (!kKey.compare("ElementType")) {
       iss >> mhd_data_type_;
@@ -182,13 +182,13 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   in_header_stream.close();
 
   // Checking the values
-  if (solid_data_device->number_of_voxels_xyz_.x <= 0 || solid_data_device->number_of_voxels_xyz_.y <= 0 || solid_data_device->number_of_voxels_xyz_.z <= 0) {
+  if (solid_data_device->number_of_voxels_xyz_.s[0] <= 0 || solid_data_device->number_of_voxels_xyz_.s[1] <= 0 || solid_data_device->number_of_voxels_xyz_.s[2] <= 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Dimension invalid for the key 'DimSize'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (solid_data_device->voxel_sizes_xyz_.x == 0.0 || solid_data_device->voxel_sizes_xyz_.y == 0.0 || solid_data_device->voxel_sizes_xyz_.z == 0.0) {
+  if (solid_data_device->voxel_sizes_xyz_.s[0] == 0.0f || solid_data_device->voxel_sizes_xyz_.s[1] == 0.0f || solid_data_device->voxel_sizes_xyz_.s[2] == 0.0f) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
@@ -232,7 +232,7 @@ void GGEMSMHDImage::Write(cl::Buffer* image, GGsize const& thread_index) const
   out_header_stream << "ObjectType = Image" << std::endl;
   out_header_stream << "BinaryDataByteOrderMSB = False" << std::endl;
   out_header_stream << "NDims = 3" << std::endl;
-  out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
+  out_header_stream << "ElementSpacing = " << element_sizes_.s[0] << " " << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
   out_header_stream << "DimSize = " << dimensions_.x_ << " " << dimensions_.y_ << " " << dimensions_.z_ << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
@@ -269,7 +269,7 @@ void GGEMSMHDImage::CheckParameters(void) const
   }
 
   // Checking size of voxels
-  if (element_sizes_.x == 0.0f && element_sizes_.y == 0.0f && element_sizes_.z == 0.0f) {
+  if (element_sizes_.s[0] == 0.0f && element_sizes_.s[1] == 0.0f && element_sizes_.s[2] == 0.0f) {
     GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
   }
 }

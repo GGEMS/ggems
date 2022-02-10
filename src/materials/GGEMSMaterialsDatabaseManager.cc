@@ -44,6 +44,9 @@ GGEMSMaterialsDatabaseManager::GGEMSMaterialsDatabaseManager(void)
   // Loading GGEMS chemical elements
   LoadChemicalElements();
 
+  // Loading RGB colors
+  LoadMaterialRGBColors();
+
   GGcout("GGEMSMaterialsDatabaseManager", "GGEMSMaterialsDatabaseManager", 3) << "GGEMSMaterialsDatabaseManager created!!!" << GGendl;
 }
 
@@ -136,6 +139,192 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& fil
 
   // Closing file stream
   database_stream.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMaterialsDatabaseManager::LoadMaterialRGBColors(void)
+{
+  GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialRGBColors", 1) << "Loading material RGB colors in GGEMS..." << GGendl;
+
+  // Name, R, G, B
+  // Atom color from https://sciencenotes.org/molecule-atom-colors-cpk-colors/
+  AddMaterialRGBColor("Hydrogen", 255, 255, 255);
+  AddMaterialRGBColor("Helium", 217, 255, 255);
+  AddMaterialRGBColor("Lithium", 204, 128, 255);
+  AddMaterialRGBColor("Beryllium", 194, 255, 0);
+  AddMaterialRGBColor("Boron", 255, 181, 181);
+  AddMaterialRGBColor("Carbon", 144, 144, 144);
+  AddMaterialRGBColor("Nitrogen", 48, 80, 248);
+  AddMaterialRGBColor("Oxygen", 255, 13, 13);
+  AddMaterialRGBColor("Fluorine", 144, 224, 80);
+  AddMaterialRGBColor("Neon", 179, 227, 245);
+  AddMaterialRGBColor("Sodium", 171, 92, 242);
+  AddMaterialRGBColor("Magnesium", 138, 255, 0);
+  AddMaterialRGBColor("Aluminium", 191, 166, 166);
+  AddMaterialRGBColor("Silicon", 240, 200, 160);
+  AddMaterialRGBColor("Phosphor", 255, 128, 0);
+  AddMaterialRGBColor("Sulfur", 255, 255, 48);
+  AddMaterialRGBColor("Chlorine", 31, 240, 31);
+  AddMaterialRGBColor("Argon", 128, 209, 227);
+  AddMaterialRGBColor("Potassium", 143, 64, 212);
+  AddMaterialRGBColor("Calcium", 61, 255, 0);
+  AddMaterialRGBColor("Scandium", 230, 230, 230);
+  AddMaterialRGBColor("Titanium", 191, 194, 199);
+  AddMaterialRGBColor("Vandium", 166, 166, 171);
+  AddMaterialRGBColor("Chromium", 138, 153, 199);
+  AddMaterialRGBColor("Manganese", 156, 122, 199);
+  AddMaterialRGBColor("Iron", 224, 102, 51);
+  AddMaterialRGBColor("Cobalt", 240, 144, 160);
+  AddMaterialRGBColor("Nickel", 80, 208, 80);
+  AddMaterialRGBColor("Copper", 200, 128, 51);
+  AddMaterialRGBColor("Zinc", 125, 128, 176);
+  AddMaterialRGBColor("Gallium", 194, 143, 143);
+  AddMaterialRGBColor("Germanium", 102, 143, 143);
+  AddMaterialRGBColor("Arsenic", 189, 128, 227);
+  AddMaterialRGBColor("Selenium", 255, 161, 0);
+  AddMaterialRGBColor("Bromine", 166, 41, 41);
+  AddMaterialRGBColor("Krypton", 92, 184, 209);
+  AddMaterialRGBColor("Rubidium", 112, 46, 176);
+  AddMaterialRGBColor("Strontium", 0, 255, 0);
+  AddMaterialRGBColor("Yttrium", 148, 255, 255);
+  AddMaterialRGBColor("Zirconium", 148, 224, 224);
+  AddMaterialRGBColor("Niobium", 115, 194, 201);
+  AddMaterialRGBColor("Molybdenum", 84, 181, 181);
+  AddMaterialRGBColor("Technetium", 59, 158, 158);
+  AddMaterialRGBColor("Ruthenium", 36, 143, 143);
+  AddMaterialRGBColor("Rhodium", 10, 125, 140);
+  AddMaterialRGBColor("Palladium", 0, 105, 133);
+  AddMaterialRGBColor("Silver", 192, 192, 192);
+  AddMaterialRGBColor("Cadmium", 255, 217, 143);
+  AddMaterialRGBColor("Indium", 166, 117, 115);
+  AddMaterialRGBColor("Tin", 102, 128, 128);
+  AddMaterialRGBColor("Antimony", 158, 99, 181);
+  AddMaterialRGBColor("Tellurium", 212, 122, 0);
+  AddMaterialRGBColor("Iodine", 148, 0, 148);
+  AddMaterialRGBColor("Xenon", 66, 158, 176);
+  AddMaterialRGBColor("Caesium", 87, 23, 143);
+  AddMaterialRGBColor("Barium", 0, 201, 0);
+  AddMaterialRGBColor("Lanthanum", 112, 212, 255);
+  AddMaterialRGBColor("Cerium", 255, 255, 199);
+  AddMaterialRGBColor("Praseodymium", 217, 255, 199);
+  AddMaterialRGBColor("Neodymium", 199, 255, 199);
+  AddMaterialRGBColor("Promethium", 163, 255, 199);
+  AddMaterialRGBColor("Samarium", 143, 255, 199);
+  AddMaterialRGBColor("Europium", 97, 255, 199);
+  AddMaterialRGBColor("Gadolinium", 69, 255, 199);
+  AddMaterialRGBColor("Terbium", 48, 255, 199);
+  AddMaterialRGBColor("Dysprosium", 31, 255, 199);
+  AddMaterialRGBColor("Holmium", 0, 255, 156);
+  AddMaterialRGBColor("Erbium", 0, 230, 117);
+  AddMaterialRGBColor("Thulium", 0, 212, 82);
+  AddMaterialRGBColor("Ytterbium", 0, 191, 56);
+  AddMaterialRGBColor("Lutetium", 0, 171, 36);
+  AddMaterialRGBColor("Hafnium", 77, 194, 255);
+  AddMaterialRGBColor("Tantalum", 77, 166, 255);
+  AddMaterialRGBColor("Tungsten", 33, 148, 214);
+  AddMaterialRGBColor("Rhenium", 38, 125, 171);
+  AddMaterialRGBColor("Osmium", 38, 102, 150);
+  AddMaterialRGBColor("Iridium", 23, 84, 135);
+  AddMaterialRGBColor("Platinum", 208, 208, 224);
+  AddMaterialRGBColor("Gold", 255, 209, 35);
+  AddMaterialRGBColor("Mercury", 184, 184, 208);
+  AddMaterialRGBColor("Thallium", 166, 84, 77);
+  AddMaterialRGBColor("Lead", 87, 89, 97);
+  AddMaterialRGBColor("Bismuth", 158, 79, 181);
+  AddMaterialRGBColor("Polonium", 171, 92, 0);
+  AddMaterialRGBColor("Astatine", 117, 79, 69);
+  AddMaterialRGBColor("Radon", 66, 130, 150);
+  AddMaterialRGBColor("Francium", 66, 0, 102);
+  AddMaterialRGBColor("Radium", 0, 125, 0);
+  AddMaterialRGBColor("Actinium", 112, 171, 250);
+  AddMaterialRGBColor("Thorium", 0, 186, 255);
+  AddMaterialRGBColor("Protactinium", 0, 161, 255);
+  AddMaterialRGBColor("Uranium", 0, 143, 255);
+  AddMaterialRGBColor("Neptunium", 0, 128, 255);
+  AddMaterialRGBColor("Plutonium", 0, 107, 255);
+  AddMaterialRGBColor("Americium", 84, 92, 242);
+  AddMaterialRGBColor("Curium", 120, 92, 227);
+  AddMaterialRGBColor("Berkelium", 138, 79, 227);
+  AddMaterialRGBColor("Californium", 161, 54, 212);
+  AddMaterialRGBColor("Einsteinium", 179, 31, 212);
+  AddMaterialRGBColor("Fermium", 179, 31, 186);
+
+  // Molecules
+  // Some colors from https://www.slicer.org/wiki/Slicer3:2010_GenericAnatomyColors
+  AddMaterialRGBColor("Breast", 250, 219, 216);
+  AddMaterialRGBColor("Brain", 250, 250, 225);
+  AddMaterialRGBColor("Adipose", 230, 220, 70);
+  AddMaterialRGBColor("Air", 255, 255, 255);
+  AddMaterialRGBColor("Pyrex", 255, 255, 255);
+  AddMaterialRGBColor("Lung", 255, 182, 193);
+  AddMaterialRGBColor("Body", 250, 219, 216);
+  AddMaterialRGBColor("RibBone", 241, 214, 145);
+  AddMaterialRGBColor("SpineBone", 241, 214, 145);
+  AddMaterialRGBColor("Bakelite", 230, 163, 93);
+  AddMaterialRGBColor("Intestine", 255, 253, 229);
+  AddMaterialRGBColor("Spleen", 157, 108, 162);
+  AddMaterialRGBColor("Blood", 216, 101, 79);
+  AddMaterialRGBColor("BloodIodine5", 216, 101, 79);
+  AddMaterialRGBColor("BloodIodine10", 216, 101, 79);
+  AddMaterialRGBColor("BloodIodine15", 216, 101, 79);
+  AddMaterialRGBColor("BloodIodine20", 216, 101, 79);
+  AddMaterialRGBColor("Heart", 206, 110, 84);
+  AddMaterialRGBColor("Liver", 221, 130, 101);
+  AddMaterialRGBColor("Kidney", 185, 102, 83);
+  AddMaterialRGBColor("Water", 212, 241, 249);
+  AddMaterialRGBColor("LSO", 220, 240, 239);
+  AddMaterialRGBColor("GOS", 255, 255, 255);
+  AddMaterialRGBColor("NaI", 167, 216, 222);
+  AddMaterialRGBColor("CsI", 104, 160, 176);
+  AddMaterialRGBColor("STM125I_Caps", 255, 255, 255);
+  AddMaterialRGBColor("STM125I_Alu", 191, 166, 166);
+  AddMaterialRGBColor("STM125I_GoldCore", 255, 209, 35);
+
+  // CT materials
+  AddMaterialRGBColor("Air_0", 255, 255, 255);
+  AddMaterialRGBColor("Lung_1", 255, 182, 193);
+  AddMaterialRGBColor("Lung_2", 255, 182, 193);
+  AddMaterialRGBColor("Lung_3", 255, 182, 193);
+  AddMaterialRGBColor("Lung_4", 255, 182, 193);
+  AddMaterialRGBColor("Lung_5", 255, 182, 193);
+  AddMaterialRGBColor("Lung_6", 255, 182, 193);
+  AddMaterialRGBColor("Lung_7", 255, 182, 193);
+  AddMaterialRGBColor("Lung_8", 255, 182, 193);
+  AddMaterialRGBColor("Lung_9", 255, 182, 193);
+  AddMaterialRGBColor("AT_AG_SI1_10", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI2_11", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI3_12", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI4_13", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI5_14", 220, 220, 220);
+  AddMaterialRGBColor("SoftTissus_15", 250, 219, 216);
+  AddMaterialRGBColor("ConnectiveTissue_16", 253, 237, 236);
+  AddMaterialRGBColor("Marrow_Bone01_17", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone02_18", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone03_19", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone04_20", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone05_21", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone06_22", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone07_23", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone08_24", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone09_25", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone10_26", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone11_27", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone12_28", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone13_29", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone14_30", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone15_31", 216, 212, 194);
+  AddMaterialRGBColor("AmalgamTooth_32", 255, 215, 0);
+  AddMaterialRGBColor("AmalgamTooth_33", 255, 215, 0);
+  AddMaterialRGBColor("AmalgamTooth_34", 255, 215, 0);
+  AddMaterialRGBColor("AmalgamTooth_35", 255, 215, 0);
+  AddMaterialRGBColor("MetallImplants_36", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_37", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_38", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_39", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_40", 135, 134, 129);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -267,6 +456,25 @@ void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& eleme
 
   // No need to check if element already insert
   chemical_elements_.insert(std::make_pair(element_name, element));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMaterialsDatabaseManager::AddMaterialRGBColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+{
+  GGcout("GGEMSMaterialsDatabaseManager", "AddMaterialRGBColor", 3) << "Adding color for " << material_name << ": "
+    << static_cast<GGint>(red) << " "
+    << static_cast<GGint>(green) << " "
+    << static_cast<GGint>(blue) << GGendl;
+
+  GGEMSRGBColor rgb;
+  rgb.red_ = static_cast<GGfloat>(red) / 255.0f;
+  rgb.green_ = static_cast<GGfloat>(green) / 255.0f;
+  rgb.blue_ = static_cast<GGfloat>(blue) / 255.0f;
+
+  material_rgb_colors_.insert(std::make_pair(material_name, rgb));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -39,6 +39,7 @@
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 class GGEMSGeometryTransformation;
+class GGEMSOpenGLVolume;
 
 /*!
   \class GGEMSSolid
@@ -97,7 +98,7 @@ class GGEMS_EXPORT GGEMSSolid
       \brief get the informations about the solid geometry
       \return header data OpenCL pointer about solid
     */
-    inline cl::Buffer* GetSolidData(GGsize const& thread_index) const {return solid_data_[thread_index];};
+    inline cl::Buffer* GetSolidData(GGsize const& thread_index) const {return solid_data_[thread_index];}
 
     /*!
       \fn inline cl::Buffer* GetLabelData(GGsize const& thread_index) const
@@ -105,7 +106,7 @@ class GGEMS_EXPORT GGEMSSolid
       \brief get buffer to label buffer
       \return data on label infos
     */
-    inline cl::Buffer* GetLabelData(GGsize const& thread_index) const {return label_data_[thread_index];};
+    inline cl::Buffer* GetLabelData(GGsize const& thread_index) const {return label_data_[thread_index];}
 
     /*!
       \fn void SetRotation(GGfloat3 const& rotation_xyz)
@@ -113,6 +114,48 @@ class GGEMS_EXPORT GGEMSSolid
       \brief set a rotation for solid
     */
     void SetRotation(GGfloat3 const& rotation_xyz);
+
+    /*!
+      \fn void SetXAngleOpenGL(GLfloat const& angle_x) const
+      \param angle_x - angle in X
+      \brief set angle of rotation in X
+    */
+    void SetXAngleOpenGL(GLfloat const& angle_x) const;
+
+    /*!
+      \fn void SetYAngleOpenGL(GLfloat const& angle_y) const
+      \param angle_y - angle in Y
+      \brief set angle of rotation in Y
+    */
+    void SetYAngleOpenGL(GLfloat const& angle_y) const;
+
+    /*!
+      \fn void SetZAngleOpenGL(GLfloat const& angle_z) const
+      \param angle_z - angle in Z
+      \brief set angle of rotation in Z
+    */
+    void SetZAngleOpenGL(GLfloat const& angle_z) const;
+
+    /*!
+      \fn void SetXUpdateAngleOpenGL(GLfloat const& update_angle_x) const
+      \param update_angle_x - angle in X
+      \brief set angle of rotation in X (after translation)
+    */
+    void SetXUpdateAngleOpenGL(GLfloat const& update_angle_x) const;
+
+    /*!
+      \fn void SetYUpdateAngleOpenGL(GLfloat const& update_angle_y) const
+      \param update_angle_y - angle in Y
+      \brief set angle of rotation in Y (after translation)
+    */
+    void SetYUpdateAngleOpenGL(GLfloat const& update_angle_y) const;
+
+    /*!
+      \fn void SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const
+      \param update_angle_z - angle in Z
+      \brief set angle of rotation in Z (after translation)
+    */
+    void SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const;
 
     /*!
       \fn void SetPosition(GGfloat3 const& position_xyz)
@@ -161,7 +204,7 @@ class GGEMS_EXPORT GGEMSSolid
       \return the type of registered data
       \brief get the type of registered data
     */
-    inline std::string GetRegisteredDataType(void) const {return data_reg_type_;};
+    inline std::string GetRegisteredDataType(void) const {return data_reg_type_;}
 
     /*!
       \fn cl::Kernel* GetKernelParticleSolidDistance(GGsize const& thread_index) const
@@ -203,6 +246,47 @@ class GGEMS_EXPORT GGEMSSolid
     */
     inline cl::Buffer* GetScatterHistogram(GGsize const& thread_index) const {return histogram_.scatter_[thread_index];}
 
+    /*!
+      \fn void SetVisible(bool const& is_visible)
+      \param is_visible - true if navigator is drawn using OpenGL
+      \brief set to true to draw navigator
+    */
+    void SetVisible(bool const& is_visible);
+
+    /*!
+      \fn void SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb)
+      \param custom_material_rgb - rgb color associated to a material
+      \brief set a new color material
+    */
+    void SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb);
+
+    /*!
+      \fn void SetMaterialVisible(MaterialVisibleUMap const& material_visible)
+      \param material_visible - visibility of material
+      \brief set visibility of material
+    */
+    void SetMaterialVisible(MaterialVisibleUMap const& material_visible);
+
+    /*!
+      \fn void SetMaterialName(std::string const& material_name) const
+      \param material_name - name of the material
+      \brief set material name to find color for OpenGL
+    */
+    void SetMaterialName(std::string const& material_name) const;
+
+    /*!
+      \fn void BuildOpenGL(void) const
+      \brief building OpenGL volume in GGEMS
+    */
+    void BuildOpenGL(void) const;
+
+    /*!
+      \fn void AddKernelOption(std::string const& option)
+      \param option - kernel option for OpenCL
+      \brief Add an additional option to OpenCL kernel
+    */
+    void AddKernelOption(std::string const& option);
+
   protected:
     /*!
       \fn void InitializeKernel(void)
@@ -230,6 +314,11 @@ class GGEMS_EXPORT GGEMSSolid
     std::string data_reg_type_; /*!< Type of registering data */
     GGEMSHistogramMode histogram_; /*!< Storing histogram useful for GGEMSSystem only */
     bool is_scatter_; /*!< boolean storing scatter in solid */
+
+    // OpenGL volume
+    #ifdef OPENGL_VISUALIZATION
+    GGEMSOpenGLVolume* opengl_solid_; /*!< OpenGL solid */
+    #endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +332,7 @@ void GGEMSSolid::SetSolidID(GGsize const& solid_id, GGsize const& thread_index)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_[thread_index], sizeof(T), thread_index);
+  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(T), thread_index);
 
   solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
 

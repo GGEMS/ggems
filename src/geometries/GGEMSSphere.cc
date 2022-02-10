@@ -96,7 +96,6 @@ void GGEMSSphere::Draw(void)
 
   // Get command queue and event
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(0);
-  cl::Event* event = opencl_manager.GetEvent(0);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(0);
@@ -108,9 +107,9 @@ void GGEMSSphere::Draw(void)
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
 
   GGint3 phantom_dimensions;
-  phantom_dimensions.x = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().x_);
-  phantom_dimensions.y = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().y_);
-  phantom_dimensions.z = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().z_);
+  phantom_dimensions.s[0] = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().x_);
+  phantom_dimensions.s[1] = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().y_);
+  phantom_dimensions.s[2] = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().z_);
 
   GGsize number_of_elements = volume_creator_manager.GetNumberElements();
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
@@ -133,12 +132,12 @@ void GGEMSSphere::Draw(void)
   kernel_draw_volume_[0]->setArg(6, *voxelized_phantom);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], 0, global_wi, local_wi, nullptr, event);
+  cl::Event event;
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], 0, global_wi, local_wi, nullptr, &event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
 
   // GGEMS Profiling
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, oss.str());
+  GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
 
   queue->finish();
 }

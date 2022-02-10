@@ -162,6 +162,17 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& thread_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(thread_index, batch_index);}
 
     /*!
+      \fn inline GGsize GetNumberOfParticles(GGsize const& source_index) const
+      \param source_index - index of the source
+      \return the number of particle
+      \brief method returning the number of particles
+    */
+    inline GGsize GetNumberOfParticles(GGsize const& source_index) const
+    {
+      return sources_[source_index]->GetNumberOfParticles();
+    }
+
+    /*!
       \fn GGEMSParticles* GetParticles(void) const
       \return pointer on particle stack
       \brief method returning the OpenCL stack on particles
@@ -230,5 +241,12 @@ extern "C" GGEMS_EXPORT void initialize_source_manager(GGEMSSourceManager* sourc
   \brief Print information about source
 */
 extern "C" GGEMS_EXPORT void print_infos_source_manager(GGEMSSourceManager* source_manager);
+
+/*!
+  \fn void clean_source_manager(GGEMSSourceManager* source_manager)
+  \param source_manager - pointer on the singleton
+  \brief Clean source manager singleton
+*/
+extern "C" GGEMS_EXPORT void clean_source_manager(GGEMSSourceManager* source_manager);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER

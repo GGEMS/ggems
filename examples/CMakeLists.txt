@@ -34,3 +34,7 @@ ADD_SUBDIRECTORY(2_CT_Scanner)
 ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
 ADD_SUBDIRECTORY(4_Dosimetry_Photon)
 ADD_SUBDIRECTORY(5_World_Tracking)
+
+IF(OPENGL_VISUALIZATION)
+  ADD_SUBDIRECTORY(6_Visualization)
+ENDIF()

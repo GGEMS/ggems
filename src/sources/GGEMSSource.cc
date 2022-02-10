@@ -121,9 +121,9 @@ void GGEMSSource::EnableTracking(void)
 void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit)
 {
   GGfloat3 translation;
-  translation.x = DistanceUnit(pos_x, unit);
-  translation.y = DistanceUnit(pos_y, unit);
-  translation.z = DistanceUnit(pos_z, unit);
+  translation.s[0] = DistanceUnit(pos_x, unit);
+  translation.s[1] = DistanceUnit(pos_y, unit);
+  translation.s[2] = DistanceUnit(pos_z, unit);
   geometry_transformation_->SetTranslation(translation);
 }
 
@@ -164,9 +164,9 @@ void GGEMSSource::SetSourceParticleType(std::string const& particle_type)
 void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   GGfloat3 rotation;
-  rotation.x = AngleUnit(rx, unit);
-  rotation.y = AngleUnit(ry, unit);
-  rotation.z = AngleUnit(rz, unit);
+  rotation.s[0] = AngleUnit(rx, unit);
+  rotation.s[1] = AngleUnit(ry, unit);
+  rotation.s[2] = AngleUnit(rz, unit);
   geometry_transformation_->SetRotation(rotation);
 }
 
@@ -232,7 +232,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
 
   // Computing number of particles to simulate for each device
   number_of_particles_by_device_ = new GGsize[number_activated_devices_];
-  if (opencl_manager.GetNumberDeviceLoads() == 0) {
+  if (opencl_manager.GetNumberDeviceBalancing() == 0) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
       number_of_particles_by_device_[i] = number_of_particles_ / number_activated_devices_;
     }

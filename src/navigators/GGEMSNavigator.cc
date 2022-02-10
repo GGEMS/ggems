@@ -15,7 +15,7 @@
 // * along with GGEMS.  If not, see <https://www.gnu.org/licenses/>.      *
 // *                                                                      *
 // ************************************************************************
- 
+
 /*!
   \file GGEMSNavigator.cc
 
@@ -34,6 +34,10 @@
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
+#include "GGEMS/physics/GGEMSMuData.hh"
+#include "GGEMS/physics/GGEMSMuDataConstants.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,17 +53,18 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   solids_(nullptr),
   number_of_solids_(0),
   dose_calculator_(nullptr),
-  is_dosimetry_mode_(false)
+  is_dosimetry_mode_(false),
+  is_tle_(0)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator creating..." << GGendl;
 
-  position_xyz_.x = 0.0f;
-  position_xyz_.y = 0.0f;
-  position_xyz_.z = 0.0f;
+  position_xyz_.s[0] = 0.0f;
+  position_xyz_.s[1] = 0.0f;
+  position_xyz_.s[2] = 0.0f;
 
-  rotation_xyz_.x = 0.0f;
-  rotation_xyz_.y = 0.0f;
-  rotation_xyz_.z = 0.0f;
+  rotation_xyz_.s[0] = 0.0f;
+  rotation_xyz_.s[1] = 0.0f;
+  rotation_xyz_.s[2] = 0.0f;
 
   // Store the phantom navigator in phantom navigator manager
   GGEMSNavigatorManager::GetInstance().Store(this);
@@ -68,11 +73,18 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   materials_ = new GGEMSMaterials();
 
   // Allocation of cross sections including physics
-  cross_sections_ = new GGEMSCrossSections();
+  cross_sections_ = new GGEMSCrossSections(materials_);
+
+  // Allocation of attenuations
+  attenuations_ = new GGEMSAttenuations(materials_, cross_sections_);
 
   // Get the number of activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  is_visible_ = false;
+  custom_material_rgb_.clear();
+  material_visible_.clear();
 
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;
 }
@@ -100,8 +112,15 @@ GGEMSNavigator::~GGEMSNavigator(void)
   }
 
   if (cross_sections_) {
+    cross_sections_->Clean();
     delete cross_sections_;
     cross_sections_ = nullptr;
+  }
+
+  if (attenuations_) {
+    attenuations_->Clean();
+    delete attenuations_;
+    attenuations_ = nullptr;
   }
 
   GGcout("GGEMSNavigator", "~GGEMSNavigator", 3) << "GGEMSNavigator erased!!!" << GGendl;
@@ -136,9 +155,9 @@ void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& posit
 void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   is_update_rot_ = true;
-  rotation_xyz_.x = AngleUnit(rx, unit);
-  rotation_xyz_.y = AngleUnit(ry, unit);
-  rotation_xyz_.z = AngleUnit(rz, unit);
+  rotation_xyz_.s[0] = AngleUnit(rx, unit);
+  rotation_xyz_.s[1] = AngleUnit(ry, unit);
+  rotation_xyz_.s[2] = AngleUnit(rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +185,70 @@ void GGEMSNavigator::SetNavigatorID(GGsize const& navigator_id)
 void GGEMSNavigator::EnableTracking(void)
 {
   is_tracking_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::EnableTLE(bool const& is_activated)
+{
+  is_tle_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetVisible(bool const& is_visible)
+{
+  is_visible_ = is_visible;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+{
+  // Adding a custom color
+  GGEMSRGBColor rgb;
+  rgb.red_ = static_cast<GGfloat>(red) / 255.0f;
+  rgb.green_ = static_cast<GGfloat>(green) / 255.0f;
+  rgb.blue_ = static_cast<GGfloat>(blue) / 255.0f;
+
+  custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialColor(std::string const& material_name, std::string const& color_name)
+{
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
+  // Getting RGB color
+  GGfloat rgb_array[] = {0.0f, 0.0f, 0.0f};
+  opengl_manager.GetRGBColor(color_name, &rgb_array[0]);
+
+  // Storing color and material
+  GGEMSRGBColor rgb;
+  rgb.red_ = rgb_array[0];
+  rgb.green_ = rgb_array[1];
+  rgb.blue_ = rgb_array[2];
+  custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+  #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)
+{
+  material_visible_.insert(std::make_pair(material_name, is_material_visible));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +289,10 @@ void GGEMSNavigator::Initialize(void)
   materials_->Initialize();
 
   // Initialization of electromagnetic process and building cross section tables for each particles and materials
-  cross_sections_->Initialize(materials_);
+  cross_sections_->Initialize();
+
+  // Initialization of attenuations
+  attenuations_->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +313,6 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -249,24 +334,24 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelParticleSolidDistance(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelParticleSolidDistance(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *solid_data);
 
     // Launching kernel
-    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, &event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ParticleSolidDistance");
     queue->finish();
 
     // GGEMS Profiling
-    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-    profiler_manager.HandleEvent(*event, oss.str());
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
   }
 }
 
@@ -279,7 +364,6 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -301,24 +385,24 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelProjectToSolid(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelProjectToSolid(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *solid_data);
 
     // Launching kernel
-    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, &event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ProjectToSolid");
     queue->finish();
 
     // GGEMS Profiling
-    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-    profiler_manager.HandleEvent(*event, oss.str());
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
   }
 }
 
@@ -331,7 +415,6 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -353,6 +436,9 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   // Getting OpenCL buffer for materials
   cl::Buffer* materials = materials_->GetMaterialTables(thread_index);
 
+  // Geetning OpenCL buffer for attenuations
+  cl::Buffer* attenuations = attenuations_->GetAttenuations(thread_index);
+
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
   GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
@@ -362,13 +448,13 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid  and label (for GGEMSVoxelizedSolid) data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
-    cl::Buffer* label_data = solids_[s]->GetLabelData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
+    cl::Buffer* label_data = solids_[i]->GetLabelData(thread_index);
 
     // Get type of registered data and OpenCL buffer to data
-    std::string data_reg_type = solids_[s]->GetRegisteredDataType();
+    std::string data_reg_type = solids_[i]->GetRegisteredDataType();
 
     // Get buffers depending on mode of simulation
     // Histogram mode (for system, CT ...)
@@ -380,9 +466,10 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     cl::Buffer* edep_tracking_dosimetry = nullptr;
     cl::Buffer* edep_squared_tracking_dosimetry = nullptr;
     cl::Buffer* dosimetry_params = nullptr;
+
     if (data_reg_type == "HISTOGRAM") {
-      histogram = solids_[s]->GetHistogram(thread_index);
-      scatter_histogram = solids_[s]->GetScatterHistogram(thread_index);
+      histogram = solids_[i]->GetHistogram(thread_index);
+      scatter_histogram = solids_[i]->GetScatterHistogram(thread_index);
     }
     else if (data_reg_type == "DOSIMETRY") {
       dosimetry_params = dose_calculator_->GetDoseParams(thread_index);
@@ -393,41 +480,42 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     }
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelTrackThroughSolid(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelTrackThroughSolid(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *randoms);
     kernel->setArg(3, *solid_data);
-    if (!label_data) kernel->setArg(4, sizeof(cl_mem), NULL);
+    if (!label_data) kernel->setArg(4, sizeof(cl_mem), nullptr);
     else kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
     kernel->setArg(5, *cross_sections);
     kernel->setArg(6, *materials);
-    kernel->setArg(7, threshold_);
+    kernel->setArg(7, *attenuations);
+    kernel->setArg(8, threshold_);
     if (data_reg_type == "HISTOGRAM") {
-      kernel->setArg(8, *histogram);
-      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), NULL);
-      else kernel->setArg(9, *scatter_histogram);
+      kernel->setArg(9, *histogram);
+      if (!scatter_histogram) kernel->setArg(10, sizeof(cl_mem), nullptr);
+      else kernel->setArg(10, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
-      kernel->setArg(8, *dosimetry_params);
-      kernel->setArg(9, *edep_tracking_dosimetry);
+      kernel->setArg(9, *dosimetry_params);
+      kernel->setArg(10, *edep_tracking_dosimetry);
 
-      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), NULL);
-      else kernel->setArg(10, *edep_squared_tracking_dosimetry);
+      if (!edep_squared_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), nullptr);
+      else kernel->setArg(11, *edep_squared_tracking_dosimetry);
 
-      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), NULL);
-      else kernel->setArg(11, *hit_tracking_dosimetry);
-      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), NULL);
-      else kernel->setArg(12, *photon_tracking_dosimetry);
+      if (!hit_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), nullptr);
+      else kernel->setArg(12, *hit_tracking_dosimetry);
+      if (!photon_tracking_dosimetry) kernel->setArg(13, sizeof(cl_mem), nullptr);
+      else kernel->setArg(13, *photon_tracking_dosimetry);
     }
 
     // Launching kernel
-    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, &event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "TrackThroughSolid");
 
     // GGEMS Profiling
-    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-    profiler_manager.HandleEvent(*event, oss.str());
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
     queue->finish();
   }
 }

@@ -21,7 +21,11 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+  prog='cross_section.py',
+  description='-->> 0 - Cross Sections Example <<--',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 
 parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 parser.add_argument('-m', '--material', required=True, type=str, help="Set a material name")
@@ -79,10 +83,17 @@ processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
 
 # ------------------------------------------------------------------------------
 # STEP 6: Add physical process and initialize it
-cross_sections = GGEMSCrossSections()
+cross_sections = GGEMSCrossSections(materials)
 cross_sections.add_process(process_name, 'gamma')
 # Intialize cross section tables with previous materials
-cross_sections.initialize(materials)
+cross_sections.initialize()
+
+# Initialize attenuation tables and get values for attenuation and energy absorption
+attenuations = GGEMSAttenuations(materials, cross_sections)
+attenuations.initialize();
+
+print('    Attenuation: ', attenuations.get_mu(material_name, energy_MeV, 'MeV'), ' cm-1')
+print('    Energy attenuation: ', attenuations.get_mu_en(material_name, energy_MeV, 'MeV'), ' cm-1')
 
 print('At ', energy_MeV, ' MeV, cross section is ', cross_sections.get_cs(process_name, material_name, energy_MeV, 'MeV'), 'cm2.g-1')
 
@@ -90,5 +101,5 @@ print('At ', energy_MeV, ' MeV, cross section is ', cross_sections.get_cs(proces
 # STEP 7: Exit safely
 materials.clean()
 cross_sections.clean()
-opencl_manager.clean()
+clean_safely()
 exit()

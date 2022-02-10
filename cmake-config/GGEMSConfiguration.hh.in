@@ -31,6 +31,7 @@
   \date Wednesday October 2, 2019
 */
 
+#cmakedefine LOGO_PATH "@LOGO_PATH@"
 #cmakedefine OPENCL_KERNEL_PATH "@OPENCL_KERNEL_PATH@"
 #cmakedefine GGEMS_PATH "@GGEMS_PATH@"
 

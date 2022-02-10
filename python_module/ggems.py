@@ -19,6 +19,7 @@
 # Import all GGEMS C++ singletons
 from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
+from ggems_opengl import GGEMSOpenGLManager
 from ggems_ram import GGEMSRAMManager
 from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from ggems_systems import GGEMSCTSystem
@@ -28,6 +29,7 @@ from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSC
 from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 from ggems_dosimetry import GGEMSDosimetryCalculator
 from ggems_profiler import GGEMSProfilerManager
+from ggems_attenuation import GGEMSAttenuations
 
 class GGEMS(object):
     """GGEMS class managing the simulation
@@ -114,3 +116,9 @@ class GGEMS(object):
 
     def tracking_verbose(self, flag, particle_id):
         ggems_lib.set_tracking_ggems(self.obj, flag, particle_id)
+
+
+def clean_safely():
+    GGEMSOpenCLManager().clean()
+    GGEMSVolumeCreatorManager().clean();
+    GGEMSSourceManager().clean();

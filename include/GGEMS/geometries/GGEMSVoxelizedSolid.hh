@@ -52,7 +52,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     /*!
       \brief GGEMSVoxelizedSolid destructor
     */
-    ~GGEMSVoxelizedSolid(void);
+    ~GGEMSVoxelizedSolid(void) override;
 
     /*!
       \fn GGEMSVoxelizedSolid(GGEMSVoxelizedSolid const& voxelized_solid) = delete
@@ -93,7 +93,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \fn void EnableScatter(void)
       \brief Activate scatter registration
     */
-    void EnableScatter(void) override {;};
+    void EnableScatter(void) override {}
 
     /*!
       \fn void PrintInfos(void) const
@@ -168,7 +168,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Get pointer on OpenCL device
-    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[d], sizeof(GGEMSVoxelizedSolidData), d);
+    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), d);
 
     // Get information about mhd file
     number_of_voxels_ = static_cast<GGsize>(solid_data_device->number_of_voxels_);
@@ -192,7 +192,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
     label_data_[d] = opencl_manager.Allocate(nullptr, number_of_voxels_ * sizeof(GGuchar), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSolid");
 
     // Get pointer on OpenCL device
-    GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_[d], number_of_voxels_ * sizeof(GGuchar), d);
+    GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxels_ * sizeof(GGuchar), d);
 
     // Set value to max of GGuchar
     std::fill(label_data_device, label_data_device + number_of_voxels_, std::numeric_limits<GGuchar>::max());

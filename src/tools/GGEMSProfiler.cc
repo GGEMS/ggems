@@ -28,8 +28,17 @@
   \date Tuesday March 16, 2021
 */
 
+#include <mutex>
+
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
+
+/*!
+  \brief empty namespace storing mutex
+*/
+namespace {
+  std::mutex mutex; /*!< Mutex variable */
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,9 +46,7 @@
 
 GGEMSProfiler::GGEMSProfiler(void)
 : profiler_item_(nullptr)
-{
-  ;
-}
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +64,7 @@ GGEMSProfiler::~GGEMSProfiler(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProfiler::CallBackFunction(cl_event event, GGint event_command_exec_status, void* user_data)
+void GGEMSProfiler::Callback(cl_event event, GGint event_command_exec_status, void* user_data)
 {
   if (event_command_exec_status == CL_COMPLETE) {
     GGEMSProfiler* p = reinterpret_cast<GGEMSProfiler*>(user_data);
@@ -87,8 +94,8 @@ void GGEMSProfiler::AddProfilerItem(cl_event event)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProfiler::HandleEvent(cl::Event event)
+void GGEMSProfiler::HandleEvent(cl::Event& event)
 {
   clRetainEvent(event());
-  event.setCallback(CL_COMPLETE, reinterpret_cast<void (CL_CALLBACK*)(cl_event, GGint, void*)>(GGEMSProfiler::CallBackFunction), this);
+  event.setCallback(CL_COMPLETE, reinterpret_cast<void (CL_CALLBACK*)(cl_event, GGint, void*)>(GGEMSProfiler::Callback), this);
 }

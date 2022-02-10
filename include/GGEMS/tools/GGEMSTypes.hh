@@ -41,6 +41,9 @@
 #endif
 
 #ifdef __OPENCL_C_VERSION__ // On OpenCL device
+#define FALSE 0
+#define TRUE 1
+
 #define GGchar char /*!< define a new type for char */
 #define GGchar2 char2 /*!< define a new type for char2 */
 #define GGchar3 char3 /*!< define a new type for char3 */
@@ -187,6 +190,16 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 #endif
 
 #else
+
+#ifdef OPENGL_VISUALIZATION
+#define GLFW_INCLUDE_NONE /*!< Prevent the GLFW header from including the OpenGL header */
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+#include <GLFW/glfw3.h>
+#define GLEW_STATIC /*!< Using GLEW in static mode */
+#include <GL/glew.h>
+#endif
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.hpp>
