@@ -35,12 +35,12 @@ Supported operating system:
 Tested compilers:
 
 * gcc 7/8/9 on Linux
-* clang v9/10/11 on Linux and Windows
-* Visual C++ 2019 on Windows
+* clang from version 9 to 13 on Linux and Windows
+* Visual C++ 2022 on Windows
 
 ## Installation
 
-To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.1/building_and_installing.html>
+To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.2/building_and_installing.html>
 
 ## Copyright
 
