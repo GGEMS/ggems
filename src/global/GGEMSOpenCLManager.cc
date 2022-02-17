@@ -204,199 +204,199 @@ void GGEMSOpenCLManager::GetOpenCLDevices(void)
 
   // Getting infos about device
   for (GGsize i = 0; i < devices_.size(); ++i) {
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_TYPE, &device_type), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_TYPE, &device_type), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_type_.push_back(device_type);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NAME, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NAME, &info_string), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_name_.push_back(info_string);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VENDOR, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VENDOR, &info_string), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_vendor_.push_back(info_string);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VENDOR_ID, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VENDOR_ID, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_vendor_id_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILE, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILE, &info_string), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_profile_.push_back(info_string);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VERSION, &char_data), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_version_.push_back(std::string(char_data));
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DRIVER_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DRIVER_VERSION, &char_data), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_driver_version_.push_back(std::string(char_data));
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_OPENCL_C_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_OPENCL_C_VERSION, &char_data), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_opencl_c_version_.push_back(std::string(char_data));
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_char_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_short_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_int_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_long_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_half_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_float_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_native_vector_width_double_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_char_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_short_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_int_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_long_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_half_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_float_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_preferred_vector_width_double_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ADDRESS_BITS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ADDRESS_BITS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_address_bits_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_AVAILABLE, &info_bool), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_AVAILABLE, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_available_.push_back(info_bool);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &info_bool), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_compiler_available_.push_back(info_bool);
 
     if (device_native_vector_width_half_[i] != 0) {
-      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HALF_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HALF_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GetOpenCLDevices");
       device_half_fp_config_.push_back(device_fp_config);
     }
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_single_fp_config_.push_back(device_fp_config);
     if (device_native_vector_width_double_[i] != 0) {
-      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GetOpenCLDevices");
       device_double_fp_config_.push_back(device_fp_config);
     }
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ENDIAN_LITTLE, &info_bool), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ENDIAN_LITTLE, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_endian_little_.push_back(info_bool);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_EXTENSIONS, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_EXTENSIONS, &info_string), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_extensions_.push_back(info_string);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ERROR_CORRECTION_SUPPORT, &info_bool), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ERROR_CORRECTION_SUPPORT, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_error_correction_support_.push_back(info_bool);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_EXECUTION_CAPABILITIES, &device_exec_capabilities), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_EXECUTION_CAPABILITIES, &device_exec_capabilities), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_execution_capabilities_.push_back(device_exec_capabilities);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, &info_ulong), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, &info_ulong), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_global_mem_cache_size_.push_back(info_ulong);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, &device_mem_cache_type), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, &device_mem_cache_type), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_global_mem_cache_type_.push_back(device_mem_cache_type);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_global_mem_cacheline_size_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &info_ulong), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &info_ulong), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_global_mem_size_.push_back(info_ulong);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_LOCAL_MEM_SIZE, &info_ulong), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_LOCAL_MEM_SIZE, &info_ulong), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_local_mem_size_.push_back(info_ulong);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_LOCAL_MEM_TYPE, &device_local_mem_type), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_LOCAL_MEM_TYPE, &device_local_mem_type), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_local_mem_type_.push_back(device_local_mem_type);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HOST_UNIFIED_MEMORY, &info_bool), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HOST_UNIFIED_MEMORY, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_host_unified_memory_.push_back(info_bool);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_SUPPORT, &info_bool), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_SUPPORT, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image_support_.push_back(info_bool);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image_max_array_size_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image_max_buffer_size_.push_back(info_size);
     
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE2D_MAX_WIDTH, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE2D_MAX_WIDTH, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image2D_max_width_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE2D_MAX_HEIGHT, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE2D_MAX_HEIGHT, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image2D_max_height_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_WIDTH, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_WIDTH, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image3D_max_width_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_HEIGHT, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_HEIGHT, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image3D_max_height_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_DEPTH, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_DEPTH, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_image3D_max_depth_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_READ_IMAGE_ARGS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_READ_IMAGE_ARGS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_read_image_args_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WRITE_IMAGE_ARGS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WRITE_IMAGE_ARGS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_write_image_args_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_clock_frequency_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_compute_units_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_ARGS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_ARGS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_constant_args_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &info_ulong), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &info_ulong), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_constant_buffer_size_.push_back(info_ulong);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &info_ulong), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &info_ulong), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_mem_alloc_size_.push_back(info_ulong);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_PARAMETER_SIZE, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_PARAMETER_SIZE, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_parameter_size_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_work_group_size_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_work_item_dimensions_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MEM_BASE_ADDR_ALIGN, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MEM_BASE_ADDR_ALIGN, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_mem_base_addr_align_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &size_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &size_data), "GGEMSOpenCLManager", "GetOpenCLDevices");
     for (GGsize j = 0; j < 3; ++j) device_max_work_item_sizes_.push_back(size_data[j]);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PRINTF_BUFFER_SIZE, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PRINTF_BUFFER_SIZE, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_printf_buffer_size_.push_back(info_size);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_SAMPLERS, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_SAMPLERS, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_max_samplers_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_AFFINITY_DOMAIN, &device_affinity_domain), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_AFFINITY_DOMAIN, &device_affinity_domain), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_partition_affinity_domain_.push_back(device_affinity_domain);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_MAX_SUB_DEVICES, &info_uint), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_MAX_SUB_DEVICES, &info_uint), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_partition_max_sub_devices_.push_back(info_uint);
 
-    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILING_TIMER_RESOLUTION, &info_size), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILING_TIMER_RESOLUTION, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_profiling_timer_resolution_.push_back(info_size);
   }
 

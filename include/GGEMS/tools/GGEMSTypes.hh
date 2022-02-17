@@ -115,6 +115,10 @@
 #pragma OPENCL EXTENSION cl_amd_fp64 : enable
 #endif
 
+#if defined(cl_khr_fp16)
+#pragma OPENCL EXTENSION cl_khr_fp16 : enable
+#endif
+
 #define GGdouble double /*!< define a new type for double */
 #define GGdouble2 double2 /*!< define a new type for double2 */
 #define GGdouble3 double3 /*!< define a new type for double3 */
