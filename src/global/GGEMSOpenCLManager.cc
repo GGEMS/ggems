@@ -279,11 +279,6 @@ void GGEMSOpenCLManager::GetOpenCLDevices(void)
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &info_bool), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_compiler_available_.push_back(info_bool);
 
-    if (device_native_vector_width_half_[i] != 0) {
-      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HALF_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GetOpenCLDevices");
-      device_half_fp_config_.push_back(device_fp_config);
-    }
-
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &device_fp_config), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_single_fp_config_.push_back(device_fp_config);
     if (device_native_vector_width_double_[i] != 0) {
@@ -441,6 +436,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Float: " << device_preferred_vector_width_float_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Double: " << device_preferred_vector_width_double_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Address Bits: " << device_address_bits_[i] << " bits" << GGendl;
+
     if (device_available_[i] == static_cast<GGbool>(true)) {
       GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Available: ON" << GGendl;
     }
@@ -453,18 +449,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     else {
       GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Compiler Available: OFF" << GGendl;
     }
-    if (device_native_vector_width_half_[i] != 0) {
-      std::string half_fp_capability("");
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_DENORM ? "DENORM " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_INF_NAN ? "INF_NAN " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_ROUND_TO_NEAREST ? "ROUND_TO_NEAREST " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_ROUND_TO_ZERO ? "ROUND_TO_ZERO " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_ROUND_TO_INF ? "ROUND_TO_INF " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_FMA ? "FMA " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_SOFT_FLOAT ? "SOFT_FLOAT " : "";
-      half_fp_capability += device_half_fp_config_[i] & CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT ? "CORRECTLY_ROUNDED_DIVIDE_SQRT" : "";
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Half Precision Capability: " << half_fp_capability << GGendl;
-    }
+
     std::string single_fp_capability("");
     single_fp_capability += device_single_fp_config_[i] & CL_FP_DENORM ? "DENORM " : "";
     single_fp_capability += device_single_fp_config_[i] & CL_FP_INF_NAN ? "INF_NAN " : "";
@@ -475,6 +460,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     single_fp_capability += device_single_fp_config_[i] & CL_FP_SOFT_FLOAT ? "SOFT_FLOAT " : "";
     single_fp_capability += device_single_fp_config_[i] & CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT ? "CORRECTLY_ROUNDED_DIVIDE_SQRT" : "";
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Single Precision Capability: " << single_fp_capability << GGendl;
+
     if (device_native_vector_width_double_[i] != 0) {
       std::string double_fp_capability("");
       double_fp_capability += device_double_fp_config_[i] & CL_FP_DENORM ? "DENORM " : "";
