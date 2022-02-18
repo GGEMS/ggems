@@ -487,7 +487,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGuint> device_address_bits_; /*!< Address Bits */
     std::vector<GGbool> device_available_; /*!< Flag on device availability */
     std::vector<GGbool> device_compiler_available_; /*!< Flag on compiler availability */
-    std::vector<cl_device_fp_config> device_half_fp_config_; /*!< Half precision capability */
     std::vector<cl_device_fp_config> device_single_fp_config_; /*!< Single precision capability */
     std::vector<cl_device_fp_config> device_double_fp_config_; /*!< Double precision capability */
     std::vector<GGbool> device_endian_little_; /*!< Endian little */
