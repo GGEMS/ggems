@@ -150,12 +150,11 @@ void GGEMSSolid::SetRotation(GGfloat3 const& rotation_xyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef OPENGL_VISUALIZATION
 void GGEMSSolid::SetXAngleOpenGL(GLfloat const& angle_x) const
 {
-  #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
     opengl_solid_->SetXAngle(angle_x);
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,10 +163,8 @@ void GGEMSSolid::SetXAngleOpenGL(GLfloat const& angle_x) const
 
 void GGEMSSolid::SetYAngleOpenGL(GLfloat const& angle_y) const
 {
-  #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
     opengl_solid_->SetYAngle(angle_y);
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,10 +173,8 @@ void GGEMSSolid::SetYAngleOpenGL(GLfloat const& angle_y) const
 
 void GGEMSSolid::SetZAngleOpenGL(GLfloat const& angle_z) const
 {
-  #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
     opengl_solid_->SetZAngle(angle_z);
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -188,10 +183,8 @@ void GGEMSSolid::SetZAngleOpenGL(GLfloat const& angle_z) const
 
 void GGEMSSolid::SetXUpdateAngleOpenGL(GLfloat const& update_angle_x) const
 {
-  #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
     opengl_solid_->SetXUpdateAngle(update_angle_x);
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,10 +193,8 @@ void GGEMSSolid::SetXUpdateAngleOpenGL(GLfloat const& update_angle_x) const
 
 void GGEMSSolid::SetYUpdateAngleOpenGL(GLfloat const& update_angle_y) const
 {
-  #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
     opengl_solid_->SetYUpdateAngle(update_angle_y);
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,11 +203,10 @@ void GGEMSSolid::SetYUpdateAngleOpenGL(GLfloat const& update_angle_y) const
 
 void GGEMSSolid::SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const
 {
-  #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
     opengl_solid_->SetZUpdateAngle(update_angle_z);
-  #endif
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

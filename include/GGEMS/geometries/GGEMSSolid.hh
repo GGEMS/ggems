@@ -115,6 +115,7 @@ class GGEMS_EXPORT GGEMSSolid
     */
     void SetRotation(GGfloat3 const& rotation_xyz);
 
+    #ifdef OPENGL_VISUALIZATION
     /*!
       \fn void SetXAngleOpenGL(GLfloat const& angle_x) const
       \param angle_x - angle in X
@@ -156,6 +157,7 @@ class GGEMS_EXPORT GGEMSSolid
       \brief set angle of rotation in Z (after translation)
     */
     void SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const;
+    #endif
 
     /*!
       \fn void SetPosition(GGfloat3 const& position_xyz)

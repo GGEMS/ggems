@@ -123,9 +123,11 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   // Perform rotation before position
   if (is_update_rot_) {
     solids_[0]->SetRotation(rotation_xyz_);
+    #ifdef OPENGL_VISUALIZATION
     solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
     solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
     solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
+    #endif
   }
   if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
 

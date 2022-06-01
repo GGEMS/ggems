@@ -805,7 +805,7 @@ GGsize GGEMSOpenCLManager::CheckKernel(std::string const& kernel_name, std::stri
   // Loop over registered kernels
   for (GGsize i = 0; i < kernels_.size(); ++i) {
     CheckOpenCLError(kernels_.at(i)->getInfo(CL_KERNEL_FUNCTION_NAME, &registered_kernel_name), "GGEMSOpenCLManager", "CheckKernel");
-    if (registered_kernel_name.back() == '\0') registered_kernel_name.erase(registered_kernel_name.end());
+    registered_kernel_name.erase(std::remove(registered_kernel_name.begin(), registered_kernel_name.end(), '\0'), registered_kernel_name.end());
     if (kernel_name == registered_kernel_name && compilation_options == kernel_compilation_options_.at(i)) return i;
   }
 

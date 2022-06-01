@@ -174,7 +174,9 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
       solids_[global_index]->SetPosition(position);
 
       // Rotation for OpenGL volume
+      #ifdef OPENGL_VISUALIZATION
       solids_[global_index]->SetZAngleOpenGL(step_angle);
+      #endif
     }
   }
 }
@@ -273,9 +275,11 @@ void GGEMSCTSystem::Initialize(void)
   if (is_update_rot_) {
     for (GGsize i = 0; i < number_of_solids_; ++i) {
       solids_[i]->SetRotation(rotation_xyz_);
+      #ifdef OPENGL_VISUALIZATION
       solids_[i]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
       solids_[i]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
       solids_[i]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
+      #endif
     }
   }
 
