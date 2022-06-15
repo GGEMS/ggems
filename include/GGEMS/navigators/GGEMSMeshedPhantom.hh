@@ -79,13 +79,50 @@ class GGEMS_EXPORT GGEMSMeshedPhantom : public GGEMSNavigator
     GGEMSMeshedPhantom& operator=(GGEMSMeshedPhantom const&& meshed_phantom_name) = delete;
 
     /*!
+      \fn void SetPhantomFile(std::string const& voxelized_phantom_filename, std::string const& range_data_filename)
+      \param voxelized_phantom_filename - MHD filename for voxelized phantom
+      \param range_data_filename - text file with range to material data
+      \brief set the mhd filename for voxelized phantom and the range data file
+    */
+    void SetPhantomFile(std::string const& meshed_phantom_filename);
+
+    /*!
+      \fn void Initialize(void) override
+      \brief Initialize the meshed phantom
+    */
+    void Initialize(void) override;
+
+    /*!
       \fn void SaveResults
       \brief save all results from solid
     */
     void SaveResults(void) override;
 
   private:
+    /*!
+      \fn void CheckParameters(void) const override
+      \brief checking parameters
+    */
+    void CheckParameters(void) const override;
+
+  private:
     std::string meshed_phantom_filename_; /*!< Mesh file storing the meshed phantom */
 };
+
+/*!
+  \fn GGEMSMeshedPhantom* create_ggems_meshed_phantom(char const* meshed_phantom_name)
+  \param meshed_phantom_name - name of meshed phantom
+  \return the pointer on the meshed phantom
+  \brief Get the GGEMSMeshedPhantom pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSMeshedPhantom* create_ggems_meshed_phantom(char const* meshed_phantom_name);
+
+/*!
+  \fn void set_phantom_file_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* phantom_filename)
+  \param meshed_phantom - pointer on meshed_phantom
+  \param phantom_filename - filename of the meshed phantom
+  \brief set the filename of meshed phantom
+*/
+extern "C" GGEMS_EXPORT void set_phantom_file_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* phantom_filename);
 
 #endif

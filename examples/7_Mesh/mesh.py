@@ -90,9 +90,9 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Phantoms and systems
-# # Loading phantom in GGEMS
-# phantom = GGEMSVoxelizedPhantom('phantom')
-# phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
+# Loading phantom in GGEMS
+phantom = GGEMSMeshedPhantom('phantom')
+phantom.set_phantom('data/Stanford_Bunny.stl')
 # phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 # phantom.set_position(0.0, 0.0, 0.0, 'mm')
 # phantom.set_visible(True)

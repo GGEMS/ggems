@@ -69,6 +69,21 @@ class GGEMSVoxelizedPhantom(object):
         ggems_lib.set_rotation_ggems_voxelized_phantom(self.obj, rx, ry, rz, unit.encode('ASCII'))
 
 
+class GGEMSMeshedPhantom(object):
+    """Class for meshed phantom for GGEMS simulation
+    """
+    def __init__(self, meshed_phantom_name):
+        ggems_lib.create_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_phantom_file_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_phantom_file_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_meshed_phantom(meshed_phantom_name.encode('ASCII'))
+
+    def set_phantom(self, phantom_filename):
+        ggems_lib.set_phantom_file_ggems_meshed_phantom(self.obj, phantom_filename.encode('ASCII'))
+
+
 class GGEMSWorld(object):
     """Class for world volume for GGEMS simulation
     """
