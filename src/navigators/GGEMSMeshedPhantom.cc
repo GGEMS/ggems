@@ -29,6 +29,7 @@
 
 #include "GGEMS/navigators/GGEMSMeshedPhantom.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,14 +82,14 @@ void GGEMSMeshedPhantom::Initialize(void)
   CheckParameters();
 
   // Getting the current number of registered solid
-  // GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
 
-  // // Get the number of already registered buffer
-  // GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids();
+  // Get the number of already registered buffer
+  GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids();
 
-  // // Allocation of memory for solid, 1 solid in case of voxelized phantom
-  // solids_ = new GGEMSSolid*[1];
-  // number_of_solids_ = 1;
+  // Allocation of memory for solid, 1 solid in case of meshed phantom
+  solids_ = new GGEMSSolid*[1];
+  number_of_solids_ = 1;
 
   // // Initializing voxelized solid for geometric navigation
   // if (is_dosimetry_mode_) {

@@ -34,13 +34,11 @@
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
-//#include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
+#include "GGEMS/navigators/GGEMSMeshedPhantom.hh"
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/sources/GGEMSXRaySource.hh"
-//#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
-//#include "GGEMS/geometries/GGEMSBox.hh"
 
 #ifdef _WIN32
 #include "GGEMS/tools/GGEMSWinGetOpt.hh"
@@ -263,9 +261,9 @@ int main(int argc, char** argv)
     // Enter material database
     material_manager.SetMaterialsDatabase("data/materials.txt");
 
-    // // Phantoms and systems
-    // GGEMSVoxelizedPhantom phantom("phantom");
-    // phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
+    // Phantoms and systems
+    GGEMSMeshedPhantom phantom("phantom");
+    phantom.SetPhantomFile("data/Stanford_Bunny.stl");
     // phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     // phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
     // phantom.SetVisible(true);
