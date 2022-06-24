@@ -85,59 +85,36 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
       \param materials - pointer on materials
       \brief Initialize solid for geometric navigation
     */
-  //   void Initialize(GGEMSMaterials* materials) override;
+    void Initialize(GGEMSMaterials* materials) override {}
 
-  //   /*!
-  //     \fn void EnableScatter(void)
-  //     \brief Activate scatter registration
-  //   */
-  //   void EnableScatter(void) override {}
+    /*!
+      \fn void EnableScatter(void)
+      \brief Activate scatter registration
+    */
+    void EnableScatter(void) override {}
 
-  //   /*!
-  //     \fn void PrintInfos(void) const
-  //     \brief printing infos about voxelized solid
-  //   */
-  //   void PrintInfos(void) const override;
+    /*!
+      \fn void PrintInfos(void) const
+      \brief printing infos about voxelized solid
+    */
+    void PrintInfos(void) const override {}
 
-  //   /*!
-  //     \fn void LoadVolumeImage(GGEMSMaterials* materials)
-  //     \param materials - pointer on material for a phantom
-  //     \brief load volume image to GGEMS and create a volume of label in GGEMS for voxelized solid
-  //   */
-  //   void LoadVolumeImage(GGEMSMaterials* materials);
-
-  //   /*!
-  //     \fn void UpdateTransformationMatrix(GGsize const& thread_index)
-  //     \param thread_index - index of the thread (= activated device index)
-  //     \brief Update transformation matrix for solid box object
-  //   */
-  //   void UpdateTransformationMatrix(GGsize const& thread_index) override;
-
-  //   /*!
-  //     \fn GGfloat3 GetVoxelSizes(GGsize const& thread_index) const
-  //     \param thread_index - index of the thread (= activated device index)
-  //     \return size of voxels in voxelized solid
-  //     \brief get the size of voxels in voxelized solid
-  //   */
-  //   GGfloat3 GetVoxelSizes(GGsize const& thread_index) const;
-
-  //   /*!
-  //     \fn GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const
-  //     \param thread_index - index of the thread (= activated device index)
-  //     \return OBB params for the object
-  //     \brief return the parameters about OBB geometry
-  //   */
-  //   GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const;
+    /*!
+      \fn void UpdateTransformationMatrix(GGsize const& thread_index)
+      \param thread_index - index of the thread (= activated device index)
+      \brief Update transformation matrix for solid box object
+    */
+    void UpdateTransformationMatrix(GGsize const& thread_index) override {}
 
   private:
-  //   /*!
-  //     \fn void InitializeKernel(void)
-  //     \brief Initialize kernel for particle solid distance
-  //   */
-  //   void InitializeKernel(void) override;
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for particle solid distance
+    */
+    void InitializeKernel(void) override {}
 
   private:
-    std::string meshed_phantom_name; /*!< Filename of STL file for mesh */
+    std::string meshed_phantom_name_; /*!< Filename of STL file for mesh */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLID_HH
