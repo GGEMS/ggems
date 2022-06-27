@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSVolumeCreatorManager(object):
     """Get Volume Creator Manager to convert analytical volume to voxelized volume

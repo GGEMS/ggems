@@ -18,17 +18,12 @@
 
 import ctypes
 import sys
-import os
+from pathlib import Path
 
 def ggems_lib_file_path(filename):
-    """ Search for GGEMS lib in PYTHONPATH
-    """
-    pythonpath = os.environ.get("PYTHONPATH")
-    if pythonpath:
-        for d in pythonpath.split(os.pathsep):
-            filepath = os.path.join(d, filename)
-            if os.path.isfile(filepath):
-                return filepath
+    path = Path(__file__).parent.parent.absolute() / filename
+    if path.exists():
+        return path
     return None
 
 # ------------------------------------------------------------------------------
