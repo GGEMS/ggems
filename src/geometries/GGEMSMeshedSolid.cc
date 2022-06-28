@@ -35,7 +35,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSMeshedSolid::GGEMSMeshedSolid(std::string const& meshed_phantom_name, std::string const& data_reg_type = "")
+GGEMSMeshedSolid::GGEMSMeshedSolid(std::string const& meshed_phantom_name, std::string const& data_reg_type)
 : GGEMSSolid(),
   meshed_phantom_name_(meshed_phantom_name)
 {
@@ -44,10 +44,10 @@ GGEMSMeshedSolid::GGEMSMeshedSolid(std::string const& meshed_phantom_name, std::
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Loop over the device
-  // for (GGsize d = 0; d < number_activated_devices_; ++d) {
-  //   // Allocating memory on OpenCL device
-  //   solid_data_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSolid");
-  // }
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    // Allocating memory on OpenCL device
+    solid_data_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMeshedSolidData), d, CL_MEM_READ_WRITE, "GGEMSMeshedSolid");
+  }
 
   // Local axis for phantom. Voxelized solid used only for phantom
   geometry_transformation_->SetAxisTransformation(

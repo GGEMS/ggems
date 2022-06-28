@@ -31,7 +31,7 @@
   \date Wednesday June 22, 2022
 */
 
-// #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
+#include "GGEMS/geometries/GGEMSMeshedSolidData.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 
 /*!
