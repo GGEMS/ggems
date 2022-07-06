@@ -92,3 +92,92 @@ GGEMSMeshedSolid::~GGEMSMeshedSolid(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
+{
+
+  GGcout("GGEMSMeshedSolid", "Initialize", 3) << "Initializing meshed solid..." << GGendl;
+
+  // Initializing kernels and loading image
+ // InitializeKernel();
+  LoadVolumeImage();
+/*
+  // Creating volume for OpenGL
+  // Get some infos for grid
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
+  if (opengl_manager.IsOpenGLActivated()) {
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
+
+    opengl_solid_ = new GGEMSOpenGLParaGrid(
+      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.s[0]),
+      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.s[1]),
+      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.s[2]),
+      solid_data_device->voxel_sizes_xyz_.s[0],
+      solid_data_device->voxel_sizes_xyz_.s[1],
+      solid_data_device->voxel_sizes_xyz_.s[2],
+      true // Draw midplanes
+    );
+
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
+
+    // Loading labels and materials for OpenGL
+    opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
+  }
+  #endif
+*/
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::LoadVolumeImage(void)
+{
+  GGcout("GGEMSMeshedSolid", "LoadVolumeImage", 3) << "Loading volume image from stl file..." << GGendl;
+
+  // Read MHD input file
+ /* GGEMSMHDImage mhd_input_phantom;
+  // Loop over the device
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    mhd_input_phantom.Read(volume_header_filename_, solid_data_[d], d);
+  }
+
+  // Get the name of raw file from mhd reader
+  std::string output_dir = mhd_input_phantom.GetOutputDirectory();
+  std::string raw_filename = output_dir + mhd_input_phantom.GetRawMDHfilename();
+
+  // Get the type
+  std::string const kDataType = mhd_input_phantom.GetDataMHDType();
+
+  // Convert raw data to material id data
+  if (!kDataType.compare("MET_CHAR")) {
+    ConvertImageToLabel<GGchar>(raw_filename, range_filename_, materials);
+  }
+  else if (!kDataType.compare("MET_UCHAR")) {
+    ConvertImageToLabel<GGuchar>(raw_filename, range_filename_, materials);
+  }
+  else if (!kDataType.compare("MET_SHORT")) {
+    ConvertImageToLabel<GGshort>(raw_filename, range_filename_, materials);
+  }
+  else if (!kDataType.compare("MET_USHORT")) {
+    ConvertImageToLabel<GGushort>(raw_filename, range_filename_, materials);
+  }
+  else if (!kDataType.compare("MET_INT")) {
+    ConvertImageToLabel<GGint>(raw_filename, range_filename_, materials);
+  }
+  else if (!kDataType.compare("MET_UINT")) {
+    ConvertImageToLabel<GGuint>(raw_filename, range_filename_, materials);
+  }
+  else if (!kDataType.compare("MET_FLOAT")) {
+    ConvertImageToLabel<GGfloat>(raw_filename, range_filename_, materials);
+  }*/
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////

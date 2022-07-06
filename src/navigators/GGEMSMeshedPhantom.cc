@@ -30,6 +30,7 @@
 #include "GGEMS/navigators/GGEMSMeshedPhantom.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
+#include "GGEMS/geometries/GGEMSMeshedSolid.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,22 +92,22 @@ void GGEMSMeshedPhantom::Initialize(void)
   solids_ = new GGEMSSolid*[1];
   number_of_solids_ = 1;
 
-  // // Initializing voxelized solid for geometric navigation
+  // Initializing meshed solid for geometric navigation
   // if (is_dosimetry_mode_) {
-  //   solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY");
+  //   solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_, "DOSIMETRY");
   // }
   // else {
-  //   solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_);
+  solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_);
   // }
 
-  // // Enabling tracking if necessary
+  // Enabling tracking if necessary
   // if (is_tracking_) solids_[0]->EnableTracking();
 
-  // // Enabling TLE
+  // Enabling TLE
   // if (is_tle_) solids_[0]->AddKernelOption(" -DTLE");
 
-  // // Load voxelized phantom from MHD file and storing materials
-  // solids_[0]->Initialize(materials_);
+  // Load meshed phantom from STL file and storing materials
+  solids_[0]->Initialize(materials_);
   // solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
   // solids_[0]->SetMaterialVisible(material_visible_);
 
@@ -132,8 +133,8 @@ void GGEMSMeshedPhantom::Initialize(void)
   // solids_[0]->BuildOpenGL();
   // #endif
 
-  // // Initialize parent class
-  // GGEMSNavigator::Initialize();
+  // Initialize parent class
+  GGEMSNavigator::Initialize();
 
   // // Checking if dosimetry mode activated
   // if (is_dosimetry_mode_) dose_calculator_->Initialize();

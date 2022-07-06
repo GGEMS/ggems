@@ -85,7 +85,7 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
       \param materials - pointer on materials
       \brief Initialize solid for geometric navigation
     */
-    void Initialize(GGEMSMaterials* materials) override {}
+    void Initialize(GGEMSMaterials* materials) override;
 
     /*!
       \fn void EnableScatter(void)
@@ -112,6 +112,12 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
       \brief Initialize kernel for particle solid distance
     */
     void InitializeKernel(void) override {}
+
+    /*!
+      \fn void LoadVolumeImage(void)
+      \brief load volume image to GGEMS and create a volume GGEMS for meshed solid
+    */
+    void LoadVolumeImage(void);
 
   private:
     std::string meshed_phantom_name_; /*!< Filename of STL file for mesh */
