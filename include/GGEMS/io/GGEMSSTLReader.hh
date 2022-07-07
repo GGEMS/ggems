@@ -19,6 +19,18 @@
 // *                                                                      *
 // ************************************************************************
 
+/*!
+  \file GGEMSSTLReader.hh
+
+  \brief I/O class handling STL mesh file
+
+  \author Julien BERT <julien.bert@univ-brest.fr>
+  \author Didier BENOIT <didier.benoit@inserm.fr>
+  \author LaTIM, INSERM - U1101, Brest, FRANCE
+  \version 1.0
+  \date Thrusday July 7, 2022
+*/
+
 #include <string>
 
 /*!
@@ -31,7 +43,7 @@ class GGEMSSTLReader
     /*!
       \brief GGEMSSTLReader constructor
     */
-    explicit GGEMSSTLReader(std::string const& stl_filename);
+    GGEMSSTLReader(void);
 
     /*!
       \brief GGEMSSTLReader destructor
@@ -65,6 +77,13 @@ class GGEMSSTLReader
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSSTLReader& operator=(GGEMSSTLReader const&& stl) = delete;
+
+    /*!
+      \fn void Read(std::string const& meshed_phantom_filename)
+      \param meshed_phantom_filename - input stl file
+      \brief read the stl file and store data
+    */
+    void Read(std::string const& meshed_phantom_filename);
 
   private:
 };

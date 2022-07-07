@@ -30,6 +30,7 @@
 
 #include "GGEMS/geometries/GGEMSMeshedSolid.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/io/GGEMSSTLReader.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +141,9 @@ void GGEMSMeshedSolid::LoadVolumeImage(void)
 {
   GGcout("GGEMSMeshedSolid", "LoadVolumeImage", 3) << "Loading volume image from stl file..." << GGendl;
 
-  // Read MHD input file
+  // Read STL input file
+  GGEMSSTLReader stl_input_phantom;
+
  /* GGEMSMHDImage mhd_input_phantom;
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {

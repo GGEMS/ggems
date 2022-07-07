@@ -47,7 +47,6 @@ GGEMSMHDImage::GGEMSMHDImage(void)
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "GGEMSMHDImage creating..." << GGendl;
 
-
   element_sizes_.s[0] = 0.0f;
   element_sizes_.s[1] = 0.0f;
   element_sizes_.s[2] = 0.0f;
