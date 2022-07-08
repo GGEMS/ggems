@@ -42,7 +42,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSolid::GGEMSSolid(void)
-: kernel_option_("")
+: number_of_voxels_(0), 
+  kernel_option_("")
 {
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "GGEMSSolid creating..." << GGendl;
 
