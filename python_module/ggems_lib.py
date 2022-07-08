@@ -23,7 +23,7 @@ from pathlib import Path
 def ggems_lib_file_path(filename):
     path = Path(__file__).parent.parent.absolute() / filename
     if path.exists():
-        return path
+        return str(path)
     return None
 
 # ------------------------------------------------------------------------------

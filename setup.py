@@ -1,5 +1,6 @@
 import os
 import pathlib
+import sys
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
@@ -27,16 +28,27 @@ class build_ext(build_ext_orig):
         config = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute()),
-            '-DCMAKE_BUILD_TYPE=' + config
+            '-DCMAKE_BUILD_TYPE=' + config,
+            '-DBUILD_EXAMPLES=OFF',
         ]
+
+        if sys.platform == 'win32':
+            cmake_args.extend([
+                '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=' + str(extdir.parent.absolute()),
+                '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=' + str(extdir.parent.absolute())
+                ])
+        else:
+            cmake_args.extend([
+                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute())
+                ])
+
 
         build_args = [
             '--config', config,
-            '--', '-j8',
+            '--parallel', '8',
         ]
 
-        print(build_args)
+        print(cmake_args, build_args)
 
         os.chdir(str(build_temp))
         self.spawn(['cmake', str(cwd)] + cmake_args)
