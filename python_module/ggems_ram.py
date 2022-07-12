@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSRAMManager(object):
     """Get the C++ singleton and print infos about RAM memory

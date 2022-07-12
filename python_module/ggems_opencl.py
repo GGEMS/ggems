@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSOpenCLManager(object):
     """Get the OpenCL C++ singleton and print infos or managing it

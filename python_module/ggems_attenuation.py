@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSAttenuations(object):
     """ Class handling attenuations in GGEMS
