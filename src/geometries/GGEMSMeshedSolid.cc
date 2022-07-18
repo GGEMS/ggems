@@ -143,6 +143,7 @@ void GGEMSMeshedSolid::LoadVolumeImage(void)
 
   // Read STL input file
   GGEMSSTLReader stl_input_phantom;
+  stl_input_phantom.Read(meshed_phantom_name_);
 
  /* GGEMSMHDImage mhd_input_phantom;
   // Loop over the device
