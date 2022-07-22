@@ -29,6 +29,7 @@
 */
 
 #include <fstream>
+#include <limits>
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
@@ -77,7 +78,18 @@ void GGEMSSTLReader::Read(std::string const& meshed_phantom_filename)
   stl_stream.read(reinterpret_cast<char*>(header_), sizeof(GGuchar)*80);
   stl_stream.read(reinterpret_cast<char*>(&number_of_triangles_), sizeof(GGuint)*1);
 
+  // Initializing max and min points of mes
+  float high_point[] = {
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
+  };
 
+  float low_point[] = {
+    std::numeric_limits<float>::max(),
+    std::numeric_limits<float>::max(),
+    std::numeric_limits<float>::max()
+  };
 
 
 
