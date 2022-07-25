@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSOpenGLManager(object):
     """Get the OpenGL C++ singleton and print infos or managing it

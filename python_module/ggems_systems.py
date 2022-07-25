@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSCTSystem(object):
     """Class for CT/CBCT for GGEMS simulation

@@ -17,19 +17,19 @@
 # ************************************************************************
 
 # Import all GGEMS C++ singletons
-from ggems_lib import *
-from ggems_opencl import GGEMSOpenCLManager
-from ggems_opengl import GGEMSOpenGLManager
-from ggems_ram import GGEMSRAMManager
-from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
-from ggems_systems import GGEMSCTSystem
-from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
-from ggems_sources import GGEMSXRaySource, GGEMSSourceManager
-from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
-from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
-from ggems_dosimetry import GGEMSDosimetryCalculator
-from ggems_profiler import GGEMSProfilerManager
-from ggems_attenuation import GGEMSAttenuations
+from .ggems_lib import *
+from .ggems_opencl import GGEMSOpenCLManager
+from .ggems_opengl import GGEMSOpenGLManager
+from .ggems_ram import GGEMSRAMManager
+from .ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
+from .ggems_systems import GGEMSCTSystem
+from .ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
+from .ggems_sources import GGEMSXRaySource, GGEMSSourceManager
+from .ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
+from .ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
+from .ggems_dosimetry import GGEMSDosimetryCalculator
+from .ggems_profiler import GGEMSProfilerManager
+from .ggems_attenuation import GGEMSAttenuations
 
 class GGEMS(object):
     """GGEMS class managing the simulation
