@@ -16,7 +16,7 @@
 # *                                                                      *
 # ************************************************************************
 
-from ggems_lib import *
+from .ggems_lib import *
 
 class GGEMSVoxelizedPhantom(object):
     """Class for voxelized phantom for GGEMS simulation
