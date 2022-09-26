@@ -110,13 +110,6 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void SetSizeOfDetectionElements(GGfloat const& size_of_detection_element_x, GGfloat const& size_of_detection_element_y, GGfloat const& size_of_detection_element_z, std::string const& unit = "mm");
 
     /*!
-      \fn void SetMaterialName(std::string const& material_name)
-      \param material_name - name of the material for detection element
-      \brief set the name of the material
-    */
-    void SetMaterialName(std::string const& material_name);
-
-    /*!
       \fn void StoreScatter(bool const& is_scatter)
       \param is_scatter - true to store scatter image
       \brief set to true to activate scatter registration

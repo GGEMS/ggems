@@ -36,6 +36,7 @@
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/navigators/GGEMSMeshedPhantom.hh"
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
+#include "GGEMS/navigators/GGEMSNavigator.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/sources/GGEMSXRaySource.hh"
@@ -264,6 +265,7 @@ int main(int argc, char** argv)
     // Phantoms and systems
     GGEMSMeshedPhantom phantom("phantom");
     phantom.SetPhantomFile("data/Stanford_Bunny.stl");
+    phantom.SetMaterialName("Water");
     // phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     // phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
     // phantom.SetVisible(true);

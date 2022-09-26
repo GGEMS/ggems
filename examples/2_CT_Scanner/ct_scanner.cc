@@ -33,6 +33,7 @@
 #include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
+#include "GGEMS/navigators/GGEMSNavigator.hh"
 #include "GGEMS/navigators/GGEMSSystem.hh"
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
