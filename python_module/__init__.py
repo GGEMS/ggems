@@ -23,7 +23,7 @@ from .ggems_opengl import GGEMSOpenGLManager
 from .ggems_ram import GGEMSRAMManager
 from .ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from .ggems_systems import GGEMSCTSystem
-from .ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
+from .ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSMeshedPhantom, GGEMSWorld
 from .ggems_sources import GGEMSXRaySource, GGEMSSourceManager
 from .ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
 from .ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere

@@ -35,6 +35,7 @@
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
+#include "GGEMS/navigators/GGEMSNavigator.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/sources/GGEMSXRaySource.hh"

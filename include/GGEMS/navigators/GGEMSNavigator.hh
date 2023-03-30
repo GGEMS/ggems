@@ -129,6 +129,13 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetNavigatorID(GGsize const& navigator_id);
 
     /*!
+      \fn void SetMaterialName(std::string const& material_name)
+      \param material_name - name of the material for detection element
+      \brief set the name of the material
+    */
+    void SetMaterialName(std::string const& material_name);
+
+    /*!
       \fn inline std::string GetNavigatorName(void) const
       \brief Get the name of the navigator
       \return the name of the navigator

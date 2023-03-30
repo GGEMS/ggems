@@ -54,7 +54,6 @@ GGEMSMaterials::GGEMSMaterials(void)
 
   material_tables_ = new cl::Buffer*[number_activated_devices_];
 
-
   GGcout("GGEMSMaterials", "GGEMSMaterials", 3) << "GGEMSMaterials created!!!" << GGendl;
 }
 
