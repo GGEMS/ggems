@@ -91,13 +91,15 @@ materials_database_manager.set_materials('data/materials.txt')
 # ------------------------------------------------------------------------------
 # STEP 5: Phantoms and systems
 # Loading phantom in GGEMS
-phantom = GGEMSMeshedPhantom('phantom')
+phantom = GGEMSMeshedPhantom('phantom_mesh')
 phantom.set_phantom('data/Stanford_Bunny.stl')
-# phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-# phantom.set_position(0.0, 0.0, 0.0, 'mm')
-# phantom.set_visible(True)
-# phantom.set_material_visible('Air', True)
-# phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
+phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
+phantom.set_position(0.0, 0.0, 0.0, 'mm')
+phantom.set_visible(True)
+phantom.set_material('Water')
+#phantom.set_material_visible('Water', True)
+#phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
+#phantom.set_material_color('GOS', 255, 0, 0)
 
 cbct_detector = GGEMSCTSystem('custom')
 cbct_detector.set_ct_type('flat')
@@ -147,7 +149,7 @@ point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 ggems = GGEMS()
 ggems.opencl_verbose(True)
 ggems.material_database_verbose(False)
-ggems.navigator_verbose(False)
+ggems.navigator_verbose(True)
 ggems.source_verbose(True)
 ggems.memory_verbose(True)
 ggems.process_verbose(True)

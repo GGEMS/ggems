@@ -95,9 +95,9 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
 
     /*!
       \fn void PrintInfos(void) const
-      \brief printing infos about voxelized solid
+      \brief printing infos about meshed solid
     */
-    void PrintInfos(void) const override {}
+    void PrintInfos(void) const override;
 
     /*!
       \fn void UpdateTransformationMatrix(GGsize const& thread_index)

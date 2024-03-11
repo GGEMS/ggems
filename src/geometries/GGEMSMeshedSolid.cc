@@ -100,7 +100,7 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
   GGcout("GGEMSMeshedSolid", "Initialize", 3) << "Initializing meshed solid..." << GGendl;
 
   // Initializing kernels and loading image
- // InitializeKernel();
+  // InitializeKernel();
   LoadVolumeImage();
 /*
   // Creating volume for OpenGL
@@ -149,39 +149,48 @@ void GGEMSMeshedSolid::LoadVolumeImage(void)
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     mhd_input_phantom.Read(volume_header_filename_, solid_data_[d], d);
-  }
-
-  // Get the name of raw file from mhd reader
-  std::string output_dir = mhd_input_phantom.GetOutputDirectory();
-  std::string raw_filename = output_dir + mhd_input_phantom.GetRawMDHfilename();
-
-  // Get the type
-  std::string const kDataType = mhd_input_phantom.GetDataMHDType();
-
-  // Convert raw data to material id data
-  if (!kDataType.compare("MET_CHAR")) {
-    ConvertImageToLabel<GGchar>(raw_filename, range_filename_, materials);
-  }
-  else if (!kDataType.compare("MET_UCHAR")) {
-    ConvertImageToLabel<GGuchar>(raw_filename, range_filename_, materials);
-  }
-  else if (!kDataType.compare("MET_SHORT")) {
-    ConvertImageToLabel<GGshort>(raw_filename, range_filename_, materials);
-  }
-  else if (!kDataType.compare("MET_USHORT")) {
-    ConvertImageToLabel<GGushort>(raw_filename, range_filename_, materials);
-  }
-  else if (!kDataType.compare("MET_INT")) {
-    ConvertImageToLabel<GGint>(raw_filename, range_filename_, materials);
-  }
-  else if (!kDataType.compare("MET_UINT")) {
-    ConvertImageToLabel<GGuint>(raw_filename, range_filename_, materials);
-  }
-  else if (!kDataType.compare("MET_FLOAT")) {
-    ConvertImageToLabel<GGfloat>(raw_filename, range_filename_, materials);
   }*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::PrintInfos(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Loop over the device
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    // Get pointer on OpenCL device
+    GGEMSMeshedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSMeshedSolidData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMeshedSolidData), d);
+
+    // Get the index of device
+    GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(d);
+
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "GGEMSMeshedSolid Infos:" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "--------------------------" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Meshed solid on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    //GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Dimension: " << solid_data_device->number_of_voxels_xyz_.s[0] << " " << solid_data_device->number_of_voxels_xyz_.s[1] << " " << solid_data_device->number_of_voxels_xyz_.s[2] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Number of voxels: " << solid_data_device->number_of_voxels_ << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Size of voxels: (" << solid_data_device->voxel_sizes_xyz_.s[0] /mm << "x" << solid_data_device->voxel_sizes_xyz_.s[1]/mm << "x" << solid_data_device->voxel_sizes_xyz_.s[2]/mm << ") mm3" << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Oriented bounding box (OBB) in local position:" << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - X: " << solid_data_device->obb_geometry_.border_min_xyz_.s[0] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[0] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Y: " << solid_data_device->obb_geometry_.border_min_xyz_.s[1] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[1] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Z: " << solid_data_device->obb_geometry_.border_min_xyz_.s[2] << " <-> " << //solid_data_device->obb_geometry_.border_max_xyz_.s[2] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Transformation matrix:" << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    [" << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[3] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[3] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[3] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[3] << GGendl;
+    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    ]" << GGendl;
+    GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Solid index: " << solid_data_device->solid_id_ << GGendl;
+    GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << GGendl;
+
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(solid_data_[d], solid_data_device, d);
+  }
+}

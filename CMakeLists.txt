@@ -30,7 +30,7 @@
 
 #-------------------------------------------------------------------------------
 # Checking CMAKE version
-CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.17 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
 # Setting the compiler type: 'CLANG', 'GCC', 'CL' (visual c++) or 'INTEL'
@@ -46,10 +46,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 # INTEL (based on LLVM): INTEL (Validated on Unix and Windows)
 # CC=icx
 # CXX=icx (Windows) icpx (Unix)
+
 IF(WIN32)
   SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
 ELSE()
-  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
+  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
 ENDIF()
 
 IF(COMPILER STREQUAL "CLANG")
@@ -81,13 +82,14 @@ PROJECT(GGEMS VERSION 1.2 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-config")
 
 #-------------------------------------------------------------------------------
-# Find the OpenCL library and for OpenCL 1.2
-FIND_PACKAGE(CUDA REQUIRED)
-SET(OpenCL_ROOT "${CUDA_TOOLKIT_ROOT_DIR}")
-FIND_PACKAGE(OpenCL REQUIRED)
-IF(${OpenCL_VERSION_STRING} VERSION_GREATER "1.2")
-  ADD_DEFINITIONS(-DCL_USE_DEPRECATED_OPENCL_1_2_APIS)
-ENDIF()
+# Find the OpenCL library and for OpenCL 3.0
+FIND_PACKAGE(CUDAToolkit 11.2 REQUIRED)
+MESSAGE(STATUS "CUDA Toolkit: ${CUDAToolkit_FOUND}")
+MESSAGE(STATUS "CUDA Toolkit VERSION: ${CUDAToolkit_VERSION}")
+MESSAGE(STATUS "CUDA Toolkit INCLUDE DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
+MESSAGE(STATUS "CUDA Toolkit LIBRARY DIR: ${CUDAToolkit_LIBRARY_DIR}")
+ADD_DEFINITIONS("-DCL_TARGET_OPENCL_VERSION=300")
+ADD_DEFINITIONS("-DCL_HPP_TARGET_OPENCL_VERSION=300")
 
 #-------------------------------------------------------------------------------
 # Find libraries for OpenGL
@@ -255,9 +257,9 @@ INCLUDE(GenerateExportHeader)
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
 IF(OPENGL_VISUALIZATION)
-  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL ${GLFW3_LIBRARY} OpenGL::GL OpenGL::GLU GLEW::glew_s glm::glm)
+  TARGET_LINK_LIBRARIES(ggems CUDA::OpenCL ${GLFW3_LIBRARY} OpenGL::GL OpenGL::GLU GLEW::glew_s glm::glm)
 ELSE()
-  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
+  TARGET_LINK_LIBRARIES(ggems CUDA::OpenCL)
 ENDIF()
 SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 
@@ -275,4 +277,3 @@ ENDIF()
 # Installing GGEMS library
 INSTALL(TARGETS ggems DESTINATION ggems/lib)
 INSTALL(DIRECTORY include/GGEMS DESTINATION ggems/include)
-#INSTALL(DIRECTORY python_module DESTINATION ggems FILES_MATCHING PATTERN "*.py")

@@ -34,13 +34,13 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSSTLReader.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSTLReader::GGEMSSTLReader(void)
-: stl_filename_("")
 {
   GGcout("GGEMSSTLReader", "GGEMSSTLReader", 3) << "GGEMSSTLReader creating..." << GGendl;
 
@@ -66,109 +66,117 @@ void GGEMSSTLReader::Read(std::string const& meshed_phantom_filename)
 {
   GGcout("GGEMSSTLReader", "Read", 2) << "Reading STL Image..." << GGendl;
 
-  // Open STL file to stream
+  //GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  //size_t number_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
+
+  // Opening STL file
   std::ifstream stl_stream(meshed_phantom_filename, std::ios::in | std::ios::binary);
   GGEMSFileStream::CheckInputStream(stl_stream, meshed_phantom_filename);
 
-  stl_filename_ = meshed_phantom_filename;
+  stl_stream.read(reinterpret_cast<char*>(header_), sizeof(GGuchar) * 80);
+  stl_stream.read(reinterpret_cast<char*>(&number_of_triangles_), sizeof(GGuint) * 1);
 
-  GGcout("GGEMSSTLReader", "Read", 2) << "STL file loaded" << GGendl;
+  // Allocating memory for triangles in each engine
+/*  triangles_mp_ = new TriangleGPU*[number_of_engines];
+  for (std::size_t i = 0; i < number_of_engines; ++i) {
+    ocl::Engine const* engine = ocl_manager.GetEngines()[i];
+    triangles_mp_[i] = engine->SVMAllocate<TriangleGPU>(CL_MEM_READ_WRITE, number_of_triangles_ * sizeof(TriangleGPU), 0);
+  }
 
-  // Reading file
-  stl_stream.read(reinterpret_cast<char*>(header_), sizeof(GGuchar)*80);
-  stl_stream.read(reinterpret_cast<char*>(&number_of_triangles_), sizeof(GGuint)*1);
-
-  // Initializing max and min points of mes
-  float high_point[] = {
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min()
-  };
-
-  float low_point[] = {
-    std::numeric_limits<float>::max(),
-    std::numeric_limits<float>::max(),
-    std::numeric_limits<float>::max()
-  };
-
-
-
-  GGcout("GGEMSSTLReader", "Read", 1) << "STL filename: " << stl_filename_ << GGendl;
-  GGcout("GGEMSSTLReader", "Read", 1) << "Header: " << header_ << GGendl;
-  GGcout("GGEMSSTLReader", "Read", 1) << "Number of triangles: " << number_of_triangles_ << GGendl;
-
-
-
-/*
-  std::cout << "Center: " << center_.x_[0] << " " << center_.x_[1] << " " << center_.x_[2] << std::endl;
-  std::cout << "Half width: " << half_width_[0] << " " << half_width_[1] << " " << half_width_[2] << std::endl;
-  std::cout << "*****" << std::endl;
-*/
-
-
-
-
-  stl_stream.close();
-
-/*
   // Min and max points
-  Point lo(FLT_MAX, FLT_MAX, FLT_MAX);
-  Point hi(FLT_MIN, FLT_MIN, FLT_MIN);
+  primitives::Point3 lo(FLT_MAX, FLT_MAX, FLT_MAX);
+  primitives::Point3 hi(FLT_MIN, FLT_MIN, FLT_MIN);
 
-  float data[12];
-  unsigned short octet_attribut;
-  triangles_ = new Triangle[number_of_triangles_];
+  float data[12]; // Vertices for triangle from STL file
+  unsigned short octet_attribut; // Useless parameter from STL file
+  shapes::Triangle* triangles_tmp = new shapes::Triangle[number_of_triangles_];
+
   for (unsigned int i = 0; i < number_of_triangles_; ++i) {
-    stl_stream.read(reinterpret_cast<char*>(data), sizeof(float)*12);
-    stl_stream.read(reinterpret_cast<char*>(&octet_attribut), sizeof(unsigned short)*1);
-    triangles_[i] = Triangle(
-      Point(data[3], data[4], data[5]),
-      Point(data[6], data[7], data[8]),
-      Point(data[9], data[10], data[11])
+    stl_stream.read(reinterpret_cast<char*>(data), sizeof(float) * 12);
+    stl_stream.read(reinterpret_cast<char*>(&octet_attribut), sizeof(unsigned short) * 1);
+    triangles_tmp[i] = shapes::Triangle(
+      primitives::Point3(data[3], data[4], data[5]),
+      primitives::Point3(data[6], data[7], data[8]),
+      primitives::Point3(data[9], data[10], data[11])
     );
 
     for (int j = 0; j < 3; ++j) { // Loop over points
-      for (int k = 0; k < 3; ++k) { // Loop over dimensions
-        if (triangles_[i].p_[j].x_[k] < lo.x_[k]) lo.x_[k] = triangles_[i].p_[j].x_[k];
-        if (triangles_[i].p_[j].x_[k] > hi.x_[k]) hi.x_[k] = triangles_[i].p_[j].x_[k];
-      }
+      if (triangles_tmp[i].pts_[j].x_ < lo.x_) lo.x_ = triangles_tmp[i].pts_[j].x_;
+      if (triangles_tmp[i].pts_[j].y_ < lo.y_) lo.y_ = triangles_tmp[i].pts_[j].y_;
+      if (triangles_tmp[i].pts_[j].z_ < lo.z_) lo.z_ = triangles_tmp[i].pts_[j].z_;
+      if (triangles_tmp[i].pts_[j].x_ > hi.x_) hi.x_ = triangles_tmp[i].pts_[j].x_;
+      if (triangles_tmp[i].pts_[j].y_ > hi.y_) hi.y_ = triangles_tmp[i].pts_[j].y_;
+      if (triangles_tmp[i].pts_[j].z_ > hi.z_) hi.z_ = triangles_tmp[i].pts_[j].z_;
     }
   }
 
-  // Expand it by 10% so that all points are well interior
-  for (int i = 0; i < 3; ++i) {
-    float expanding = (hi.x_[i]-lo.x_[i])*0.1f;
-    lo.x_[i] -= expanding;
-    hi.x_[i] += expanding;
-
-    // Selecting correct integer
-    if (lo.x_[i] < 0.0f) lo.x_[i] = std::floor(lo.x_[i]);
-    else lo.x_[i] = std::ceil(lo.x_[i]);
-
-    if (hi.x_[i] < 0.0f) hi.x_[i] = std::floor(hi.x_[i]);
-    else hi.x_[i] = std::ceil(hi.x_[i]);
+  // Loading triangles to engines using 1 thread a engine
+  std::thread* thread_triangle_loading = new std::thread[number_of_engines];
+  for (std::size_t i = 0; i < number_of_engines; ++i) {
+    thread_triangle_loading[i] = std::thread(&STLReader::LoadTriangleOnEngine, this, triangles_tmp, i);
   }
 
+  // Joining thread
+  for (std::size_t i = 0; i < number_of_engines; ++i) thread_triangle_loading[i].join();
+
+  delete[] thread_triangle_loading;
+
+  // Expand it by 10% so that all points are well interior
+  float expanding_x = (hi.x_ - lo.x_) * 0.1f;
+  float expanding_y = (hi.y_ - lo.y_) * 0.1f;
+  float expanding_z = (hi.z_ - lo.z_) * 0.1f;
+
+  lo.x_ -= expanding_x;
+  hi.x_ += expanding_x;
+  lo.y_ -= expanding_y;
+  hi.y_ += expanding_y;
+  lo.z_ -= expanding_z;
+  hi.z_ += expanding_z;
+
+  if (lo.x_ < 0.0f) lo.x_ = std::floor(lo.x_);
+  else lo.x_ = std::ceil(lo.x_);
+
+  if (lo.y_ < 0.0f) lo.y_ = std::floor(lo.y_);
+  else lo.y_ = std::ceil(lo.y_);
+
+  if (lo.z_ < 0.0f) lo.z_ = std::floor(lo.z_);
+  else lo.z_ = std::ceil(lo.z_);
+
+  if (hi.x_ < 0.0f) hi.x_ = std::floor(hi.x_);
+  else hi.x_ = std::ceil(hi.x_);
+
+  if (hi.y_ < 0.0f) hi.y_ = std::floor(hi.y_);
+  else hi.y_ = std::ceil(hi.y_);
+
+  if (hi.z_ < 0.0f) hi.z_ = std::floor(hi.z_);
+  else hi.z_ = std::ceil(hi.z_);
+
   // Computing the center of octree box
-  center_ = Point(
-    (hi.x_[0]+lo.x_[0])*0.5f,
-    (hi.x_[1]+lo.x_[1])*0.5f,
-    (hi.x_[2]+lo.x_[2])*0.5f
+  center_ = primitives::Point3(
+    (hi.x_+lo.x_)*0.5f,
+    (hi.y_+lo.y_)*0.5f,
+    (hi.z_+lo.z_)*0.5f
   );
 
   // Computing half width for each axes
-  half_width_[0] = (hi.x_[0]-lo.x_[0])*0.5f;
-  half_width_[1] = (hi.x_[1]-lo.x_[1])*0.5f;
-  half_width_[2] = (hi.x_[2]-lo.x_[2])*0.5f;
-*/
+  half_width_[0] = (hi.x_-lo.x_)*0.5f;
+  half_width_[1] = (hi.y_-lo.y_)*0.5f;
+  half_width_[2] = (hi.z_-lo.z_)*0.5f;
 
-/*
+  // Deleting triangles on host
+  if (triangles_tmp) {
+    delete[] triangles_tmp;
+    triangles_tmp = nullptr;
+  }
+*/
+  stl_stream.close();
+
   std::cout << "*****" << std::endl;
-  std::cout << "STL filename: " << stl_filename_ << std::endl;
+  std::string header;
+  header.assign(header_, header_ + 80);
   std::cout << "Header: " << header_<< std::endl;
   std::cout << "Number of triangles: " << number_of_triangles_ << std::endl;
-  std::cout << "Center: " << center_.x_[0] << " " << center_.x_[1] << " " << center_.x_[2] << std::endl;
+  std::cout << "Center: " << center_.x_ << " " << center_.y_ << " " << center_.z_ << std::endl;
   std::cout << "Half width: " << half_width_[0] << " " << half_width_[1] << " " << half_width_[2] << std::endl;
   std::cout << "*****" << std::endl;
-*/
 }

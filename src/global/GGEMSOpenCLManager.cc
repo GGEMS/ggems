@@ -739,7 +739,11 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
   ComputingDevice computing_device;
   computing_device.index_ = device_id;
   computing_device.context_ = new cl::Context(*devices_.at(device_id));
-  computing_device.queue_ = new cl::CommandQueue(*computing_device.context_, *devices_.at(device_id), CL_QUEUE_PROFILING_ENABLE);
+
+  GGint error = 0;
+  cl_queue_properties const properties[] = {CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0};
+  computing_device.queue_ = new cl::CommandQueue(*computing_device.context_, *devices_.at(device_id), properties, &error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "DeviceToActivate");
 
   // Storing computing device
   computing_devices_.push_back(computing_device);
@@ -758,7 +762,7 @@ void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
   GGsize pos = 0;
   GGfloat balancing = 0;
   std::string delimiter = ";";
-  GGsize i = 0;
+  volatile GGsize i = 0;
   GGfloat incr_balancing = 0.0f;
   while ((pos = tmp_device_load.find(delimiter)) != std::string::npos) {
     balancing = std::stof(tmp_device_load.substr(0, pos));

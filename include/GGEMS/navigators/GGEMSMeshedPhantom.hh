@@ -125,4 +125,70 @@ extern "C" GGEMS_EXPORT GGEMSMeshedPhantom* create_ggems_meshed_phantom(char con
 */
 extern "C" GGEMS_EXPORT void set_phantom_file_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* phantom_filename);
 
+/*!
+  \fn void set_position_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+  \param meshed_phantom - pointer on meshed phantom
+  \param position_x - offset in X
+  \param position_y - offset in Y
+  \param position_z - offset in Z
+  \param unit - unit of the distance
+  \brief set the position of the meshed phantom in X, Y and Z
+*/
+extern "C" GGEMS_EXPORT void set_position_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit);
+
+/*!
+  \fn void set_rotation_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+  \param meshed_phantom - pointer on meshed phantom
+  \param rx - Rotation around X along local axis
+  \param ry - Rotation around Y along local axis
+  \param rz - Rotation around Z along local axis
+  \param unit - unit of the angle
+  \brief Set the rotation of the meshed phantom around local axis
+*/
+extern "C" GGEMS_EXPORT void set_rotation_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
+
+/*!
+  \fn void set_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, bool const flag)
+  \param meshed_phantom - pointer on meshed phantom
+  \param flag - flag drawing meshed phantom
+  \brief Set flag drawing meshed phantom
+*/
+extern "C" GGEMS_EXPORT void set_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, bool const flag);
+
+/*!
+  \fn void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name)
+  \param meshed_phantom - pointer on meshed phantom
+  \param material_name - name of the material
+  \brief set the material name for mesh phantom
+*/
+extern "C" GGEMS_EXPORT void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name);
+
+/*!
+  \fn void set_material_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, bool const flag)
+  \param meshed_phantom - pointer on meshed phantom
+  \param material_name - name of material to draw (or not)
+  \param flag - flag drawing meshed phantom
+  \brief Set flag for each material to draw
+*/
+extern "C" GGEMS_EXPORT void set_material_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, bool const flag);
+
+/*!
+  \fn void set_material_color_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue)
+  \param meshed_phantom - pointer on meshed phantom
+  \param material_name - name of material to draw (or not)
+  \param red - red value
+  \param green - green value
+  \param blue - blue value
+  \brief Set a new rgb color for a material
+*/
+extern "C" GGEMS_EXPORT void set_material_color_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue);
+
+/*!
+  \fn void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* ct_system, char const* material_name, char const* color_name)
+  \param meshed_phantom - pointer on meshed phantom
+  \param material_name - name of material to draw (or not)
+  \param color_name - color name
+  \brief Set a color for material
+*/
+extern "C" GGEMS_EXPORT void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, char const* color_name);
 #endif

@@ -939,10 +939,10 @@ void GGEMSOpenGLManager::InitShaders(std::string const& vertex_shader_source, st
 
 void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
 {
-  GLint sucess = 0;
+  GLint success = 0;
   glCompileShader(shader);
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &sucess);
-  if(sucess == GL_FALSE) {
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if(success == GL_FALSE) {
     GLint max_length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
 

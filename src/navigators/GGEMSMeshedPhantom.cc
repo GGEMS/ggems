@@ -107,31 +107,31 @@ void GGEMSMeshedPhantom::Initialize(void)
   // if (is_tle_) solids_[0]->AddKernelOption(" -DTLE");
 
   // Load meshed phantom from STL file and storing materials
-  solids_[0]->Initialize(materials_);
-  // solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
-  // solids_[0]->SetMaterialVisible(material_visible_);
+  solids_[0]->Initialize(nullptr);
+  solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
+  solids_[0]->SetMaterialVisible(material_visible_);
 
-  // // Perform rotation before position
-  // if (is_update_rot_) {
-  //   solids_[0]->SetRotation(rotation_xyz_);
-  //   #ifdef OPENGL_VISUALIZATION
-  //   solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
-  //   solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
-  //   solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
-  //   #endif
-  // }
-  // if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
+  // Perform rotation before position
+  if (is_update_rot_) {
+    solids_[0]->SetRotation(rotation_xyz_);
+    #ifdef OPENGL_VISUALIZATION
+    solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
+    solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
+    solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
+    #endif
+  }
+  if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
 
-  // for (GGsize j = 0; j < number_activated_devices_; ++j) {
-  //   solids_[0]->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids, j);
-  //   // Store the transformation matrix in solid object
-  //   solids_[0]->UpdateTransformationMatrix(j);
-  // }
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+     solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
+     // Store the transformation matrix in solid object
+     solids_[0]->UpdateTransformationMatrix(j);
+  }
 
-  // #ifdef OPENGL_VISUALIZATION
-  // solids_[0]->SetVisible(is_visible_);
+  #ifdef OPENGL_VISUALIZATION
+  solids_[0]->SetVisible(is_visible_);
   // solids_[0]->BuildOpenGL();
-  // #endif
+  #endif
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -166,7 +166,6 @@ void GGEMSMeshedPhantom::SaveResults(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
 GGEMSMeshedPhantom* create_ggems_meshed_phantom(char const* meshed_phantom_name)
 {
   return new(std::nothrow) GGEMSMeshedPhantom(meshed_phantom_name);
@@ -175,8 +174,63 @@ GGEMSMeshedPhantom* create_ggems_meshed_phantom(char const* meshed_phantom_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
 void set_phantom_file_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* phantom_filename)
 {
   meshed_phantom->SetPhantomFile(phantom_filename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_position_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+{
+  meshed_phantom->SetPosition(position_x, position_y, position_z, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_rotation_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+{
+  meshed_phantom->SetRotation(rx, ry, rz, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, bool const flag)
+{
+  meshed_phantom->SetVisible(flag);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_color_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue)
+{
+  meshed_phantom->SetMaterialColor(material_name, red, green, blue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, char const* color_name)
+{
+  meshed_phantom->SetMaterialColor(material_name, color_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name)
+{
+  meshed_phantom->SetMaterialName(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, bool const flag)
+{
+  meshed_phantom->SetMaterialVisible(material_name, flag);
 }

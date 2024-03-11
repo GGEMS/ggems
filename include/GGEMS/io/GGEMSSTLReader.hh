@@ -32,6 +32,7 @@
 */
 
 #include <string>
+#include <GGEMS/geometries/GGEMSPrimitiveGeometries.hh>
 
 /*!
   \class GGEMSSTLReader
@@ -86,13 +87,11 @@ class GGEMSSTLReader
     void Read(std::string const& meshed_phantom_filename);
 
   private:
-    std::string stl_filename_;
-    GGuchar header_[80];
-    GGuint number_of_triangles_;
-    /*Triangle* triangles_;
-    Point center_;
-    float half_width_[3];
-*/
+    GGuchar          header_[80];
+    GGuint           number_of_triangles_;
+    GGfloat          half_width_[3];
+    GGEMSTriangle3** triangles_;
+    GGEMSPoint3      center_;
 };
 
 #endif // End of GUARD_GGEMS_IO_GGEMSSTLREADER_HH
