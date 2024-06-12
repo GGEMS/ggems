@@ -91,6 +91,8 @@ MESSAGE(STATUS "CUDA Toolkit LIBRARY DIR: ${CUDAToolkit_LIBRARY_DIR}")
 ADD_DEFINITIONS("-DCL_TARGET_OPENCL_VERSION=300")
 ADD_DEFINITIONS("-DCL_HPP_TARGET_OPENCL_VERSION=300")
 
+#python setup.py build_ext --generator=Ninja --opengl=ON --examples=ON install --user
+
 #-------------------------------------------------------------------------------
 # Find libraries for OpenGL
 OPTION(OPENGL_VISUALIZATION "Using OpenGL for visualization" OFF)
@@ -100,8 +102,8 @@ IF(OPENGL_VISUALIZATION)
   FIND_PACKAGE(OpenGL REQUIRED)
   SET(GLEW_USE_STATIC_LIBS TRUE) # Using GLEW in static, important for Python!!!
   FIND_PACKAGE(GLEW REQUIRED)
-  FIND_PACKAGE(glm REQUIRED)
-  GET_FILENAME_COMPONENT(GLM_INCLUDE_DIR ${glm_DIR}/../../../include ABSOLUTE)
+  FIND_PACKAGE(glm CONFIG REQUIRED)
+  #GET_FILENAME_COMPONENT(GLM_INCLUDE_DIR ${glm_DIR}/../../include ABSOLUTE)
 ENDIF()
 
 #-------------------------------------------------------------------------------
