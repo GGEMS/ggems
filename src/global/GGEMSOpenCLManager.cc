@@ -741,8 +741,8 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
   computing_device.context_ = new cl::Context(*devices_.at(device_id));
 
   GGint error = 0;
-  cl_queue_properties const properties[] = {CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0};
-  computing_device.queue_ = new cl::CommandQueue(*computing_device.context_, *devices_.at(device_id), properties, &error);
+
+  computing_device.queue_ = new cl::CommandQueue(*computing_device.context_, *devices_.at(device_id), cl::QueueProperties::Profiling, &error);
   CheckOpenCLError(error, "GGEMSOpenCLManager", "DeviceToActivate");
 
   // Storing computing device
@@ -877,7 +877,8 @@ void GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::
     std::string source_code(std::istreambuf_iterator<char>(source_file_stream), (std::istreambuf_iterator<char>()));
 
     // Creating an OpenCL program
-    cl::Program::Sources program_source(1, std::make_pair(source_code.c_str(), source_code.length() + 1));
+    cl::Program::Sources program_source;
+    program_source.push_back({source_code.c_str(), source_code.length()});
 
     // Loop over activated device
     for (GGsize i = 0; i < computing_devices_.size(); ++i) {
