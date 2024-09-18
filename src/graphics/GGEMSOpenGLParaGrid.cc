@@ -77,6 +77,8 @@ GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GGsize const& elements_x, GGsize const&
   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
   opengl_manager.InitShaders(vertex_shader_source_, fragment_shader_source_, program_shader_id_);
 
+  is_color_in_vertex_buffer_ = true;
+
   GGcout("GGEMSOpenGLParaGrid", "GGEMSOpenGLParaGrid", 3) << "GGEMSOpenGLParaGrid created!!!" << GGendl;
 }
 

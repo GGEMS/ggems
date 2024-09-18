@@ -73,7 +73,7 @@ if is_gl:
   opengl_manager.set_msaa(msaa)
   opengl_manager.set_background_color(window_color)
   opengl_manager.set_draw_axis(is_axis)
-  opengl_manager.set_world_size(3.0, 3.0, 3.0, 'm')
+  opengl_manager.set_world_size(2.0, 2.0, 2.0, 'm')
   opengl_manager.set_image_output('data/axis')
   opengl_manager.set_displayed_particles(number_of_displayed_particles)
   opengl_manager.set_particle_color('gamma', 152, 251, 152)
@@ -93,13 +93,13 @@ materials_database_manager.set_materials('data/materials.txt')
 # Loading phantom in GGEMS
 phantom = GGEMSMeshedPhantom('phantom_mesh')
 phantom.set_phantom('data/Stanford_Bunny.stl')
+#phantom.set_phantom('data/Male_Mesh_Phantom2024.stl')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 phantom.set_visible(True)
 phantom.set_material('Water')
-#phantom.set_material_visible('Water', True)
 #phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
-#phantom.set_material_color('GOS', 255, 0, 0)
+#phantom.set_material_color('Water', 207, 160, 233)
 
 cbct_detector = GGEMSCTSystem('custom')
 cbct_detector.set_ct_type('flat')
@@ -110,13 +110,13 @@ cbct_detector.set_material('GOS')
 cbct_detector.set_source_detector_distance(1500.5, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
 cbct_detector.set_source_isocenter_distance(900.0, 'mm')
 cbct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
-cbct_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm');
+cbct_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm')
 cbct_detector.set_threshold(10.0, 'keV')
 cbct_detector.save('data/projection')
 cbct_detector.store_scatter(True)
 cbct_detector.set_visible(True)
 cbct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
-#cbct_detector.set_material_color('GOS', color_name='red') # Using registered color
+#cbct_detector.set_material_color('GOS', color_name='blue') # Using registered color
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics

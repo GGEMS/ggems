@@ -114,32 +114,50 @@ void GGEMSSphere::Draw(void)
   GGsize number_of_elements = volume_creator_manager.GetNumberElements();
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
-  // Getting work group size, and work-item number
-  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
-  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_elements);
-
-  // Parameters for work-item in kernel
-  cl::NDRange global_wi(number_of_work_items);
-  cl::NDRange local_wi(work_group_size);
-
   // Set parameters for kernel
-  kernel_draw_volume_[0]->setArg(0, number_of_elements);
-  kernel_draw_volume_[0]->setArg(1, voxel_sizes);
-  kernel_draw_volume_[0]->setArg(2, phantom_dimensions);
-  kernel_draw_volume_[0]->setArg(3, positions_);
-  kernel_draw_volume_[0]->setArg(4, label_value_);
-  kernel_draw_volume_[0]->setArg(5, radius_);
-  kernel_draw_volume_[0]->setArg(6, *voxelized_phantom);
+  GGuint index_arg = 0;
+  kernel_draw_volume_[0]->setArg(index_arg++, number_of_elements);
+  kernel_draw_volume_[0]->setArg(index_arg++, voxel_sizes);
+  kernel_draw_volume_[0]->setArg(index_arg++, phantom_dimensions);
+  kernel_draw_volume_[0]->setArg(index_arg++, positions_);
+  kernel_draw_volume_[0]->setArg(index_arg++, label_value_);
+  kernel_draw_volume_[0]->setArg(index_arg++, radius_);
+  kernel_draw_volume_[0]->setArg(index_arg++, *voxelized_phantom);
 
-  // Launching kernel
-  cl::Event event;
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], 0, global_wi, local_wi, nullptr, &event);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
+  // Compute parameter to optimize work-item for OpenCL
+  GGsize work_group_size = opencl_manager.GetKernelWorkGroupSize(kernel_draw_volume_[0]);
+  GGsize max_work_item = opencl_manager.GetDeviceMaxWorkItemSize(device_index, 0) * work_group_size;
 
-  // GGEMS Profiling
-  GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
+  // Number total of work items
+  GGsize number_of_work_item = (((number_of_elements - 1) / work_group_size) + 1) * work_group_size; // Multiple of work group size
 
-  queue->finish();
+  // Organize work item in batch
+  bool is_last_batch = false;
+  GGsize number_of_work_item_in_batch = max_work_item;
+  GGsize number_batchs_work_item = (number_of_work_item / (max_work_item + 1)) + 1;
+
+  for (GGsize i = 0; i < number_batchs_work_item; ++i) {
+    if (i == number_batchs_work_item - 1) is_last_batch = true;
+
+    if (is_last_batch) {
+      number_of_work_item_in_batch = (number_of_work_item % max_work_item) == 0 ?
+        max_work_item :
+        number_of_work_item % max_work_item;
+    }
+
+    cl::NDRange global_wi(number_of_work_item_in_batch);
+    cl::NDRange offset_wi(i * max_work_item);
+    cl::NDRange local_wi(number_of_work_item_in_batch / work_group_size);
+
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], offset_wi, global_wi, local_wi, nullptr, &event);
+    opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
+
+    // GGEMS Profiling
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
+
+    queue->finish();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

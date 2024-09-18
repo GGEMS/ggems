@@ -251,7 +251,6 @@ void GGEMSCTSystem::Initialize(void)
     solids_[i]->SetVisible(is_visible_);
     solids_[i]->SetMaterialName(materials_->GetMaterialName(0));
     solids_[i]->SetCustomMaterialColor(custom_material_rgb_);
-    solids_[i]->SetMaterialVisible(material_visible_);
 
     // Enabling scatter if necessary
     if (is_scatter_) solids_[i]->EnableScatter();
@@ -415,15 +414,6 @@ void store_scatter_ggems_ct_system(GGEMSCTSystem* ct_system, bool const is_scatt
 void set_visible_ggems_ct_system(GGEMSCTSystem* ct_system, bool const flag)
 {
   ct_system->SetVisible(flag);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_material_visible_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, bool const flag)
-{
-  ct_system->SetMaterialVisible(material_name, flag);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

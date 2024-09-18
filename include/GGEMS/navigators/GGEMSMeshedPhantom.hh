@@ -164,15 +164,6 @@ extern "C" GGEMS_EXPORT void set_visible_ggems_meshed_phantom(GGEMSMeshedPhantom
 extern "C" GGEMS_EXPORT void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name);
 
 /*!
-  \fn void set_material_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, bool const flag)
-  \param meshed_phantom - pointer on meshed phantom
-  \param material_name - name of material to draw (or not)
-  \param flag - flag drawing meshed phantom
-  \brief Set flag for each material to draw
-*/
-extern "C" GGEMS_EXPORT void set_material_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, bool const flag);
-
-/*!
   \fn void set_material_color_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue)
   \param meshed_phantom - pointer on meshed phantom
   \param material_name - name of material to draw (or not)

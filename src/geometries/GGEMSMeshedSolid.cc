@@ -31,6 +31,7 @@
 #include "GGEMS/geometries/GGEMSMeshedSolid.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/io/GGEMSSTLReader.hh"
+#include "GGEMS/graphics/GGEMSOpenGLMesh.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,6 +88,16 @@ GGEMSMeshedSolid::~GGEMSMeshedSolid(void)
 {
   GGcout("GGEMSMeshedSolid", "GGEMSMeshedSolid", 3) << "GGEMSMeshedSolid erasing..." << GGendl;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (triangles_) {
+    for (std::size_t i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.SVMDeallocate(triangles_[i], number_of_triangles_ * sizeof(GGEMSTriangle3), i, "GGEMSMeshedSolid");
+    }
+    delete[] triangles_;
+    triangles_ = nullptr;
+  }
+
   GGcout("GGEMSMeshedSolid", "GGEMSMeshedSolid", 3) << "GGEMSMeshedSolid erased!!!" << GGendl;
 }
 
@@ -102,15 +113,32 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
   // Initializing kernels and loading image
   // InitializeKernel();
   LoadVolumeImage();
-/*
+
+  // Building octree for mesh
+
   // Creating volume for OpenGL
   // Get some infos for grid
   #ifdef OPENGL_VISUALIZATION
   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   if (opengl_manager.IsOpenGLActivated()) {
-    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+    // Mapping triangles
+    opencl_manager.GetSVMData(
+      triangles_[0],
+      sizeof(GGEMSTriangle3) * number_of_triangles_,
+      0,
+      CL_TRUE,
+      CL_MAP_READ
+    );
 
+    opengl_solid_ = new GGEMSOpenGLMesh(triangles_[0], number_of_triangles_);
+
+    // Unmapping triangles
+    opencl_manager.ReleaseSVMData(triangles_[0], 0);
+
+    //GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+/*
     GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
 
     opengl_solid_ = new GGEMSOpenGLParaGrid(
@@ -121,16 +149,15 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
       solid_data_device->voxel_sizes_xyz_.s[1],
       solid_data_device->voxel_sizes_xyz_.s[2],
       true // Draw midplanes
-    );
+    );*/
 
     // Release the pointer
-    opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
+    //opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
 
     // Loading labels and materials for OpenGL
-    opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
+    // opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
   }
   #endif
-*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,13 +170,41 @@ void GGEMSMeshedSolid::LoadVolumeImage(void)
 
   // Read STL input file
   GGEMSSTLReader stl_input_phantom;
+
+  // Load triangles
   stl_input_phantom.Read(meshed_phantom_name_);
 
- /* GGEMSMHDImage mhd_input_phantom;
-  // Loop over the device
-  for (GGsize d = 0; d < number_activated_devices_; ++d) {
-    mhd_input_phantom.Read(volume_header_filename_, solid_data_[d], d);
-  }*/
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Allocating memory for triangles in each engine
+  number_of_triangles_ = stl_input_phantom.GetNumberOfTriangles();
+  triangles_ = new GGEMSTriangle3*[number_activated_devices_];
+
+  // Load triangles to OpenCL devices
+  for (std::size_t i = 0; i < number_activated_devices_; ++i) {
+    triangles_[i] = opencl_manager.SVMAllocate<GGEMSTriangle3>(
+      number_of_triangles_ * sizeof(GGEMSTriangle3),
+      i,
+      CL_MEM_READ_WRITE,
+      0,
+      "GGEMSMeshedSolid"
+    );
+
+    // Mapping triangles
+    opencl_manager.GetSVMData(
+      triangles_[i],
+      sizeof(GGEMSTriangle3) * number_of_triangles_,
+      i,
+      CL_TRUE,
+      CL_MAP_WRITE
+    );
+
+    // Loading triangles from STL
+    stl_input_phantom.LoadTriangles(triangles_[i]);
+  
+    // Unmapping triangles
+    opencl_manager.ReleaseSVMData(triangles_[i], i);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,6 +228,8 @@ void GGEMSMeshedSolid::PrintInfos(void) const
     GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "GGEMSMeshedSolid Infos:" << GGendl;
     GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "--------------------------" << GGendl;
     GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Meshed solid on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Mesh filename: " << meshed_phantom_name_ << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Number of triangles: " << number_of_triangles_ << GGendl;
     //GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Dimension: " << solid_data_device->number_of_voxels_xyz_.s[0] << " " << solid_data_device->number_of_voxels_xyz_.s[1] << " " << solid_data_device->number_of_voxels_xyz_.s[2] << GGendl;
     //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Number of voxels: " << solid_data_device->number_of_voxels_ << GGendl;
     //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Size of voxels: (" << solid_data_device->voxel_sizes_xyz_.s[0] /mm << "x" << solid_data_device->voxel_sizes_xyz_.s[1]/mm << "x" << solid_data_device->voxel_sizes_xyz_.s[2]/mm << ") mm3" << GGendl;

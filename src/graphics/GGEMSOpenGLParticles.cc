@@ -80,7 +80,7 @@ GGEMSOpenGLParticles::GGEMSOpenGLParticles(void)
 
   // Index
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, number_of_indices_ * sizeof(GLint), nullptr, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, number_of_indices_ * sizeof(GLuint), nullptr, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   glBindVertexArray(0);

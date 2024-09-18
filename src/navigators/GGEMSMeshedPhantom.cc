@@ -108,11 +108,12 @@ void GGEMSMeshedPhantom::Initialize(void)
 
   // Load meshed phantom from STL file and storing materials
   solids_[0]->Initialize(nullptr);
+  solids_[0]->SetVisible(is_visible_);
+  solids_[0]->SetMaterialName(materials_->GetMaterialName(0));
   solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
-  solids_[0]->SetMaterialVisible(material_visible_);
 
-  // Perform rotation before position
-  if (is_update_rot_) {
+    // Perform rotation before position
+  /*if (is_update_rot_) {
     solids_[0]->SetRotation(rotation_xyz_);
     #ifdef OPENGL_VISUALIZATION
     solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
@@ -120,17 +121,17 @@ void GGEMSMeshedPhantom::Initialize(void)
     solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
     #endif
   }
-  if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
+  if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);*/
 
-  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+ /*for (GGsize j = 0; j < number_activated_devices_; ++j) {
      solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
      // Store the transformation matrix in solid object
      solids_[0]->UpdateTransformationMatrix(j);
-  }
+  }*/
 
   #ifdef OPENGL_VISUALIZATION
   solids_[0]->SetVisible(is_visible_);
-  // solids_[0]->BuildOpenGL();
+  solids_[0]->BuildOpenGL();
   #endif
 
   // Initialize parent class
@@ -225,12 +226,4 @@ void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_pha
 void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name)
 {
   meshed_phantom->SetMaterialName(material_name);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-void set_material_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, bool const flag)
-{
-  meshed_phantom->SetMaterialVisible(material_name, flag);
 }

@@ -29,11 +29,9 @@
 */
 
 #include <algorithm>
-#include <sstream>
 
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,6 +193,7 @@ void GGEMSOpenCLManager::GetOpenCLDevices(void)
   cl_device_mem_cache_type device_mem_cache_type;
   cl_device_local_mem_type device_local_mem_type;
   cl_device_affinity_domain device_affinity_domain;
+  cl_device_svm_capabilities device_svm_capabilities;
   GGuint info_uint;
   GGulong info_ulong;
   GGsize info_size;
@@ -393,6 +392,9 @@ void GGEMSOpenCLManager::GetOpenCLDevices(void)
 
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILING_TIMER_RESOLUTION, &info_size), "GGEMSOpenCLManager", "GetOpenCLDevices");
     device_profiling_timer_resolution_.push_back(info_size);
+
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_SVM_CAPABILITIES, &device_svm_capabilities), "GGEMSOpenCLManager", "GetOpenCLManager");
+    device_svm_capabilities_.push_back(device_svm_capabilities);
   }
 
   // Custom work group size, 64 seems a good trade-off
@@ -543,6 +545,14 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Printf Buffer Size: " << device_printf_buffer_size_[i] << " bytes" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Samplers: " << device_max_samplers_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Partition Max Sub-Devices: " << device_partition_max_sub_devices_[i] << GGendl;
+
+    std::string svm_capabilities("");
+    svm_capabilities += device_svm_capabilities_[i] & CL_DEVICE_SVM_COARSE_GRAIN_BUFFER ? "CL_DEVICE_SVM_COARSE_GRAIN_BUFFER " : "";
+    svm_capabilities += device_svm_capabilities_[i] & CL_DEVICE_SVM_FINE_GRAIN_BUFFER ? "CL_DEVICE_SVM_FINE_GRAIN_BUFFER " : "";
+    svm_capabilities += device_svm_capabilities_[i] & CL_DEVICE_SVM_FINE_GRAIN_SYSTEM ? "CL_DEVICE_SVM_FINE_GRAIN_SYSTEM " : "";
+    svm_capabilities += device_svm_capabilities_[i] & CL_DEVICE_SVM_ATOMICS ? "CL_DEVICE_SVM_ATOMICS " : "";
+     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + SVM capabilities: " << svm_capabilities << GGendl;
+
     std::string partition_affinity("");
     partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_NUMA ? "NUMA " : "";
     partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE ? "L4_CACHE " : "";
@@ -551,6 +561,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE ? "L1_CACHE " : "";
     partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE ? "NEXT_PARTITIONABLE " : "";
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Partition Affinity: " << partition_affinity << GGendl;
+
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Timer Resolution: " << device_profiling_timer_resolution_[i] << " ns" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + GGEMS Custom Work Group Size: " << work_group_size_ << GGendl;
   }
@@ -564,7 +575,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
 void GGEMSOpenCLManager::SetOpenCLCompilationOptions(void)
 {
   // Define the compilation options by default for OpenCL
-  build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
+  build_options_ = "-cl-std=CL3.0 -w -Werror -cl-fast-relaxed-math -cl-kernel-arg-info";
 
   // Give precision for dosimetry
   #ifdef DOSIMETRY_DOUBLE_PRECISION
@@ -970,6 +981,15 @@ void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize cons
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+bool GGEMSOpenCLManager::IsSVMAvailability(GGsize const& device_index) const
+{
+  return (device_svm_capabilities_[device_index] & CL_DEVICE_SVM_FINE_GRAIN_BUFFER);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index)
 {
   GGcout("GGEMSOpenCLManager","CleanBuffer", 3) << "Cleaning OpenCL buffer..." << GGendl;
@@ -1021,6 +1041,66 @@ GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) con
   else {
     return number_of_elements + (work_group_size_ - number_of_elements%work_group_size_);
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+inline GGulong GGEMSOpenCLManager::GetKernelLocalMemSize(cl::Kernel* kernel) const
+{
+  GGint error = 0;
+
+  cl::Context context = kernel->getInfo<CL_KERNEL_CONTEXT>(&error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelLocalMemSize");
+
+  std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>(&error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelLocalMemSize");
+
+  GGulong kernel_local_mem_size = kernel->getWorkGroupInfo<CL_KERNEL_LOCAL_MEM_SIZE>(devices[0], &error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelLocalMemSize");
+
+  return kernel_local_mem_size;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+inline GGulong GGEMSOpenCLManager::GetKernelPrivateMemSize(cl::Kernel* kernel) const
+{
+  GGint error = 0;
+
+  cl::Context context = kernel->getInfo<CL_KERNEL_CONTEXT>(&error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelPrivateMemSize");
+
+  std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>(&error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelPrivateMemSize");
+
+  GGulong kernel_private_mem_size = kernel->getWorkGroupInfo<CL_KERNEL_PRIVATE_MEM_SIZE>(devices[0], &error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelPrivateMemSize");
+
+  return kernel_private_mem_size;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+inline GGulong GGEMSOpenCLManager::GetKernelWorkGroupSize(cl::Kernel* kernel) const
+{
+  GGint error = 0;
+
+  cl::Context context = kernel->getInfo<CL_KERNEL_CONTEXT>(&error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelWorkGroupSize");
+
+  std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>(&error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelWorkGroupSize");
+
+  GGsize kernel_work_group_size = kernel->getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices[0], &error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "GetKernelWorkGroupSize");
+
+  return kernel_work_group_size;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

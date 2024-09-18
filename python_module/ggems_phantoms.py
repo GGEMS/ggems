@@ -96,9 +96,6 @@ class GGEMSMeshedPhantom(object):
         ggems_lib.set_material_name_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_material_name_ggems_meshed_phantom.restype = ctypes.c_void_p
 
-        ggems_lib.set_material_visible_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_bool]
-        ggems_lib.set_material_visible_ggems_meshed_phantom.restype = ctypes.c_void_p
-
         self.obj = ggems_lib.create_ggems_meshed_phantom(meshed_phantom_name.encode('ASCII'))
 
     def set_phantom(self, phantom_filename):
@@ -112,9 +109,6 @@ class GGEMSMeshedPhantom(object):
 
     def set_visible(self, flag):
         ggems_lib.set_visible_ggems_meshed_phantom(self.obj, flag)
-
-    def set_material_visible(self, material_name, flag):
-        ggems_lib.set_material_visible_ggems_meshed_phantom(self.obj, material_name.encode('ASCII'), flag)
 
     def set_material(self, material_name):
         ggems_lib.set_material_name_ggems_meshed_phantom(self.obj, material_name.encode('ASCII'))

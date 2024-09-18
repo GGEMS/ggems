@@ -80,18 +80,62 @@ class GGEMSSTLReader
     GGEMSSTLReader& operator=(GGEMSSTLReader const&& stl) = delete;
 
     /*!
-      \fn void Read(std::string const& meshed_phantom_filename)
+      \fn void Read(std::string const& meshed_phantom_filename, cl::Buffer* solid_data, GGsize const& thread_index)
       \param meshed_phantom_filename - input stl file
-      \brief read the stl file and store data
+      \param solid_data - pointer on solid data
+      \param thread_index - index of the thread (= activated device index)
+      \brief read the stl file and load triangles
     */
     void Read(std::string const& meshed_phantom_filename);
 
+    /*!
+      \fn GGfloat* GetHalfWidth(void)
+      \brief Get the half width of bounding box
+      \return the half width of bounding box
+    */
+    GGfloat* GetHalfWidth(void) { return half_width_; }
+
+    /*!
+      \fn GGEMSPoint3 GetCenter(void)
+      \brief Get the center of the bounding box
+      \return the center of the bounding box
+    */
+    GGEMSPoint3 GetCenter(void) const { return center_; }
+
+    /*!
+      \fn void LoadTriangles(GGEMSTriangle3* triangles)
+      \param triangles - SVM buffer storing triangles
+      \brief Load triangles to SVM memory
+    */
+    void LoadTriangles(GGEMSTriangle3* triangles);
+
+    /*!
+      \fn GGuint GetNumberOfTriangles(void) const
+      \brief Get the number of triangles from mesh file
+      \return the number of triangles
+    */
+    GGuint GetNumberOfTriangles(void) const { return number_of_triangles_; }
+
+
   private:
-    GGuchar          header_[80];
-    GGuint           number_of_triangles_;
-    GGfloat          half_width_[3];
-    GGEMSTriangle3** triangles_;
-    GGEMSPoint3      center_;
+    struct GGEMSMeshTriangle {
+      GGEMSMeshTriangle(void) {}
+      GGEMSMeshTriangle(GGEMSPoint3 const& p0, GGEMSPoint3 const& p1, GGEMSPoint3 const& p2);
+
+      void MostSeparatedPointsOnAABB(GGEMSPoint3 pts[3], GGint& min, GGint& max);
+      void SphereFromDistantPoints(GGEMSSphere3& s, GGEMSPoint3 pts[3]);
+      void SphereOfSphereAndPoint(GGEMSSphere3& s, GGEMSPoint3& p);
+
+      GGEMSPoint3        pts_[3];
+      GGEMSSphere3       bounding_sphere_;
+    };
+
+  private:
+    GGuchar            header_[80]; /*!< Header infos */
+    GGuint             number_of_triangles_; /*< Number of triangles in mesh file */
+    GGfloat            half_width_[3]; /*!< half width of whole mesh volume */
+    GGEMSMeshTriangle* triangles_; /*!< Triangle from STL file */
+    GGEMSPoint3        center_; /*!< Center of bounding box around mesh */
 };
 
 #endif // End of GUARD_GGEMS_IO_GGEMSSTLREADER_HH

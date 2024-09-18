@@ -51,9 +51,6 @@ class GGEMSCTSystem(object):
         ggems_lib.set_global_system_position_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_global_system_position_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_material_visible_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_bool]
-        ggems_lib.set_material_visible_ggems_ct_system.restype = ctypes.c_void_p
-
         ggems_lib.set_material_color_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_ubyte, ctypes.c_ubyte, ctypes.c_ubyte]
         ggems_lib.set_material_color_ggems_ct_system.restype = ctypes.c_void_p
 
@@ -103,9 +100,6 @@ class GGEMSCTSystem(object):
 
     def set_threshold(self, threshold, unit):
         ggems_lib.set_threshold_ggems_ct_system(self.obj, threshold, unit.encode('ASCII'))
-
-    def set_material_visible(self, material_name, flag):
-        ggems_lib.set_material_visible_ggems_ct_system(self.obj, material_name.encode('ASCII'), flag)
 
     def set_visible(self, flag):
         ggems_lib.set_visible_ggems_ct_system(self.obj, flag)

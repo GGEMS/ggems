@@ -121,6 +121,11 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
 
   private:
     std::string meshed_phantom_name_; /*!< Filename of STL file for mesh */
+
+    GGEMSTriangle3** triangles_; /*!< Pointer to mesh triangles */
+    GGuint           number_of_triangles_;
+
+    // Storing infos about Octree and Node
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLID_HH
