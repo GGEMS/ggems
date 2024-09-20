@@ -104,7 +104,9 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
       \param thread_index - index of the thread (= activated device index)
       \brief Update transformation matrix for solid box object
     */
-    void UpdateTransformationMatrix(GGsize const& thread_index) override {}
+    void UpdateTransformationMatrix(GGsize const& thread_index) override;
+
+    void UpdateTriangles(GGsize const& thread_index);
 
   private:
     /*!

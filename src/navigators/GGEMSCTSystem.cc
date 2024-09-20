@@ -173,9 +173,10 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
       position.s[2] = global_position_z + global_system_position_xyz_.s[2];
       solids_[global_index]->SetPosition(position);
 
-      // Rotation for OpenGL volume
+      // Rotation and translation for OpenGL volume
       #ifdef OPENGL_VISUALIZATION
       solids_[global_index]->SetZAngleOpenGL(step_angle);
+      solids_[global_index]->SetPositionOpenGL(position.s[0], position.s[1], position.s[2]);
       #endif
     }
   }
@@ -212,6 +213,10 @@ void GGEMSCTSystem::InitializeFlatGeometry(void)
       position.s[1] = global_position_y + global_system_position_xyz_.s[1];
       position.s[2] = global_position_z + global_system_position_xyz_.s[2];
       solids_[global_index]->SetPosition(position);
+
+      #ifdef OPENGL_VISUALIZATION
+      solids_[global_index]->SetPositionOpenGL(position.s[0], position.s[1], position.s[2]);
+      #endif
     }
   }
 }

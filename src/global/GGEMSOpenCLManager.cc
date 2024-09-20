@@ -575,7 +575,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
 void GGEMSOpenCLManager::SetOpenCLCompilationOptions(void)
 {
   // Define the compilation options by default for OpenCL
-  build_options_ = "-cl-std=CL3.0 -w -Werror -cl-fast-relaxed-math -cl-kernel-arg-info";
+  build_options_ = "-cl-std=CL3.0 -w -Werror"; // -cl-fast-relaxed-math crash with Intel !!!
 
   // Give precision for dosimetry
   #ifdef DOSIMETRY_DOUBLE_PRECISION

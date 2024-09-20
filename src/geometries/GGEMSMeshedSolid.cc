@@ -114,10 +114,7 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
   // InitializeKernel();
   LoadVolumeImage();
 
-  // Building octree for mesh
-
   // Creating volume for OpenGL
-  // Get some infos for grid
   #ifdef OPENGL_VISUALIZATION
   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -158,6 +155,153 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
     // opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
   }
   #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::UpdateTransformationMatrix(GGsize const& thread_index)
+{
+  // Get the OpenCL manager
+  //GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Copy information to OBB
+  //GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSSolidBoxData), thread_index);
+ /* GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), thread_index);
+
+  //for (GGint i = 0; i < 4; ++i) {
+    std::cout << transformation_matrix_device->m0_[0] << " " << transformation_matrix_device->m0_[1] << " "
+      << transformation_matrix_device->m0_[2] << " " << transformation_matrix_device->m0_[3] << std::endl;
+    std::cout << transformation_matrix_device->m1_[0] << " " << transformation_matrix_device->m1_[1] << " "
+      << transformation_matrix_device->m1_[2] << " " << transformation_matrix_device->m1_[3] << std::endl;
+    std::cout << transformation_matrix_device->m2_[0] << " " << transformation_matrix_device->m2_[1] << " "
+      << transformation_matrix_device->m2_[2] << " " << transformation_matrix_device->m2_[3] << std::endl;*/
+
+ //   solid_data_device->obb_geometry_.matrix_transformation_.m0_[i] = transformation_matrix_device->m0_[i];
+  //  solid_data_device->obb_geometry_.matrix_transformation_.m1_[i] = transformation_matrix_device->m1_[i];
+ //   solid_data_device->obb_geometry_.matrix_transformation_.m2_[i] = transformation_matrix_device->m2_[i];
+ //   solid_data_device->obb_geometry_.matrix_transformation_.m3_[i] = transformation_matrix_device->m3_[i];
+  //}
+
+  // Computing new position of triangles
+  // Mapping triangles
+  /*opencl_manager.GetSVMData(
+    triangles_[thread_index],
+    sizeof(GGEMSTriangle3) * number_of_triangles_,
+    0,
+    CL_TRUE,
+    CL_MAP_READ | CL_MAP_WRITE
+  );
+
+  // Translation
+  GGEMSPoint3 translation = {
+    transformation_matrix_device->m0_[3],
+    transformation_matrix_device->m1_[3],
+    transformation_matrix_device->m2_[3]
+  };*/
+
+  // Loop over all triangles
+  //for (GGuint t = 0; t < 1/*number_of_triangles_*/; ++t) {
+    /*std::cout << "triangle " << t << std::endl;
+    // Loop over the 3 points
+    for (int p = 0; p < 3; ++p) {
+      std::cout << " * point " << p << std::endl;
+      std::cout << triangles_[thread_index][t].pts_[p].x_ << std::endl;
+      std::cout << triangles_[thread_index][t].pts_[p].y_ << std::endl;
+      std::cout << triangles_[thread_index][t].pts_[p].z_ << std::endl;
+    }
+    // Change position of bounding sphere
+    std::cout << " * bounding sphere" << std::endl;
+    std::cout << triangles_[thread_index][t].bounding_sphere_.center_.x_ << std::endl;
+    std::cout << triangles_[thread_index][t].bounding_sphere_.center_.y_ << std::endl;
+    std::cout << triangles_[thread_index][t].bounding_sphere_.center_.z_ << std::endl;
+  }
+
+  // Unmapping triangles
+  opencl_manager.ReleaseSVMData(triangles_[thread_index], thread_index);
+
+  // Release the pointer
+  //opencl_manager.ReleaseDeviceBuffer(solid_data_[thread_index], solid_data_device, thread_index);
+  opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(thread_index), transformation_matrix_device, thread_index);*/
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::UpdateTriangles(GGsize const& thread_index)
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Loop over device
+  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), thread_index);
+
+  // Computing new position of triangles
+  // Mapping triangles
+  opencl_manager.GetSVMData(
+    triangles_[thread_index],
+    sizeof(GGEMSTriangle3) * number_of_triangles_,
+    0,
+    CL_TRUE,
+    CL_MAP_READ | CL_MAP_WRITE
+  );
+
+  // Translation
+  GGEMSPoint3 translation = {
+    transformation_matrix_device->m0_[3],
+    transformation_matrix_device->m1_[3],
+    transformation_matrix_device->m2_[3]
+  };
+
+  // Rotation
+  GGEMSPoint3 row0 = {
+    transformation_matrix_device->m0_[0],
+    transformation_matrix_device->m0_[1],
+    transformation_matrix_device->m0_[2]
+  };
+
+  GGEMSPoint3 row1 = {
+    transformation_matrix_device->m1_[0],
+    transformation_matrix_device->m1_[1],
+    transformation_matrix_device->m1_[2]
+  };
+
+  GGEMSPoint3 row2 = {
+    transformation_matrix_device->m2_[0],
+    transformation_matrix_device->m2_[1],
+    transformation_matrix_device->m2_[2]
+  };
+
+  // Loop over all triangles
+  GGEMSPoint3 rotated_new_point;
+  for (GGuint t = 0; t < number_of_triangles_; ++t) {
+    // Loop over the 3 points
+    for (int p = 0; p < 3; ++p) {
+      rotated_new_point.x_ = Dot(row0, triangles_[thread_index][t].pts_[p]);
+      rotated_new_point.y_ = Dot(row1, triangles_[thread_index][t].pts_[p]);
+      rotated_new_point.z_ = Dot(row2, triangles_[thread_index][t].pts_[p]);
+
+      triangles_[thread_index][t].pts_[p].x_ = rotated_new_point.x_ + translation.x_;
+      triangles_[thread_index][t].pts_[p].y_ = rotated_new_point.y_ + translation.y_;
+      triangles_[thread_index][t].pts_[p].z_ = rotated_new_point.z_ + translation.z_;
+    }
+    // Change position of bounding sphere
+    rotated_new_point.x_ = Dot(row0, triangles_[thread_index][t].bounding_sphere_.center_);
+    rotated_new_point.y_ = Dot(row1, triangles_[thread_index][t].bounding_sphere_.center_);
+    rotated_new_point.z_ = Dot(row2, triangles_[thread_index][t].bounding_sphere_.center_);
+
+    triangles_[thread_index][t].bounding_sphere_.center_.x_ = rotated_new_point.x_ + translation.x_;
+    triangles_[thread_index][t].bounding_sphere_.center_.y_ = rotated_new_point.y_ + translation.y_;
+    triangles_[thread_index][t].bounding_sphere_.center_.z_ = rotated_new_point.z_ + translation.z_;
+  }
+
+  // Unmapping triangles
+  opencl_manager.ReleaseSVMData(triangles_[thread_index], thread_index);
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(thread_index), transformation_matrix_device, thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

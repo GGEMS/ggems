@@ -207,6 +207,16 @@ void GGEMSSolid::SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const
   if (opengl_solid_)
     opengl_solid_->SetZUpdateAngle(update_angle_z);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolid::SetPositionOpenGL(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z)
+{
+  if (opengl_solid_)
+    opengl_solid_->SetPosition(position_x, position_y, position_z);
+}
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,10 +227,10 @@ void GGEMSSolid::SetPosition(GGfloat3 const& position_xyz)
 {
   geometry_transformation_->SetTranslation(position_xyz);
 
-  #ifdef OPENGL_VISUALIZATION
-  if (opengl_solid_)
-    opengl_solid_->SetPosition(position_xyz.s[0], position_xyz.s[1], position_xyz.s[2]);
-  #endif
+  //#ifdef OPENGL_VISUALIZATION
+  //if (opengl_solid_)
+  //  opengl_solid_->SetPosition(position_xyz.s[0], position_xyz.s[1], position_xyz.s[2]);
+  //#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

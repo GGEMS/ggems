@@ -112,27 +112,43 @@ void GGEMSMeshedPhantom::Initialize(void)
   solids_[0]->SetMaterialName(materials_->GetMaterialName(0));
   solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
 
-    // Perform rotation before position
-  /*if (is_update_rot_) {
-    solids_[0]->SetRotation(rotation_xyz_);
-    #ifdef OPENGL_VISUALIZATION
-    solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
-    solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
-    solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
-    #endif
+  // Perform rotation before translation
+  if (is_update_rot_) {
+    solids_[0]->SetRotation(rotation_xyz_); // For matrix transformation
+   // #ifdef OPENGL_VISUALIZATION
+   // solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
+   // solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
+   // solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
+   // #endif
   }
-  if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);*/
+  if (is_update_pos_) {
+    solids_[0]->SetPosition(position_xyz_); // For matrix transformation
+    //#ifdef OPENGL_VISUALIZATION
+    //solids_[0]->SetPositionOpenGL(position_xyz_.s[0], position_xyz_.s[1], position_xyz_.s[2]);
+    //#endif
+  }
 
- /*for (GGsize j = 0; j < number_activated_devices_; ++j) {
-     solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
+  // Update transformation matrix and triangles positions
+  //for (GGsize j = 0; j < number_activated_devices_; ++j) {
+     //solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
      // Store the transformation matrix in solid object
-     solids_[0]->UpdateTransformationMatrix(j);
-  }*/
+ //    solids_[0]->UpdateTransformationMatrix(j);
+  //}
+
+  // Update new position of mesh after translation and rotation
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    dynamic_cast<GGEMSMeshedSolid*>(solids_[0])->UpdateTriangles(j);
+  }
 
   #ifdef OPENGL_VISUALIZATION
   solids_[0]->SetVisible(is_visible_);
   solids_[0]->BuildOpenGL();
   #endif
+
+  // Build Octree
+  // solids_[0]->Build Octree for each devices
+
+  // Mettre à jour les parametres sur les devices pour faire la navigation + processes physiques
 
   // Initialize parent class
   GGEMSNavigator::Initialize();

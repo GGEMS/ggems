@@ -92,14 +92,14 @@ materials_database_manager.set_materials('data/materials.txt')
 # STEP 5: Phantoms and systems
 # Loading phantom in GGEMS
 phantom = GGEMSMeshedPhantom('phantom_mesh')
-phantom.set_phantom('data/Stanford_Bunny.stl')
-#phantom.set_phantom('data/Male_Mesh_Phantom2024.stl')
-phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-phantom.set_position(0.0, 0.0, 0.0, 'mm')
+#phantom.set_phantom('data/Stanford_Bunny.stl')
+phantom.set_phantom('data/Male_Mesh_Phantom2024.stl')
+phantom.set_rotation(-90.0, 0.0, 90.0, 'deg')
+phantom.set_position(0.0, 0.0, -1000.0, 'mm')
 phantom.set_visible(True)
 phantom.set_material('Water')
 #phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
-#phantom.set_material_color('Water', 207, 160, 233)
+phantom.set_material_color('Water', 207, 160, 233)
 
 cbct_detector = GGEMSCTSystem('custom')
 cbct_detector.set_ct_type('flat')
