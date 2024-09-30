@@ -129,7 +129,7 @@ void GGEMSOpenGLMesh::Build(void)
   }
 
   for (GGsize i = 0; i < number_of_indices_; ++i) {
-    indices_[i] = i;
+    indices_[i] = static_cast<GLuint>(i);
   }
 
   // Creating a VAO

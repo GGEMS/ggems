@@ -102,10 +102,10 @@ void GGEMSMeshedPhantom::Initialize(void)
   // }
 
   // Enabling tracking if necessary
-  // if (is_tracking_) solids_[0]->EnableTracking();
+  if (is_tracking_) solids_[0]->EnableTracking();
 
   // Enabling TLE
-  // if (is_tle_) solids_[0]->AddKernelOption(" -DTLE");
+  // if (is_tle_) solids_[0]->EnableTLE();
 
   // Load meshed phantom from STL file and storing materials
   solids_[0]->Initialize(nullptr);

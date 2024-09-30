@@ -58,8 +58,8 @@ class GGEMS_EXPORT GGEMSOctree
     GGint GetTotalNodes(void) const {return total_nodes_;}
 
   private:
-    void BuildOctreeOnEngine(GGEMSPoint3 const& center, GGsize const& thread_index);
-    void InsertTrianglesOnEngine(GGEMSTriangle3* triangle, GGuint number_of_triangles, GGsize const& thread_index);
+    void BuildOctreeOnDevice(GGEMSPoint3 const& center, GGsize const& thread_index);
+    void InsertTrianglesOnDevice(GGEMSTriangle3* triangle, GGuint number_of_triangles, GGsize const& thread_index);
 
   private:
     static constexpr GGint pmax_ = 8; // maximum number of levels

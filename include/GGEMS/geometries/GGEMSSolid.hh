@@ -87,12 +87,6 @@ class GGEMS_EXPORT GGEMSSolid
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
 
     /*!
-      \fn void EnableTracking(void)
-      \brief Enabling tracking infos during simulation
-    */
-    void EnableTracking(void);
-
-    /*!
       \fn inline cl::Buffer* GetSolidData(GGsize const& thread_index) const
       \param thread_index - index of the thread (= activated device index)
       \brief get the informations about the solid geometry
@@ -290,6 +284,18 @@ class GGEMS_EXPORT GGEMSSolid
       \brief building OpenGL volume in GGEMS
     */
     void BuildOpenGL(void) const;
+
+    /*!
+      \fn void EnableTracking(void)
+      \brief Enabling tracking infos during simulation
+    */
+    void EnableTracking(void);
+
+    /*!
+      \fn void EnableTLE(void)
+      \brief Enabling TLE for dosimetry
+    */
+    void EnableTLE(void);
 
     /*!
       \fn void AddKernelOption(std::string const& option)

@@ -84,7 +84,7 @@ void GGEMSSTLReader::Read(std::string const& meshed_phantom_filename)
 
   triangles_ = new GGEMSMeshTriangle[number_of_triangles_];
 
-  for (unsigned int i = 0; i < number_of_triangles_; ++i) {
+  for (GGuint i = 0; i < number_of_triangles_; ++i) {
     stl_stream.read(reinterpret_cast<char*>(data), sizeof(float) * 12);
     stl_stream.read(reinterpret_cast<char*>(&octet_attribut), sizeof(unsigned short) * 1);
 
@@ -126,11 +126,11 @@ GGEMSSTLReader::GGEMSMeshTriangle::GGEMSMeshTriangle(GGEMSPoint3 const& p0, GGEM
 void GGEMSSTLReader::GGEMSMeshTriangle::MostSeparatedPointsOnAABB(GGEMSPoint3 pts[3], GGint& min, GGint& max)
 {
   // First find most extreme points along principal axes
-  int minx{0}, maxx{0};
-  int miny{0}, maxy{0};
-  int minz{0}, maxz{0};
+  GGint minx{0}, maxx{0};
+  GGint miny{0}, maxy{0};
+  GGint minz{0}, maxz{0};
 
-  for (int i = 1; i < 3; ++i) {
+  for (GGint i = 1; i < 3; ++i) {
     if (pts[i].x_ < pts[minx].x_) minx = i;
     if (pts[i].x_ > pts[maxx].x_) maxx = i;
     if (pts[i].y_ < pts[miny].y_) miny = i;
@@ -154,9 +154,9 @@ void GGEMSSTLReader::GGEMSMeshTriangle::MostSeparatedPointsOnAABB(GGEMSPoint3 pt
   pz.y_ = pts[maxz].y_ - pts[minz].y_;
   pz.z_ = pts[maxz].z_ - pts[minz].z_;
 
-  float dist2x = Dot(px, px);
-  float dist2y = Dot(py, py);
-  float dist2z = Dot(pz, pz);
+  GGfloat dist2x = Dot(px, px);
+  GGfloat dist2y = Dot(py, py);
+  GGfloat dist2z = Dot(pz, pz);
 
   // Pick the pair (min,max) of points most distant
   min = minx;
@@ -178,8 +178,8 @@ void GGEMSSTLReader::GGEMSMeshTriangle::MostSeparatedPointsOnAABB(GGEMSPoint3 pt
 void GGEMSSTLReader::GGEMSMeshTriangle::SphereFromDistantPoints(GGEMSSphere3& s, GGEMSPoint3 pts[3])
 {
   // Find the most separated point pair defining the encompassing AABB
-  int min{0};
-  int max{0};
+  GGint min{0};
+  GGint max{0};
 
   MostSeparatedPointsOnAABB(pts, min, max);
 
@@ -212,12 +212,12 @@ void GGEMSSTLReader::GGEMSMeshTriangle::SphereOfSphereAndPoint(GGEMSSphere3& s, 
   p_scenter.y_ = p.y_ - s.center_.y_;
   p_scenter.z_ = p.z_ - s.center_.z_;
 
-  float dist2 = Dot(p_scenter, p_scenter);
+  GGfloat dist2 = Dot(p_scenter, p_scenter);
 
   if (dist2 > s.radius_ * s.radius_) {
-    float dist = sqrtf(dist2);
-    float new_radius = (s.radius_ + dist) * 0.5;
-    float k = (new_radius - s.radius_) / dist;
+    GGfloat dist = sqrtf(dist2);
+    GGfloat new_radius = (s.radius_ + dist) * 0.5f;
+    GGfloat k = (new_radius - s.radius_) / dist;
     s.radius_ = new_radius;
     s.center_.x_ += p_scenter.x_ * k;
     s.center_.y_ += p_scenter.y_ * k;

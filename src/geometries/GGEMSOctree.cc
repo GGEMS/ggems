@@ -132,11 +132,11 @@ void GGEMSOctree::Build(GGEMSPoint3 const& center)
 {
   GGcout("GGEMSOctree", "Build", 3) << "Building octree..." << GGendl;
 
-  // Build octree for each engine
+  // Build octree for each device
   std::thread* thread_octree = new std::thread[number_activated_devices_];
   for (std::size_t i = 0; i < number_activated_devices_; ++i)
     thread_octree[i] =
-      std::thread(&GGEMSOctree::BuildOctreeOnEngine, this, center, i);
+      std::thread(&GGEMSOctree::BuildOctreeOnDevice, this, center, i);
 
   // Joining threads
   for (std::size_t i = 0; i < number_activated_devices_; ++i) thread_octree[i].join();
@@ -148,7 +148,7 @@ void GGEMSOctree::Build(GGEMSPoint3 const& center)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOctree::BuildOctreeOnEngine(GGEMSPoint3 const& center, GGsize const& thread_index)
+void GGEMSOctree::BuildOctreeOnDevice(GGEMSPoint3 const& center, GGsize const& thread_index)
 {
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
@@ -175,8 +175,8 @@ void GGEMSOctree::BuildOctreeOnEngine(GGEMSPoint3 const& center, GGsize const& t
   // Loop over octree level
   GGint current_node_id = 1;
   for (GGint i = 2; i <= max_depth_; ++i) {
-    GGint total_nodes_through_level = (std::pow(8.0f, i) - 1) / 7;
-    GGint total_nodes_in_level = total_nodes_through_level - (std::pow(8.0f, i - 1) - 1) / 7;
+    GGint total_nodes_through_level = (static_cast<GGint>(std::pow(8, i)) - 1) / 7;
+    GGint total_nodes_in_level = total_nodes_through_level - (static_cast<GGint>(std::pow(8.0, i - 1)) - 1) / 7;
 
     // Loop over nodes in level
     GGint node_cluster = 0;
@@ -230,10 +230,10 @@ void GGEMSOctree::InsertTriangles(GGEMSTriangle3** triangles, GGuint const& numb
 {
   GGcout("GGEMSOctree", "InsertTriangles", 3) << "Inserting triangles..." << GGendl;
 
-  // Build octree for each engine
+  // Build octree for each device
   std::thread* thread_octree = new std::thread[number_activated_devices_];
   for (std::size_t i = 0; i < number_activated_devices_; ++i) {
-    thread_octree[i] = std::thread(&GGEMSOctree::InsertTrianglesOnEngine, this,
+    thread_octree[i] = std::thread(&GGEMSOctree::InsertTrianglesOnDevice, this,
       &triangles[i][0], number_of_triangles, i);
   }
 
@@ -247,7 +247,7 @@ void GGEMSOctree::InsertTriangles(GGEMSTriangle3** triangles, GGuint const& numb
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOctree::InsertTrianglesOnEngine(GGEMSTriangle3* triangle, GGuint number_of_triangles, GGsize const& thread_index)
+void GGEMSOctree::InsertTrianglesOnDevice(GGEMSTriangle3* triangle, GGuint number_of_triangles, GGsize const& thread_index)
 {
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
