@@ -72,22 +72,12 @@ void GGEMSSTLReader::Read(std::string const& meshed_phantom_filename)
 {
   GGcout("GGEMSSTLReader", "Read", 2) << "Reading STL Image and loading mesh triangles..." << GGendl;
 
-  //GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  //size_t number_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
-
   // Opening STL file
   std::ifstream stl_stream(meshed_phantom_filename, std::ios::in | std::ios::binary);
   GGEMSFileStream::CheckInputStream(stl_stream, meshed_phantom_filename);
 
   stl_stream.read(reinterpret_cast<char*>(header_), sizeof(GGuchar) * 80);
   stl_stream.read(reinterpret_cast<char*>(&number_of_triangles_), sizeof(GGuint) * 1);
-
-  // Min and max points
-  GGEMSPoint3 lo;
-  lo.x_ = FLT_MAX; lo.y_ = FLT_MAX; lo.z_ = FLT_MAX;
-
-  GGEMSPoint3 hi;
-  hi.x_ = FLT_MIN; hi.y_ = FLT_MIN; hi.z_ = FLT_MIN;
 
   GGfloat data[12]; // Vertices for triangle from STL file
   GGushort octet_attribut; // Useless parameter from STL file
@@ -104,56 +94,7 @@ void GGEMSSTLReader::Read(std::string const& meshed_phantom_filename)
     p3.x_= data[9]; p3.y_ = data[10]; p3.z_ = data[11];
 
     triangles_[i] = GGEMSMeshTriangle(p1, p2, p3);
-
-    for (int j = 0; j < 3; ++j) { // Loop over points
-      if (triangles_[i].pts_[j].x_ < lo.x_) lo.x_ = triangles_[i].pts_[j].x_;
-      if (triangles_[i].pts_[j].y_ < lo.y_) lo.y_ = triangles_[i].pts_[j].y_;
-      if (triangles_[i].pts_[j].z_ < lo.z_) lo.z_ = triangles_[i].pts_[j].z_;
-      if (triangles_[i].pts_[j].x_ > hi.x_) hi.x_ = triangles_[i].pts_[j].x_;
-      if (triangles_[i].pts_[j].y_ > hi.y_) hi.y_ = triangles_[i].pts_[j].y_;
-      if (triangles_[i].pts_[j].z_ > hi.z_) hi.z_ = triangles_[i].pts_[j].z_;
-    }
   }
-
-  // Expand it by 10% so that all points are well interior
-  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.1f;
-  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.1f;
-  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.1f;
-
-  lo.x_ -= expanding_x;
-  hi.x_ += expanding_x;
-  lo.y_ -= expanding_y;
-  hi.y_ += expanding_y;
-  lo.z_ -= expanding_z;
-  hi.z_ += expanding_z;
-
-  if (lo.x_ < 0.0f) lo.x_ = std::floor(lo.x_);
-  else lo.x_ = std::ceil(lo.x_);
-
-  if (lo.y_ < 0.0f) lo.y_ = std::floor(lo.y_);
-  else lo.y_ = std::ceil(lo.y_);
-
-  if (lo.z_ < 0.0f) lo.z_ = std::floor(lo.z_);
-  else lo.z_ = std::ceil(lo.z_);
-
-  if (hi.x_ < 0.0f) hi.x_ = std::floor(hi.x_);
-  else hi.x_ = std::ceil(hi.x_);
-
-  if (hi.y_ < 0.0f) hi.y_ = std::floor(hi.y_);
-  else hi.y_ = std::ceil(hi.y_);
-
-  if (hi.z_ < 0.0f) hi.z_ = std::floor(hi.z_);
-  else hi.z_ = std::ceil(hi.z_);
-
-  // Computing the center of octree box
-  center_.x_ = (hi.x_+lo.x_)*0.5f;
-  center_.y_ = (hi.y_+lo.y_)*0.5f;
-  center_.z_ = (hi.z_+lo.z_)*0.5f;
-
-  // Computing half width for each axes
-  half_width_[0] = (hi.x_-lo.x_)*0.5f;
-  half_width_[1] = (hi.y_-lo.y_)*0.5f;
-  half_width_[2] = (hi.z_-lo.z_)*0.5f;
 
   stl_stream.close();
 }

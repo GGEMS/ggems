@@ -93,14 +93,14 @@ class GGEMSSTLReader
       \brief Get the half width of bounding box
       \return the half width of bounding box
     */
-    GGfloat* GetHalfWidth(void) { return half_width_; }
+   // GGfloat* GetHalfWidth(void) { return half_width_; }
 
     /*!
       \fn GGEMSPoint3 GetCenter(void)
       \brief Get the center of the bounding box
       \return the center of the bounding box
     */
-    GGEMSPoint3 GetCenter(void) const { return center_; }
+   // GGEMSPoint3 GetCenter(void) const { return center_; }
 
     /*!
       \fn void LoadTriangles(GGEMSTriangle3* triangles)
@@ -133,9 +133,7 @@ class GGEMSSTLReader
   private:
     GGuchar            header_[80]; /*!< Header infos */
     GGuint             number_of_triangles_; /*< Number of triangles in mesh file */
-    GGfloat            half_width_[3]; /*!< half width of whole mesh volume */
     GGEMSMeshTriangle* triangles_; /*!< Triangle from STL file */
-    GGEMSPoint3        center_; /*!< Center of bounding box around mesh */
 };
 
 #endif // End of GUARD_GGEMS_IO_GGEMSSTLREADER_HH

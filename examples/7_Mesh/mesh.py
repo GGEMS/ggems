@@ -92,10 +92,13 @@ materials_database_manager.set_materials('data/materials.txt')
 # STEP 5: Phantoms and systems
 # Loading phantom in GGEMS
 phantom = GGEMSMeshedPhantom('phantom_mesh')
-#phantom.set_phantom('data/Stanford_Bunny.stl')
-phantom.set_phantom('data/Male_Mesh_Phantom2024.stl')
-phantom.set_rotation(-90.0, 0.0, 90.0, 'deg')
-phantom.set_position(0.0, 0.0, -1000.0, 'mm')
+phantom.set_phantom('data/Stanford_Bunny.stl')
+phantom.set_rotation(90.0, 90.0, 0.0, 'deg')
+phantom.set_position(0.0, 0.0, 25.0, 'mm')
+#phantom.set_phantom('data/Male_Mesh_Phantom2024.stl')
+#phantom.set_rotation(-90.0, 0.0, 90.0, 'deg')
+#phantom.set_position(0.0, 0.0, -1000.0, 'mm')
+phantom.set_mesh_octree_depth(4)
 phantom.set_visible(True)
 phantom.set_material('Water')
 #phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color

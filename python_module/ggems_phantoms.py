@@ -96,6 +96,9 @@ class GGEMSMeshedPhantom(object):
         ggems_lib.set_material_name_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_material_name_ggems_meshed_phantom.restype = ctypes.c_void_p
 
+        ggems_lib.set_mesh_octree_depth_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        ggems_lib.set_mesh_octree_depth_ggems_meshed_phantom.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_meshed_phantom(meshed_phantom_name.encode('ASCII'))
 
     def set_phantom(self, phantom_filename):
@@ -112,6 +115,9 @@ class GGEMSMeshedPhantom(object):
 
     def set_material(self, material_name):
         ggems_lib.set_material_name_ggems_meshed_phantom(self.obj, material_name.encode('ASCII'))
+
+    def set_mesh_octree_depth(self, depth):
+        ggems_lib.set_mesh_octree_depth_ggems_meshed_phantom(self.obj, depth)
 
     def set_material_color(self, material_name, red=0, green=0, blue=0, color_name=''):
         if color_name:

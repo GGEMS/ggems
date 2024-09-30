@@ -117,4 +117,21 @@ typedef struct GGEMSTriangle3_t
   struct GGEMSTriangle3_t* next_triangle_; // use of next triangle (useful for meshed navigation) */
 } GGEMSTriangle3; /*!< Using C convention name of struct to C++ (_t deletion) */
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSNode_t
+  \brief Structure storing Triangle geometry
+*/
+typedef struct GGEMSNode_t
+{
+  GGint           node_depth_;
+  GGEMSPoint3     center_;
+  GGint           first_child_node_id_;
+  GGfloat         half_width_[3];
+  GGEMSTriangle3* triangle_list_;
+} GGEMSNode;
+
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

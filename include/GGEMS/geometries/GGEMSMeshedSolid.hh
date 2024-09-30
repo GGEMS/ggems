@@ -34,6 +34,8 @@
 #include "GGEMS/geometries/GGEMSMeshedSolidData.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 
+class GGEMSOctree;
+
 /*!
   \class GGEMSMeshedSolid
   \brief GGEMS class for meshed solid
@@ -106,7 +108,14 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
     */
     void UpdateTransformationMatrix(GGsize const& thread_index) override;
 
+    /*!
+      \fn void UpdateTriangles(GGsize const& thread_index)
+      \param thread_index - index of the thread (= activated device index)
+      \brief Update triangles after position and rotation
+    */
     void UpdateTriangles(GGsize const& thread_index);
+
+    void BuildOctree(GGint const& depth);
 
   private:
     /*!
@@ -121,11 +130,15 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
     */
     void LoadVolumeImage(void);
 
+    GGEMSPoint3 ComputeOctreeCenter(void) const;
+    void ComputeHalfWidthCenter(GGfloat* half_width) const;
+
   private:
     std::string meshed_phantom_name_; /*!< Filename of STL file for mesh */
 
     GGEMSTriangle3** triangles_; /*!< Pointer to mesh triangles */
-    GGuint           number_of_triangles_;
+    GGuint           number_of_triangles_; /*!< Number of the triangles */
+    GGEMSOctree*     octree_; /*!< Pointer to octree storing triangles */
 
     // Storing infos about Octree and Node
 };

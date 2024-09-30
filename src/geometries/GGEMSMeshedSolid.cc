@@ -32,6 +32,7 @@
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/io/GGEMSSTLReader.hh"
 #include "GGEMS/graphics/GGEMSOpenGLMesh.hh"
+#include "GGEMS/geometries/GGEMSOctree.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +78,8 @@ GGEMSMeshedSolid::GGEMSMeshedSolid(std::string const& meshed_phantom_name, std::
     }
   }
 
+  octree_ = nullptr;
+
   GGcout("GGEMSMeshedSolid", "GGEMSMeshedSolid", 3) << "GGEMSMeshedSolid created!!!" << GGendl;
 }
 
@@ -96,6 +99,10 @@ GGEMSMeshedSolid::~GGEMSMeshedSolid(void)
     }
     delete[] triangles_;
     triangles_ = nullptr;
+  }
+
+  if (octree_) {
+    delete octree_;
   }
 
   GGcout("GGEMSMeshedSolid", "GGEMSMeshedSolid", 3) << "GGEMSMeshedSolid erased!!!" << GGendl;
@@ -308,6 +315,150 @@ void GGEMSMeshedSolid::UpdateTriangles(GGsize const& thread_index)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSMeshedSolid::BuildOctree(GGint const& depth)
+{
+  // Compute center of octree
+  GGEMSPoint3 octree_center = ComputeOctreeCenter();
+
+  // Compute half_width of octree
+  GGfloat octree_half_width[3];
+  ComputeHalfWidthCenter(octree_half_width);
+
+  // Creating octree and build it
+  octree_ = new GGEMSOctree(depth, octree_half_width);
+  octree_->Build(octree_center);
+
+  // Inserting triangles
+  octree_->InsertTriangles(triangles_, number_of_triangles_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSPoint3 GGEMSMeshedSolid::ComputeOctreeCenter(void) const
+{
+  // Min and max points
+  GGEMSPoint3 lo;
+  lo.x_ = FLT_MAX; lo.y_ = FLT_MAX; lo.z_ = FLT_MAX;
+
+  GGEMSPoint3 hi;
+  hi.x_ = FLT_MIN; hi.y_ = FLT_MIN; hi.z_ = FLT_MIN;
+
+  for (unsigned int i = 0; i < number_of_triangles_; ++i) {
+    for (int j = 0; j < 3; ++j) { // Loop over points
+      if (triangles_[0][i].pts_[j].x_ < lo.x_) lo.x_ = triangles_[0][i].pts_[j].x_;
+      if (triangles_[0][i].pts_[j].y_ < lo.y_) lo.y_ = triangles_[0][i].pts_[j].y_;
+      if (triangles_[0][i].pts_[j].z_ < lo.z_) lo.z_ = triangles_[0][i].pts_[j].z_;
+      if (triangles_[0][i].pts_[j].x_ > hi.x_) hi.x_ = triangles_[0][i].pts_[j].x_;
+      if (triangles_[0][i].pts_[j].y_ > hi.y_) hi.y_ = triangles_[0][i].pts_[j].y_;
+      if (triangles_[0][i].pts_[j].z_ > hi.z_) hi.z_ = triangles_[0][i].pts_[j].z_;
+    }
+  }
+
+  // Expand it by 10% so that all points are well interior
+  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.1f;
+  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.1f;
+  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.1f;
+
+  lo.x_ -= expanding_x;
+  hi.x_ += expanding_x;
+  lo.y_ -= expanding_y;
+  hi.y_ += expanding_y;
+  lo.z_ -= expanding_z;
+  hi.z_ += expanding_z;
+
+  if (lo.x_ < 0.0f) lo.x_ = std::floor(lo.x_);
+  else lo.x_ = std::ceil(lo.x_);
+
+  if (lo.y_ < 0.0f) lo.y_ = std::floor(lo.y_);
+  else lo.y_ = std::ceil(lo.y_);
+
+  if (lo.z_ < 0.0f) lo.z_ = std::floor(lo.z_);
+  else lo.z_ = std::ceil(lo.z_);
+
+  if (hi.x_ < 0.0f) hi.x_ = std::floor(hi.x_);
+  else hi.x_ = std::ceil(hi.x_);
+
+  if (hi.y_ < 0.0f) hi.y_ = std::floor(hi.y_);
+  else hi.y_ = std::ceil(hi.y_);
+
+  if (hi.z_ < 0.0f) hi.z_ = std::floor(hi.z_);
+  else hi.z_ = std::ceil(hi.z_);
+
+  // Computing the center of octree box
+  GGEMSPoint3 center;
+  center.x_ = (hi.x_+lo.x_)*0.5f;
+  center.y_ = (hi.y_+lo.y_)*0.5f;
+  center.z_ = (hi.z_+lo.z_)*0.5f;
+
+  return center;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::ComputeHalfWidthCenter(GGfloat* half_width) const
+{
+  // Min and max points
+  GGEMSPoint3 lo;
+  lo.x_ = FLT_MAX; lo.y_ = FLT_MAX; lo.z_ = FLT_MAX;
+
+  GGEMSPoint3 hi;
+  hi.x_ = FLT_MIN; hi.y_ = FLT_MIN; hi.z_ = FLT_MIN;
+
+  for (unsigned int i = 0; i < number_of_triangles_; ++i) {
+    for (int j = 0; j < 3; ++j) { // Loop over points
+      if (triangles_[0][i].pts_[j].x_ < lo.x_) lo.x_ = triangles_[0][i].pts_[j].x_;
+      if (triangles_[0][i].pts_[j].y_ < lo.y_) lo.y_ = triangles_[0][i].pts_[j].y_;
+      if (triangles_[0][i].pts_[j].z_ < lo.z_) lo.z_ = triangles_[0][i].pts_[j].z_;
+      if (triangles_[0][i].pts_[j].x_ > hi.x_) hi.x_ = triangles_[0][i].pts_[j].x_;
+      if (triangles_[0][i].pts_[j].y_ > hi.y_) hi.y_ = triangles_[0][i].pts_[j].y_;
+      if (triangles_[0][i].pts_[j].z_ > hi.z_) hi.z_ = triangles_[0][i].pts_[j].z_;
+    }
+  }
+
+  // Expand it by 10% so that all points are well interior
+  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.1f;
+  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.1f;
+  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.1f;
+
+  lo.x_ -= expanding_x;
+  hi.x_ += expanding_x;
+  lo.y_ -= expanding_y;
+  hi.y_ += expanding_y;
+  lo.z_ -= expanding_z;
+  hi.z_ += expanding_z;
+
+  if (lo.x_ < 0.0f) lo.x_ = std::floor(lo.x_);
+  else lo.x_ = std::ceil(lo.x_);
+
+  if (lo.y_ < 0.0f) lo.y_ = std::floor(lo.y_);
+  else lo.y_ = std::ceil(lo.y_);
+
+  if (lo.z_ < 0.0f) lo.z_ = std::floor(lo.z_);
+  else lo.z_ = std::ceil(lo.z_);
+
+  if (hi.x_ < 0.0f) hi.x_ = std::floor(hi.x_);
+  else hi.x_ = std::ceil(hi.x_);
+
+  if (hi.y_ < 0.0f) hi.y_ = std::floor(hi.y_);
+  else hi.y_ = std::ceil(hi.y_);
+
+  if (hi.z_ < 0.0f) hi.z_ = std::floor(hi.z_);
+  else hi.z_ = std::ceil(hi.z_);
+
+  // Computing the center of octree box
+  half_width[0] = (hi.x_-lo.x_)*0.5f;
+  half_width[1] = (hi.y_-lo.y_)*0.5f;
+  half_width[2] = (hi.z_-lo.z_)*0.5f;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSMeshedSolid::LoadVolumeImage(void)
 {
   GGcout("GGEMSMeshedSolid", "LoadVolumeImage", 3) << "Loading volume image from stl file..." << GGendl;
@@ -345,7 +496,7 @@ void GGEMSMeshedSolid::LoadVolumeImage(void)
 
     // Loading triangles from STL
     stl_input_phantom.LoadTriangles(triangles_[i]);
-  
+
     // Unmapping triangles
     opencl_manager.ReleaseSVMData(triangles_[i], i);
   }

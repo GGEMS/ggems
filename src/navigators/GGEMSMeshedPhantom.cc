@@ -38,7 +38,8 @@
 
 GGEMSMeshedPhantom::GGEMSMeshedPhantom(std::string const& meshed_phantom_name)
 : GGEMSNavigator(meshed_phantom_name),
-  meshed_phantom_filename_("")
+  meshed_phantom_filename_(""),
+  mesh_octree_depth_(1)
 {
   GGcout("GGEMSMeshedPhantom", "GGEMSMeshedPhantom", 3) << "GGEMSMeshedPhantom creating..." << GGendl;
 
@@ -146,7 +147,7 @@ void GGEMSMeshedPhantom::Initialize(void)
   #endif
 
   // Build Octree
-  // solids_[0]->Build Octree for each devices
+  dynamic_cast<GGEMSMeshedSolid*>(solids_[0])->BuildOctree(mesh_octree_depth_);
 
   // Mettre à jour les parametres sur les devices pour faire la navigation + processes physiques
 
@@ -164,6 +165,15 @@ void GGEMSMeshedPhantom::Initialize(void)
 void GGEMSMeshedPhantom::SetPhantomFile(std::string const& meshed_phantom_filename)
 {
   meshed_phantom_filename_ = meshed_phantom_filename;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedPhantom::SetMeshOctreeDepth(GGint const& depth)
+{
+  mesh_octree_depth_ = depth;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,4 +252,12 @@ void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_pha
 void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name)
 {
   meshed_phantom->SetMaterialName(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_mesh_octree_depth_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGint const depth)
+{
+  meshed_phantom->SetMeshOctreeDepth(depth);
 }

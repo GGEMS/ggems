@@ -87,6 +87,13 @@ class GGEMS_EXPORT GGEMSMeshedPhantom : public GGEMSNavigator
     void SetPhantomFile(std::string const& meshed_phantom_filename);
 
     /*!
+      \fn void SetMeshOctreeDepth(GGint const& depth)
+      \param depth - depth of octree
+      \brief set the mesh octree depth
+    */
+    void SetMeshOctreeDepth(GGint const& depth);
+
+    /*!
       \fn void Initialize(void) override
       \brief Initialize the meshed phantom
     */
@@ -107,6 +114,7 @@ class GGEMS_EXPORT GGEMSMeshedPhantom : public GGEMSNavigator
 
   private:
     std::string meshed_phantom_filename_; /*!< Mesh file storing the meshed phantom */
+    GGint mesh_octree_depth_; /*!< Depth of octree for mesh */
 };
 
 /*!
@@ -182,4 +190,12 @@ extern "C" GGEMS_EXPORT void set_material_color_ggems_meshed_phantom(GGEMSMeshed
   \brief Set a color for material
 */
 extern "C" GGEMS_EXPORT void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, char const* color_name);
+
+/*!
+  \fn void set_mesh_octree_depth_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGint const depth)
+  \param meshed_phantom - pointer on meshed phantom
+  \param depth - name of material to draw (or not)
+  \brief Set depth
+*/
+extern "C" GGEMS_EXPORT void set_mesh_octree_depth_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGint const depth);
 #endif
