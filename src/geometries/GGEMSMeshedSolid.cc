@@ -48,6 +48,7 @@ GGEMSMeshedSolid::GGEMSMeshedSolid(std::string const& meshed_phantom_name, std::
 
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    label_data_[d] = nullptr;
     // Allocating memory on OpenCL device
     solid_data_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMeshedSolidData), d, CL_MEM_READ_WRITE, "GGEMSMeshedSolid");
   }
@@ -118,7 +119,7 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
   GGcout("GGEMSMeshedSolid", "Initialize", 3) << "Initializing meshed solid..." << GGendl;
 
   // Initializing kernels and loading image
-  // InitializeKernel();
+  InitializeKernel();
   LoadVolumeImage();
 
   // Creating volume for OpenGL
@@ -140,28 +141,31 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
 
     // Unmapping triangles
     opencl_manager.ReleaseSVMData(triangles_[0], 0);
-
-    //GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-/*
-    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
-
-    opengl_solid_ = new GGEMSOpenGLParaGrid(
-      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.s[0]),
-      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.s[1]),
-      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.s[2]),
-      solid_data_device->voxel_sizes_xyz_.s[0],
-      solid_data_device->voxel_sizes_xyz_.s[1],
-      solid_data_device->voxel_sizes_xyz_.s[2],
-      true // Draw midplanes
-    );*/
-
-    // Release the pointer
-    //opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
-
-    // Loading labels and materials for OpenGL
-    // opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
   }
   #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedSolid::InitializeKernel(void)
+{
+  GGcout("GGEMSMeshedSolid", "InitializeKernel", 3) << "Initializing kernel for mesh solid..." << GGendl;
+
+  // Getting OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Getting the path to kernel
+  std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
+  std::string particle_solid_distance_filename = openCL_kernel_path + "/ParticleSolidDistanceGGEMSMeshSolid.cl";
+  std::string project_to_filename = openCL_kernel_path + "/ProjectToGGEMSMeshSolid.cl";
+  std::string track_through_filename = openCL_kernel_path + "/TrackThroughGGEMSMeshSolid.cl";
+
+  // Compiling the kernels
+  opencl_manager.CompileKernel(particle_solid_distance_filename, "particle_solid_distance_ggems_meshed_solid", kernel_particle_solid_distance_, nullptr, const_cast<char*>(kernel_option_.c_str()));
+  opencl_manager.CompileKernel(project_to_filename, "project_to_ggems_meshed_solid", kernel_project_to_solid_, nullptr, const_cast<char*>(kernel_option_.c_str()));
+  opencl_manager.CompileKernel(track_through_filename, "track_through_ggems_meshed_solid", kernel_track_through_solid_, nullptr, const_cast<char*>(kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,66 +175,18 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
 void GGEMSMeshedSolid::UpdateTransformationMatrix(GGsize const& thread_index)
 {
   // Get the OpenCL manager
-  //GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Copy information to OBB
-  //GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSSolidBoxData), thread_index);
- /* GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), thread_index);
+  GGEMSMeshedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSMeshedSolidData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMeshedSolidData), thread_index);
 
-  //for (GGint i = 0; i < 4; ++i) {
-    std::cout << transformation_matrix_device->m0_[0] << " " << transformation_matrix_device->m0_[1] << " "
-      << transformation_matrix_device->m0_[2] << " " << transformation_matrix_device->m0_[3] << std::endl;
-    std::cout << transformation_matrix_device->m1_[0] << " " << transformation_matrix_device->m1_[1] << " "
-      << transformation_matrix_device->m1_[2] << " " << transformation_matrix_device->m1_[3] << std::endl;
-    std::cout << transformation_matrix_device->m2_[0] << " " << transformation_matrix_device->m2_[1] << " "
-      << transformation_matrix_device->m2_[2] << " " << transformation_matrix_device->m2_[3] << std::endl;*/
-
- //   solid_data_device->obb_geometry_.matrix_transformation_.m0_[i] = transformation_matrix_device->m0_[i];
-  //  solid_data_device->obb_geometry_.matrix_transformation_.m1_[i] = transformation_matrix_device->m1_[i];
- //   solid_data_device->obb_geometry_.matrix_transformation_.m2_[i] = transformation_matrix_device->m2_[i];
- //   solid_data_device->obb_geometry_.matrix_transformation_.m3_[i] = transformation_matrix_device->m3_[i];
-  //}
-
-  // Computing new position of triangles
-  // Mapping triangles
-  /*opencl_manager.GetSVMData(
-    triangles_[thread_index],
-    sizeof(GGEMSTriangle3) * number_of_triangles_,
-    0,
-    CL_TRUE,
-    CL_MAP_READ | CL_MAP_WRITE
-  );
-
-  // Translation
-  GGEMSPoint3 translation = {
-    transformation_matrix_device->m0_[3],
-    transformation_matrix_device->m1_[3],
-    transformation_matrix_device->m2_[3]
-  };*/
-
-  // Loop over all triangles
-  //for (GGuint t = 0; t < 1/*number_of_triangles_*/; ++t) {
-    /*std::cout << "triangle " << t << std::endl;
-    // Loop over the 3 points
-    for (int p = 0; p < 3; ++p) {
-      std::cout << " * point " << p << std::endl;
-      std::cout << triangles_[thread_index][t].pts_[p].x_ << std::endl;
-      std::cout << triangles_[thread_index][t].pts_[p].y_ << std::endl;
-      std::cout << triangles_[thread_index][t].pts_[p].z_ << std::endl;
-    }
-    // Change position of bounding sphere
-    std::cout << " * bounding sphere" << std::endl;
-    std::cout << triangles_[thread_index][t].bounding_sphere_.center_.x_ << std::endl;
-    std::cout << triangles_[thread_index][t].bounding_sphere_.center_.y_ << std::endl;
-    std::cout << triangles_[thread_index][t].bounding_sphere_.center_.z_ << std::endl;
-  }
-
-  // Unmapping triangles
-  opencl_manager.ReleaseSVMData(triangles_[thread_index], thread_index);
+  solid_data_device->obb_geometry_.matrix_transformation_.m0_[0] = 1.0f;
+  solid_data_device->obb_geometry_.matrix_transformation_.m1_[1] = 1.0f;
+  solid_data_device->obb_geometry_.matrix_transformation_.m2_[2] = 1.0f;
+  solid_data_device->obb_geometry_.matrix_transformation_.m3_[3] = 1.0f;
 
   // Release the pointer
-  //opencl_manager.ReleaseDeviceBuffer(solid_data_[thread_index], solid_data_device, thread_index);
-  opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(thread_index), transformation_matrix_device, thread_index);*/
+  opencl_manager.ReleaseDeviceBuffer(solid_data_[thread_index], solid_data_device, thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -330,6 +286,45 @@ void GGEMSMeshedSolid::BuildOctree(GGint const& depth)
 
   // Inserting triangles
   octree_->InsertTriangles(triangles_, number_of_triangles_);
+
+  GGEMSNode** nodes = octree_->GetNodes();
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Storing border of octree in OBB
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    GGEMSMeshedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSMeshedSolidData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMeshedSolidData), d);
+
+    solid_data_device->obb_geometry_.matrix_transformation_.m0_[0] = 1.0f;
+    solid_data_device->obb_geometry_.matrix_transformation_.m1_[1] = 1.0f;
+    solid_data_device->obb_geometry_.matrix_transformation_.m2_[2] = 1.0f;
+    solid_data_device->obb_geometry_.matrix_transformation_.m3_[3] = 1.0f;
+
+    solid_data_device->obb_geometry_.matrix_transformation_.m0_[3] = 0.0f;
+    solid_data_device->obb_geometry_.matrix_transformation_.m1_[3] = 0.0f;
+    solid_data_device->obb_geometry_.matrix_transformation_.m2_[3] = 0.0f;
+
+    solid_data_device->obb_geometry_.border_min_xyz_.s[0] = octree_center.x_ - octree_half_width[0];
+    solid_data_device->obb_geometry_.border_min_xyz_.s[1] = octree_center.y_ - octree_half_width[1];
+    solid_data_device->obb_geometry_.border_min_xyz_.s[2] = octree_center.z_ - octree_half_width[2];
+
+    solid_data_device->obb_geometry_.border_max_xyz_.s[0] = octree_center.x_ + octree_half_width[0];
+    solid_data_device->obb_geometry_.border_max_xyz_.s[1] = octree_center.y_ + octree_half_width[1];
+    solid_data_device->obb_geometry_.border_max_xyz_.s[2] = octree_center.z_ + octree_half_width[2];
+
+    solid_data_device->nodes_ = nodes[d];
+    solid_data_device->total_nodes_ = octree_->GetTotalNodes();
+
+
+    //clSetKernelExecInfo((*kernel_track_through_solid_[d])(), CL_KERNEL_EXEC_INFO_SVM_PTRS, sizeof(GGEMSNode), nodes[d]);
+
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(solid_data_[d], solid_data_device, d);
+  }
+
+    //kernel_mesh_intersection_[thread_index]->SetKernelExecInfo(
+      //sizeof(TriangleGPU*), &triangle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -356,10 +351,10 @@ GGEMSPoint3 GGEMSMeshedSolid::ComputeOctreeCenter(void) const
     }
   }
 
-  // Expand it by 10% so that all points are well interior
-  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.1f;
-  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.1f;
-  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.1f;
+  // Expand it by 2.5% so that all points are well interior
+  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.025f;
+  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.025f;
+  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.025f;
 
   lo.x_ -= expanding_x;
   hi.x_ += expanding_x;
@@ -419,10 +414,10 @@ void GGEMSMeshedSolid::ComputeHalfWidthCenter(GGfloat* half_width) const
     }
   }
 
-  // Expand it by 10% so that all points are well interior
-  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.1f;
-  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.1f;
-  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.1f;
+  // Expand it by 2.5% so that all points are well interior
+  GGfloat expanding_x = (hi.x_ - lo.x_) * 0.025f;
+  GGfloat expanding_y = (hi.y_ - lo.y_) * 0.025f;
+  GGfloat expanding_z = (hi.z_ - lo.z_) * 0.025f;
 
   lo.x_ -= expanding_x;
   hi.x_ += expanding_x;
@@ -525,22 +520,22 @@ void GGEMSMeshedSolid::PrintInfos(void) const
     GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Meshed solid on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
     GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Mesh filename: " << meshed_phantom_name_ << GGendl;
     GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "Number of triangles: " << number_of_triangles_ << GGendl;
-    //GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Dimension: " << solid_data_device->number_of_voxels_xyz_.s[0] << " " << solid_data_device->number_of_voxels_xyz_.s[1] << " " << solid_data_device->number_of_voxels_xyz_.s[2] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Number of voxels: " << solid_data_device->number_of_voxels_ << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Size of voxels: (" << solid_data_device->voxel_sizes_xyz_.s[0] /mm << "x" << solid_data_device->voxel_sizes_xyz_.s[1]/mm << "x" << solid_data_device->voxel_sizes_xyz_.s[2]/mm << ") mm3" << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Oriented bounding box (OBB) in local position:" << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - X: " << solid_data_device->obb_geometry_.border_min_xyz_.s[0] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[0] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Y: " << solid_data_device->obb_geometry_.border_min_xyz_.s[1] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[1] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Z: " << solid_data_device->obb_geometry_.border_min_xyz_.s[2] << " <-> " << //solid_data_device->obb_geometry_.border_max_xyz_.s[2] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Transformation matrix:" << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    [" << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[3] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[3] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[3] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[3] << GGendl;
-    //GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    ]" << GGendl;
-    GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Solid index: " << solid_data_device->solid_id_ << GGendl;
-    GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Dimension: " << solid_data_device->number_of_voxels_xyz_.s[0] << " " << solid_data_device->number_of_voxels_xyz_.s[1] << " " << solid_data_device->number_of_voxels_xyz_.s[2] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Number of voxels: " << solid_data_device->number_of_voxels_ << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Size of voxels: (" << solid_data_device->voxel_sizes_xyz_.s[0] /mm << "x" << solid_data_device->voxel_sizes_xyz_.s[1]/mm << "x" << solid_data_device->voxel_sizes_xyz_.s[2]/mm << ") mm3" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Oriented bounding box (OBB) in local position:" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "    - X: " << solid_data_device->obb_geometry_.border_min_xyz_.s[0] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[0] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "    - Y: " << solid_data_device->obb_geometry_.border_min_xyz_.s[1] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[1] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "    - Z: " << solid_data_device->obb_geometry_.border_min_xyz_.s[2] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.s[2] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "    - Transformation matrix:" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "    [" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[3] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m1_[3] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m2_[3] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m3_[3] << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "    ]" << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << "* Solid index: " << solid_data_device->solid_id_ << GGendl;
+    GGcout("GGEMSMeshedSolid", "PrintInfos", 0) << GGendl;
 
     // Release the pointer
     opencl_manager.ReleaseDeviceBuffer(solid_data_[d], solid_data_device, d);

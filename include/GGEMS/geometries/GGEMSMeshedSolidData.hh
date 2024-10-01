@@ -39,11 +39,13 @@
 */
 typedef struct GGEMSMeshedSolidData_t
 {
-  //GGEMSOBB obb_geometry_; /*!< OBB storing border of meshed solid and matrix of transformation */
-  //GGfloat3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
-  //GGint3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z */
+  GGEMSOBB obb_geometry_; /*!< OBB storing border of meshed solid and matrix of transformation */
+  GGfloat3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
+  GGint3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z */
   GGint solid_id_; /*!< Navigator index */
-  //GGint number_of_voxels_; /*!< Total number of voxels */
+  GGint number_of_voxels_; /*!< Total number of voxels */
+  GGEMSNode* nodes_; /*! Nodes storing triangles */
+  GGint total_nodes_;
 } GGEMSMeshedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSMESHEDSOLIDDATA_HH

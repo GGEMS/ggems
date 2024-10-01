@@ -64,6 +64,7 @@ opencl_manager = GGEMSOpenCLManager()
 materials_database_manager = GGEMSMaterialsDatabaseManager()
 processes_manager = GGEMSProcessesManager()
 range_cuts_manager = GGEMSRangeCutsManager()
+volume_creator_manager = GGEMSVolumeCreatorManager()
 
 # ------------------------------------------------------------------------------
 # STEP 2: Params for visualization
@@ -90,21 +91,45 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Phantoms and systems
+
+# Generating box phantom
+volume_creator_manager.set_dimensions(120, 120, 120)
+volume_creator_manager.set_element_sizes(0.6, 0.6, 0.6, 'mm')
+volume_creator_manager.set_output('data/phantom.mhd')
+volume_creator_manager.set_range_output('data/range_phantom.txt')
+volume_creator_manager.set_material('Air')
+volume_creator_manager.set_data_type('MET_INT')
+volume_creator_manager.initialize()
+
+box_phantom = GGEMSBox(65.0, 65.0, 65.0, 'mm')
+box_phantom.set_position(0.0, 0.0, 0.0, 'mm')
+box_phantom.set_label_value(1)
+box_phantom.set_material('Water')
+box_phantom.initialize()
+box_phantom.draw()
+box_phantom.delete()
+
+volume_creator_manager.write()
+
+# Loading voxelized phantom in GGEMS
+vox_phantom = GGEMSVoxelizedPhantom('phantom')
+vox_phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
+vox_phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
+vox_phantom.set_position(0.0, 0.0, 100.0, 'mm')
+vox_phantom.set_visible(True)
+vox_phantom.set_material_visible('Air', False)
+vox_phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
+
 # Loading phantom in GGEMS
-phantom = GGEMSMeshedPhantom('phantom_mesh')
-phantom.set_phantom('data/Stanford_Bunny.stl')
-phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-phantom.set_position(0.0, 0.0, 0.0, 'mm')
-#phantom.set_rotation(90.0, 90.0, 0.0, 'deg')
-#phantom.set_position(0.0, 0.0, 25.0, 'mm')
-#phantom.set_phantom('data/Male_Mesh_Phantom2024.stl')
-#phantom.set_rotation(-90.0, 0.0, 90.0, 'deg')
-#phantom.set_position(0.0, 0.0, -1000.0, 'mm')
-phantom.set_mesh_octree_depth(4)
-phantom.set_visible(True)
-phantom.set_material('Water')
-#phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
-phantom.set_material_color('Water', 207, 160, 233)
+mesh_phantom = GGEMSMeshedPhantom('phantom_mesh')
+mesh_phantom.set_phantom('data/Stanford_Bunny.stl')
+mesh_phantom.set_rotation(90.0, 90.0, 0.0, 'deg')
+mesh_phantom.set_position(0.0, 0.0, -35.0, 'mm')
+mesh_phantom.set_mesh_octree_depth(4)
+mesh_phantom.set_visible(True)
+mesh_phantom.set_material('Water')
+mesh_phantom.set_material_color('Water', color_name='white') # Uncomment for automatic color
+#mesh_phantom.set_material_color('Water', 207, 160, 233)
 
 cbct_detector = GGEMSCTSystem('custom')
 cbct_detector.set_ct_type('flat')
@@ -161,7 +186,7 @@ ggems.process_verbose(True)
 ggems.range_cuts_verbose(True)
 ggems.random_verbose(True)
 ggems.profiling_verbose(True)
-ggems.tracking_verbose(False, 0)
+ggems.tracking_verbose(True, 2)
 
 # Initializing the GGEMS simulation
 ggems.initialize(seed)

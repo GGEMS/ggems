@@ -116,25 +116,19 @@ void GGEMSMeshedPhantom::Initialize(void)
   // Perform rotation before translation
   if (is_update_rot_) {
     solids_[0]->SetRotation(rotation_xyz_); // For matrix transformation
-   // #ifdef OPENGL_VISUALIZATION
-   // solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
-   // solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
-   // solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
-   // #endif
   }
   if (is_update_pos_) {
     solids_[0]->SetPosition(position_xyz_); // For matrix transformation
-    //#ifdef OPENGL_VISUALIZATION
-    //solids_[0]->SetPositionOpenGL(position_xyz_.s[0], position_xyz_.s[1], position_xyz_.s[2]);
-    //#endif
   }
 
   // Update transformation matrix and triangles positions
-  //for (GGsize j = 0; j < number_activated_devices_; ++j) {
-     //solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+     solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
      // Store the transformation matrix in solid object
- //    solids_[0]->UpdateTransformationMatrix(j);
-  //}
+     // All triangles rotated, so the rotation angles are at initial value : 1
+     // OBB is also translated, so translation matrix is 0
+     solids_[0]->UpdateTransformationMatrix(j);
+  }
 
   // Update new position of mesh after translation and rotation
   for (GGsize j = 0; j < number_activated_devices_; ++j) {

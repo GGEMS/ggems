@@ -122,7 +122,7 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
       \fn void InitializeKernel(void)
       \brief Initialize kernel for particle solid distance
     */
-    void InitializeKernel(void) override {}
+    void InitializeKernel(void) override;
 
     /*!
       \fn void LoadVolumeImage(void)
