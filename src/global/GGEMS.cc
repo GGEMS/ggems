@@ -319,8 +319,8 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       source_manager.GetPrimaries(i, thread_index, number_of_particles);
 
       // Loop until ALL particles are dead
- //     GGint loop_counter = 0, max_loop = 100; // Prevent infinite loop
- //     do {
+      GGint loop_counter = 0, max_loop = 100; // Prevent infinite loop
+      do {
         // Step 2: Find closest navigator (phantom, detector) before projection and track operation
         navigator_manager.FindSolid(thread_index);
 
@@ -333,8 +333,8 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
         // Step 4: Track through step, particles are tracked in selected solid
         navigator_manager.TrackThroughSolid(thread_index);
 
- //       loop_counter++;
- //     } while (source_manager.IsAlive(thread_index) && loop_counter < max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+        loop_counter++;
+      } while (source_manager.IsAlive(thread_index) && loop_counter < max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
 
       // Incrementing progress bar
       ::mutex.lock();

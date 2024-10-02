@@ -72,7 +72,7 @@ kernel void particle_solid_distance_ggems_meshed_solid(
     primary_particle->dz_[global_id]
   };
 
-  // Check if particle inside voxelized navigator, if yes distance is 0.0 and not need to compute particle - solid distance
+  // Check if particle inside meshed navigator, if yes distance is 0.0 and not need to compute particle - solid distance
   if (IsParticleInOBB(&position, &meshed_solid_data->obb_geometry_)) {
     #ifdef GGEMS_TRACKING
     if (global_id == primary_particle->particle_tracking_id) {
@@ -88,7 +88,7 @@ kernel void particle_solid_distance_ggems_meshed_solid(
     return;
   }
 
-  // Compute distance between particles and voxelized navigator
+  // Compute distance between particles and meshed navigator
   GGfloat distance = ComputeDistanceToOBB(&position, &direction, &meshed_solid_data->obb_geometry_);
 
   // Check distance value with previous value. Store the minimum value

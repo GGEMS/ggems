@@ -231,7 +231,6 @@ inline GGint GetMeshIOPositions(GGfloat3 const p, GGfloat3 const d, GGEMSMeshedS
           mesh_pos[0].z = point_on_mesh_surface.z;
           nearest_point[0] = d2;
         } else {
-          d2 = 10.0f;
           for (GGint i = index_mesh_pos - 1; i >= 0; --i) {
             // Compare distance
             if (d2 < nearest_point[i]) shift++;
@@ -250,9 +249,9 @@ inline GGint GetMeshIOPositions(GGfloat3 const p, GGfloat3 const d, GGEMSMeshedS
               mesh_pos[index_mesh_pos - j].z = mesh_pos[index_mesh_pos - j - 1].z;
               nearest_point[index_mesh_pos - j] = nearest_point[index_mesh_pos - j - 1];
             }
-            mesh_pos[index_mesh_pos].x = point_on_mesh_surface.x;
-            mesh_pos[index_mesh_pos].y = point_on_mesh_surface.y;
-            mesh_pos[index_mesh_pos].z = point_on_mesh_surface.z;
+            mesh_pos[index_mesh_pos - shift].x = point_on_mesh_surface.x;
+            mesh_pos[index_mesh_pos - shift].y = point_on_mesh_surface.y;
+            mesh_pos[index_mesh_pos - shift].z = point_on_mesh_surface.z;
             nearest_point[index_mesh_pos - shift] = d2;
           }
         }
@@ -332,179 +331,33 @@ kernel void track_through_ggems_meshed_solid(
   };
 
   GGfloat3 mesh_surface_pos[MAX_TRIANGLE_INTERACTION];
+  GGfloat3 next_triangle_pos;
 
-  // Get list of points crossing triangles
-  // Points are sorted from distance closest to local_position
-  GGint number_intersec_triangles = GetMeshIOPositions(local_position, local_direction, meshed_solid_data, mesh_surface_pos);
-
-  // If no triangle interaction, project particle to limit of OBB and exit
-  if (number_intersec_triangles == 0) {
-    //primary_particle->px_[global_id] = ;
-    //primary_particle->py_[global_id] = ;
-    //primary_particle->pz_[global_id] = ;
-    return;
-  }
-
-  // Move particle to first triangle position
-  local_position.x = mesh_surface_pos[0].x;
-  local_position.y = mesh_surface_pos[0].y;
-  local_position.z = mesh_surface_pos[0].z;
-
-  // Find next discrete photon interaction
-  GetPhotonNextInteraction(primary_particle, random, particle_cross_sections, 0, global_id);
-  GGfloat next_interaction_distance = primary_particle->next_interaction_distance_[global_id];
-  GGchar next_discrete_process = primary_particle->next_discrete_process_[global_id];
-
-  // Computing distance to next triangle
-  GGfloat dX = (mesh_surface_pos[1].x - mesh_surface_pos[0].x);
-  GGfloat dY = (mesh_surface_pos[1].y - mesh_surface_pos[0].y);
-  GGfloat dZ = (mesh_surface_pos[1].z - mesh_surface_pos[0].z);
-  GGfloat distance_to_next_triangle = sqrt(dX*dX + dY*dY + dZ*dZ);
-
-  // If distance to next triangle is inferior to distance to next interaction we move particle to next triangle
-  if (distance_to_next_triangle <= next_interaction_distance) {
-    next_interaction_distance = distance_to_next_triangle + GEOMETRY_TOLERANCE;
-    next_discrete_process = TRANSPORTATION;
-   // #if defined(DOSIMETRY)
-  //  if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
-  //  #endif
-  }
-
-  #if defined(GGEMS_TRACKING)
-  if (global_id == primary_particle->particle_tracking_id) {
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] ################################################################################\n");
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Particle id: %d\n", global_id);
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Particle type: ");
-    if (primary_particle->pname_[global_id] == PHOTON) printf("gamma\n");
-    else if (primary_particle->pname_[global_id] == ELECTRON) printf("e-\n");
-    else if (primary_particle->pname_[global_id] == POSITRON) printf("e+\n");
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Local position (x, y, z): %e %e %e mm\n", local_position.x/mm, local_position.y/mm, local_position.z/mm);
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Local direction (x, y, z): %e %e %e\n", local_direction.x, local_direction.y, local_direction.z);
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Energy: %e keV\n", primary_particle->E_[global_id]/keV);
-    printf("\n");
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid id: %u\n", meshed_solid_data->solid_id_);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Nb voxels: %u %u %u\n", number_of_voxels.x, number_of_voxels.y, number_of_voxels.z);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel size: %e %e %e mm\n", voxel_size.x/mm, voxel_size.y/mm, voxel_size.z/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid X Borders: %e %e mm\n", border_min.x/mm, border_max.x/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid Y Borders: %e %e mm\n", border_min.y/mm, border_max.y/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid Z Borders: %e %e mm\n", border_min.z/mm, border_max.z/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel X Borders: %e %e mm\n", voxel_border_min.x/mm, voxel_border_max.x/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel Y Borders: %e %e mm\n", voxel_border_min.y/mm, voxel_border_max.y/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel Z Borders: %e %e mm\n", voxel_border_min.z/mm, voxel_border_max.z/mm);
-    //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Index of current voxel (x, y, z): %d %d %d\n", voxel_id.x, voxel_id.y, voxel_id.z);
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Material: %s\n", particle_cross_sections->material_names_[0]);
-    printf("\n");
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Next process: ");
-    if (next_discrete_process == COMPTON_SCATTERING) printf("COMPTON_SCATTERING\n");
-    if (next_discrete_process == PHOTOELECTRIC_EFFECT) printf("PHOTOELECTRIC_EFFECT\n");
-    if (next_discrete_process == RAYLEIGH_SCATTERING) printf("RAYLEIGH_SCATTERING\n");
-    if (next_discrete_process == TRANSPORTATION) printf("TRANSPORTATION\n");
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Next interaction distance: %e mm\n", next_interaction_distance/mm);
-    printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Distance to next triangle: %e mm\n", distance_to_next_triangle/mm);
-  }
-  #endif
-
-  // Moving particle to next position
-  local_position = local_position + local_direction*next_interaction_distance;
-
-  // Storing new position in local
-  primary_particle->px_[global_id] = local_position.x + GEOMETRY_TOLERANCE;
-  primary_particle->py_[global_id] = local_position.y + GEOMETRY_TOLERANCE;
-  primary_particle->pz_[global_id] = local_position.z + GEOMETRY_TOLERANCE;
-
-  //#if defined(DOSIMETRY)
-  //GGfloat initial_energy = primary_particle->E_[global_id];
-  //#endif
-
-  // Resolve process if different of TRANSPORTATION
-  if (next_discrete_process != TRANSPORTATION) {
-
-    PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, 0, global_id);
-
-    // If process is COMPTON_SCATTERING or RAYLEIGH_SCATTERING scatter order is incremented
-    if (next_discrete_process == COMPTON_SCATTERING || next_discrete_process == RAYLEIGH_SCATTERING)
-    {
-      primary_particle->scatter_[global_id] = TRUE;
-    }
-
-    //#if defined(DOSIMETRY)
-    //GGfloat edep = initial_energy - primary_particle->E_[global_id];
-    //dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
-    //#endif
-
-    local_direction.x = primary_particle->dx_[global_id];
-    local_direction.y = primary_particle->dy_[global_id];
-    local_direction.z = primary_particle->dz_[global_id];
-
-    #if defined(OPENGL)
-    if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
-      // Storing OpenGL index on OpenCL private memory
-      GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
-
-      // Checking if buffer is full
-      if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
-        primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = local_position.x;
-        primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = local_position.y;
-        primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = local_position.z;
-
-        // Storing final index
-        primary_particle->stored_particles_gl_[global_id] += 1;
-      }
-    }
-    #endif
-  }
-
-  //#if defined(DOSIMETRY) 
-  //GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
-  //GGfloat mu_en = 0.0f;
-  //if (E_index == 0) {
-  //  mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];
-  //}
-  //else {
-  //  mu_en = LinearInterpolation(
-  //    attenuations->energy_bins_[E_index-1], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index-1],
-  //    attenuations->energy_bins_[E_index], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index],
-  //    initial_energy
-  //  );
-  //}
-  //GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1f;
-  //dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
-  //#endif
-
-  // Apply threshold
-  if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[0]) {
-   // #if defined(DOSIMETRY)
-   // dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, primary_particle->E_[global_id], &local_position);
-   // #endif
-    primary_particle->status_[global_id] = DEAD;
-  }
-
-  // Get next triangle intersections
-  number_intersec_triangles = GetMeshIOPositions(local_position, local_direction, meshed_solid_data, mesh_surface_pos);
-
-  printf("%d\n", number_intersec_triangles);
-  for (GGint i = 0; i < number_intersec_triangles; ++i) {
-    printf("%4.7f %4.7f %4.7f\n", mesh_surface_pos[i].x, mesh_surface_pos[i].y, mesh_surface_pos[i].z);
-  }
-
-  // Get borders of OBB
-  //GGfloat3 border_min = meshed_solid_data->obb_geometry_.border_min_xyz_;
-  //GGfloat3 border_max = meshed_solid_data->obb_geometry_.border_max_xyz_;
-
-  //GGfloat3 voxel_size = voxelized_solid_data->voxel_sizes_xyz_;
-  //GGint3 number_of_voxels = voxelized_solid_data->number_of_voxels_xyz_;
-/*
-  // Track particle until out of solid
+  // Loop for navigation of particles to meshed volume
   do {
-    // Get index of voxelized phantom, x, y, z
-    GGint3 voxel_id = convert_int3((local_position - border_min) / voxel_size);
+    // Get position of interaction with triangles
+    GGint n_inter_triangles = GetMeshIOPositions(local_position, local_direction, meshed_solid_data, mesh_surface_pos);
 
-    if (voxel_id.x >= number_of_voxels.x ||
-        voxel_id.y >= number_of_voxels.y ||
-        voxel_id.z >= number_of_voxels.z) {
+    if (n_inter_triangles == 0) { // No iteraction particle/meshed volume
       primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
       primary_particle->solid_id_[global_id] = -1; // Out of world
       break;
+    }
+
+    // n_inter_triangles even : particle outside meshed volume
+    // n_inter_triangles odd : particle inside meshed volume
+    if (n_inter_triangles%2 == 0) { // Move particles to first triangle
+      local_position.x = mesh_surface_pos[0].x;
+      local_position.y = mesh_surface_pos[0].y;
+      local_position.z = mesh_surface_pos[0].z;
+
+      next_triangle_pos.x = mesh_surface_pos[1].x;
+      next_triangle_pos.y = mesh_surface_pos[1].y;
+      next_triangle_pos.z = mesh_surface_pos[1].z;
+    } else {
+      next_triangle_pos.x = mesh_surface_pos[0].x;
+      next_triangle_pos.y = mesh_surface_pos[0].y;
+      next_triangle_pos.z = mesh_surface_pos[0].z;
     }
 
     // Find next discrete photon interaction
@@ -512,77 +365,71 @@ kernel void track_through_ggems_meshed_solid(
     GGfloat next_interaction_distance = primary_particle->next_interaction_distance_[global_id];
     GGchar next_discrete_process = primary_particle->next_discrete_process_[global_id];
 
-    // Get the borders of the current voxel
-    //GGfloat3 voxel_border_min = border_min +  convert_float3(voxel_id)*voxel_size;
-    //GGfloat3 voxel_border_max = voxel_border_min + voxel_size;
+    // Computing distance to next triangle
+    GGfloat dX = (next_triangle_pos.x - local_position.x);
+    GGfloat dY = (next_triangle_pos.y - local_position.y);
+    GGfloat dZ = (next_triangle_pos.z - local_position.z);
+    GGfloat distance_to_next_triangle = sqrt(dX*dX + dY*dY + dZ*dZ);
 
-    // Get safety position of particle to be sure particle is inside voxel
-    //TransportGetSafetyInsideAABB(
-    //  &local_position,
-    //  voxel_border_min.x, voxel_border_max.x,
-    //  voxel_border_min.y, voxel_border_max.y,
-    //  voxel_border_min.z, voxel_border_max.z,
-     // GEOMETRY_TOLERANCE
-    //);
-
-    // Get the distance to next boundary
-    GGfloat distance_to_next_boundary = ComputeDistanceToAABB(
-      &local_position, &local_direction,
-      voxel_border_min.x, voxel_border_max.x,
-      voxel_border_min.y, voxel_border_max.y,
-      voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
-    );
-
-    // If distance to next boundary is inferior to distance to next interaction we move particle to boundary
-    if (distance_to_next_boundary <= next_interaction_distance) {
-      next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
+    // If distance to next triangle is inferior to distance to next interaction we move particle to next triangle
+    if (distance_to_next_triangle <= next_interaction_distance) {
+      next_interaction_distance = distance_to_next_triangle + GEOMETRY_TOLERANCE;
       next_discrete_process = TRANSPORTATION;
-      #if defined(DOSIMETRY)
-      if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
-      #endif
-    }*/
+    // #if defined(DOSIMETRY)
+    //  if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
+    //  #endif
+    }
 
+    #if defined(GGEMS_TRACKING)
+    if (global_id == primary_particle->particle_tracking_id) {
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] ################################################################################\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Particle id: %d\n", global_id);
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Particle type: ");
+      if (primary_particle->pname_[global_id] == PHOTON) printf("gamma\n");
+      else if (primary_particle->pname_[global_id] == ELECTRON) printf("e-\n");
+      else if (primary_particle->pname_[global_id] == POSITRON) printf("e+\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Local position (x, y, z): %e %e %e mm\n", local_position.x/mm, local_position.y/mm, local_position.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Local direction (x, y, z): %e %e %e\n", local_direction.x, local_direction.y, local_direction.z);
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Energy: %e keV\n", primary_particle->E_[global_id]/keV);
+      printf("\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid id: %u\n", meshed_solid_data->solid_id_);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Nb voxels: %u %u %u\n", number_of_voxels.x, number_of_voxels.y, number_of_voxels.z);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel size: %e %e %e mm\n", voxel_size.x/mm, voxel_size.y/mm, voxel_size.z/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid X Borders: %e %e mm\n", border_min.x/mm, border_max.x/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid Y Borders: %e %e mm\n", border_min.y/mm, border_max.y/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Solid Z Borders: %e %e mm\n", border_min.z/mm, border_max.z/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel X Borders: %e %e mm\n", voxel_border_min.x/mm, voxel_border_max.x/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel Y Borders: %e %e mm\n", voxel_border_min.y/mm, voxel_border_max.y/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Voxel Z Borders: %e %e mm\n", voxel_border_min.z/mm, voxel_border_max.z/mm);
+      //printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Index of current voxel (x, y, z): %d %d %d\n", voxel_id.x, voxel_id.y, voxel_id.z);
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Material: %s\n", particle_cross_sections->material_names_[0]);
+      printf("\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Next process: ");
+      if (next_discrete_process == COMPTON_SCATTERING) printf("COMPTON_SCATTERING\n");
+      if (next_discrete_process == PHOTOELECTRIC_EFFECT) printf("PHOTOELECTRIC_EFFECT\n");
+      if (next_discrete_process == RAYLEIGH_SCATTERING) printf("RAYLEIGH_SCATTERING\n");
+      if (next_discrete_process == TRANSPORTATION) printf("TRANSPORTATION\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Next interaction distance: %e mm\n", next_interaction_distance/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_meshed_solid] Distance to next triangle: %e mm\n", distance_to_next_triangle/mm);
+    }
+    #endif
 
-
-
-
-
-
-
-/*
     // Moving particle to next position
     local_position = local_position + local_direction*next_interaction_distance;
 
-    // Get safety position of particle to be sure particle is outside voxel
-    TransportGetSafetyOutsideAABB(
-      &local_position,
-      voxel_border_min.x, voxel_border_max.x,
-      voxel_border_min.y, voxel_border_max.y,
-      voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
-    );
-
-    //  Checking if particle outside solid, still in local
-    if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, GEOMETRY_TOLERANCE)) {
-      primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
-      primary_particle->solid_id_[global_id] = -1; // Out of world
-      break;
-    }
-
     // Storing new position in local
-    primary_particle->px_[global_id] = local_position.x;
-    primary_particle->py_[global_id] = local_position.y;
-    primary_particle->pz_[global_id] = local_position.z;
+    primary_particle->px_[global_id] = local_position.x + GEOMETRY_TOLERANCE;
+    primary_particle->py_[global_id] = local_position.y + GEOMETRY_TOLERANCE;
+    primary_particle->pz_[global_id] = local_position.z + GEOMETRY_TOLERANCE;
 
-    #if defined(DOSIMETRY)
-    GGfloat initial_energy = primary_particle->E_[global_id];
-    #endif
+    //#if defined(DOSIMETRY)
+    //GGfloat initial_energy = primary_particle->E_[global_id];
+    //#endif
 
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
 
-      PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
+      PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, 0, global_id);
 
       // If process is COMPTON_SCATTERING or RAYLEIGH_SCATTERING scatter order is incremented
       if (next_discrete_process == COMPTON_SCATTERING || next_discrete_process == RAYLEIGH_SCATTERING)
@@ -590,10 +437,10 @@ kernel void track_through_ggems_meshed_solid(
         primary_particle->scatter_[global_id] = TRUE;
       }
 
-      #if defined(DOSIMETRY) && !defined(TLE)
-      GGfloat edep = initial_energy - primary_particle->E_[global_id];
-      dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
-      #endif
+      //#if defined(DOSIMETRY)
+      //GGfloat edep = initial_energy - primary_particle->E_[global_id];
+      //dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+      //#endif
 
       local_direction.x = primary_particle->dx_[global_id];
       local_direction.y = primary_particle->dy_[global_id];
@@ -606,12 +453,9 @@ kernel void track_through_ggems_meshed_solid(
 
         // Checking if buffer is full
         if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
-          // Getting global position
-          global_position = LocalToGlobalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &local_position);
-
-          primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.x;
-          primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.y;
-          primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.z;
+          primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = local_position.x;
+          primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = local_position.y;
+          primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = local_position.z;
 
           // Storing final index
           primary_particle->stored_particles_gl_[global_id] += 1;
@@ -620,30 +464,41 @@ kernel void track_through_ggems_meshed_solid(
       #endif
     }
 
-    #if defined(DOSIMETRY) && defined(TLE)
-    GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
-    GGfloat mu_en = 0.0f;
-    if (E_index == 0) {
-      mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];
-    }
-    else {
-      mu_en = LinearInterpolation(
-        attenuations->energy_bins_[E_index-1], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index-1],
-        attenuations->energy_bins_[E_index], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index],
-        initial_energy
-      );
-    }
-    GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1f;
-    dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
-    #endif
+    //#if defined(DOSIMETRY) 
+    //GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
+    //GGfloat mu_en = 0.0f;
+    //if (E_index == 0) {
+    //  mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];
+    //}
+    //else {
+    //  mu_en = LinearInterpolation(
+    //    attenuations->energy_bins_[E_index-1], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index-1],
+    //    attenuations->energy_bins_[E_index], attenuations->mu_en_[material_id*attenuations->number_of_bins_ + E_index],
+    //    initial_energy
+    //  );
+    //}
+    //GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1f;
+    //dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+    //#endif
 
     // Apply threshold
-    if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[material_id]) {
-      #if defined(DOSIMETRY)
-      dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, primary_particle->E_[global_id], &local_position);
-      #endif
+    if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[0]) {
+    // #if defined(DOSIMETRY)
+    // dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, primary_particle->E_[global_id], &local_position);
+    // #endif
       primary_particle->status_[global_id] = DEAD;
     }
   } while (primary_particle->status_[global_id] == ALIVE);
-*/
+
+  // Compute distance between particles and voxelized navigator
+  GGfloat distance = ComputeDistanceToOBB(&local_position, &local_direction, &meshed_solid_data->obb_geometry_);
+
+  // Project particles to limit of volume
+  primary_particle->px_[global_id] = local_position.x + local_direction.x * (distance + GEOMETRY_TOLERANCE);
+  primary_particle->py_[global_id] = local_position.y + local_direction.y * (distance + GEOMETRY_TOLERANCE);
+  primary_particle->pz_[global_id] = local_position.z + local_direction.z * (distance + GEOMETRY_TOLERANCE);
+
+  primary_particle->dx_[global_id] = local_direction.x;
+  primary_particle->dy_[global_id] = local_direction.y;
+  primary_particle->dz_[global_id] = local_direction.z;
 }

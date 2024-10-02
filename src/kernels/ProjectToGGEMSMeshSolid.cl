@@ -118,7 +118,6 @@ kernel void project_to_ggems_meshed_solid(
 
   primary_particle->particle_solid_distance_[global_id] = 0.0f;
 
-  //printf("%d", global_id);
   #ifdef GGEMS_TRACKING
   if (global_id == primary_particle->particle_tracking_id) {
     printf("[GGEMS OpenCL kernel project_to_ggems_meshed_solid] ********************************************************************************\n");
