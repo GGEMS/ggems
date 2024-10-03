@@ -1047,7 +1047,7 @@ GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-inline GGulong GGEMSOpenCLManager::GetKernelLocalMemSize(cl::Kernel* kernel) const
+GGulong GGEMSOpenCLManager::GetKernelLocalMemSize(cl::Kernel* kernel) const
 {
   GGint error = 0;
 
@@ -1067,7 +1067,7 @@ inline GGulong GGEMSOpenCLManager::GetKernelLocalMemSize(cl::Kernel* kernel) con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-inline GGulong GGEMSOpenCLManager::GetKernelPrivateMemSize(cl::Kernel* kernel) const
+GGulong GGEMSOpenCLManager::GetKernelPrivateMemSize(cl::Kernel* kernel) const
 {
   GGint error = 0;
 
@@ -1087,7 +1087,7 @@ inline GGulong GGEMSOpenCLManager::GetKernelPrivateMemSize(cl::Kernel* kernel) c
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-inline GGulong GGEMSOpenCLManager::GetKernelWorkGroupSize(cl::Kernel* kernel) const
+GGsize GGEMSOpenCLManager::GetKernelWorkGroupSize(cl::Kernel* kernel) const
 {
   GGint error = 0;
 

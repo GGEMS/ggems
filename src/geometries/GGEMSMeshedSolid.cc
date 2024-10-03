@@ -450,7 +450,7 @@ void GGEMSMeshedSolid::ComputeHalfWidthCenter(GGfloat* half_width) const
 
 GGfloat3 GGEMSMeshedSolid::GetVoxelSizes(GGsize const& thread_index) const
 {
-  return {0.0f, 0.0f, 0.0f};
+  return {{0.0f, 0.0f, 0.0f}};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -109,14 +109,14 @@ GGEMSSTLReader::GGEMSMeshTriangle::GGEMSMeshTriangle(GGEMSPoint3 const& p0, GGEM
   pts_[1] = p1;
   pts_[2] = p2;
 
-  GGEMSSphere3 s;
-  SphereFromDistantPoints(s, pts_);
+  GGEMSSphere3 sph;
+  SphereFromDistantPoints(sph, pts_);
   for (int i = 0; i < 3; ++i) {
-    SphereOfSphereAndPoint(s, pts_[i]);
+    SphereOfSphereAndPoint(sph, pts_[i]);
   }
 
-  bounding_sphere_.center_ = s.center_;
-  bounding_sphere_.radius_ = s.radius_;
+  bounding_sphere_.center_ = sph.center_;
+  bounding_sphere_.radius_ = sph.radius_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +175,7 @@ void GGEMSSTLReader::GGEMSMeshTriangle::MostSeparatedPointsOnAABB(GGEMSPoint3 pt
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSTLReader::GGEMSMeshTriangle::SphereFromDistantPoints(GGEMSSphere3& s, GGEMSPoint3 pts[3])
+void GGEMSSTLReader::GGEMSMeshTriangle::SphereFromDistantPoints(GGEMSSphere3& sph, GGEMSPoint3 pts[3])
 {
   // Find the most separated point pair defining the encompassing AABB
   GGint min{0};
@@ -189,39 +189,39 @@ void GGEMSSTLReader::GGEMSMeshTriangle::SphereFromDistantPoints(GGEMSSphere3& s,
   center.z_ = (pts[min].z_ + pts[max].z_) * 0.5f;
 
   // Set up sphere to just encompass these two points
-  s.center_ = center;
+  sph.center_ = center;
 
   GGEMSPoint3 distance;
   distance.x_ = pts[max].x_ - center.x_;
   distance.y_ = pts[max].y_ - center.y_;
   distance.z_ = pts[max].z_ - center.z_;
 
-  s.radius_ = Dot(distance, distance);
-  s.radius_ = sqrtf(s.radius_);
+  sph.radius_ = Dot(distance, distance);
+  sph.radius_ = sqrtf(sph.radius_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSTLReader::GGEMSMeshTriangle::SphereOfSphereAndPoint(GGEMSSphere3& s, GGEMSPoint3& p)
+void GGEMSSTLReader::GGEMSMeshTriangle::SphereOfSphereAndPoint(GGEMSSphere3& sph, GGEMSPoint3& p)
 {
   // Compute squared distance between point and sphere center
   GGEMSPoint3 p_scenter;
-  p_scenter.x_ = p.x_ - s.center_.x_;
-  p_scenter.y_ = p.y_ - s.center_.y_;
-  p_scenter.z_ = p.z_ - s.center_.z_;
+  p_scenter.x_ = p.x_ - sph.center_.x_;
+  p_scenter.y_ = p.y_ - sph.center_.y_;
+  p_scenter.z_ = p.z_ - sph.center_.z_;
 
   GGfloat dist2 = Dot(p_scenter, p_scenter);
 
-  if (dist2 > s.radius_ * s.radius_) {
+  if (dist2 > sph.radius_ * sph.radius_) {
     GGfloat dist = sqrtf(dist2);
-    GGfloat new_radius = (s.radius_ + dist) * 0.5f;
-    GGfloat k = (new_radius - s.radius_) / dist;
-    s.radius_ = new_radius;
-    s.center_.x_ += p_scenter.x_ * k;
-    s.center_.y_ += p_scenter.y_ * k;
-    s.center_.z_ += p_scenter.z_ * k;
+    GGfloat new_radius = (sph.radius_ + dist) * 0.5f;
+    GGfloat k = (new_radius - sph.radius_) / dist;
+    sph.radius_ = new_radius;
+    sph.center_.x_ += p_scenter.x_ * k;
+    sph.center_.y_ += p_scenter.y_ * k;
+    sph.center_.z_ += p_scenter.z_ * k;
   }
 }
 

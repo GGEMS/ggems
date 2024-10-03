@@ -28,19 +28,12 @@
   \date Wednesday September 25, 2024
 */
 
-#include <mutex>
+#include <thread>
 
 #include "GGEMS/geometries/GGEMSOctree.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-/*!
-  \brief empty namespace storing mutex
-*/
-namespace {
-  std::mutex mutex; /*!< Mutex variable */
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

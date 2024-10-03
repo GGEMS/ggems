@@ -83,7 +83,7 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-config")
 
 #-------------------------------------------------------------------------------
 # Find the OpenCL library and for OpenCL 3.0
-FIND_PACKAGE(CUDAToolkit 11.2 REQUIRED)
+FIND_PACKAGE(CUDAToolkit 12.0 REQUIRED)
 MESSAGE(STATUS "CUDA Toolkit: ${CUDAToolkit_FOUND}")
 MESSAGE(STATUS "CUDA Toolkit VERSION: ${CUDAToolkit_VERSION}")
 MESSAGE(STATUS "CUDA Toolkit INCLUDE DIRS: ${CUDAToolkit_INCLUDE_DIRS}")

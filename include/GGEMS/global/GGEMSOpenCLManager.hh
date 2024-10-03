@@ -35,6 +35,7 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include <sstream>
+#include "GGEMS/tools/GGEMSTools.hh"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
@@ -228,8 +229,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     GGulong GetKernelLocalMemSize(cl::Kernel* kernel) const;
     GGulong GetKernelPrivateMemSize(cl::Kernel* kernel) const;
     GGsize GetKernelWorkGroupSize(cl::Kernel* kernel) const;
-
-    //CL_KERNEL_LOCAL_MEM_SIZE cl_ulong
 
     /*!
       \fn inline GGsize GetNumberOfDetectedDevice(void) const
