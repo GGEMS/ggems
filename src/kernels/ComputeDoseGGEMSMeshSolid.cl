@@ -17,46 +17,46 @@
 // ************************************************************************
 
 /*!
-  \file ComputeDoseGGEMSVoxelizedSolid.cl
+  \file ComputeDoseGGEMSMeshSolid.cl
 
-  \brief OpenCL kernel compute dose in voxelized solid
+  \brief OpenCL kernel compute dose in meshed solid
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Wednesday January 13, 2021
+  \date Wednesday October 2, 2024
 */
 
 #include "GGEMS/navigators/GGEMSDoseParams.hh"
 #include "GGEMS/materials/GGEMSMaterialTables.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-#include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
+#include "GGEMS/geometries/GGEMSMeshedSolidData.hh"
 
 /*!
-  \fn kernel void compute_dose_ggems_voxelized_solid(GGsize const dosel_id_limit, global GGEMSDoseParams const* dose_params, global GGDosiType const* edep, global GGint const* hit, global GGDosiType const* edep_squared, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSMaterialTables const* materials, global GGfloat* dose, global GGfloat* uncertainty, GGfloat const scale_factor, GGchar const is_water_reference, GGfloat const minimum_density)
+  \fn kernel void compute_dose_ggems_meshed_solid(GGsize const dosel_id_limit, global GGEMSDoseParams const* dose_params, global GGDosiType const* edep, global GGint const* hit, global GGDosiType const* edep_squared, global GGEMSMeshedSolidData const* meshed_solid_data, global GGuchar const* label_data, global GGEMSMaterialTables const* materials, global GGfloat* dose, global GGfloat* uncertainty, GGfloat const scale_factor, GGchar const is_water_reference, GGfloat const minimum_density)
   \param dosel_id_limit - number total of dosels
   \param dose_params - params about dosemap
   \param edep - buffer storing energy deposit
   \param hit - buffer storing hit
   \param edep_squared - buffer storing edep squared
-  \param voxelized_solid_data - pointer to voxelized solid data
-  \param label_data - label data associated to voxelized phantom
-  \param materials - registered material in voxelized phantom
+  \param meshed_solid_data - pointer to meshed solid data
+  \param label_data - label data associated to meshed phantom
+  \param materials - registered material in meshed phantom
   \param dose - output buffer storing dose in gray (Gy)
   \param uncertainty - output buffer storing dose uncertainty
   \param scale_factor - scale factor apply to dose
   \param is_water_reference - water reference mode
   \param minimum_density - minimum density threshold
-  \brief computing dose for voxelized solid
+  \brief computing dose for meshed solid
 */
-kernel void compute_dose_ggems_voxelized_solid(
+kernel void compute_dose_ggems_meshed_solid(
   GGsize const dosel_id_limit,
   global GGEMSDoseParams const* dose_params,
   global GGDosiType const* edep,
   global GGint const* hit,
   global GGDosiType const* edep_squared,
-  global GGEMSVoxelizedSolidData const* voxelized_solid_data,
+  global GGEMSMeshedSolidData const* meshed_solid_data,
   global GGuchar const* label_data,
   global GGEMSMaterialTables const* materials,
   global GGfloat* dose,
@@ -77,19 +77,11 @@ kernel void compute_dose_ggems_voxelized_solid(
   dosel_id.x = (global_id - dosel_id.z*dose_params->slice_number_of_dosels_)%dose_params->number_of_dosels_.x;
   dosel_id.y = (global_id - dosel_id.z*dose_params->slice_number_of_dosels_)/dose_params->number_of_dosels_.x;
 
-
   // Convert doxel_id into position
   GGfloat3 dosel_pos = convert_float3(dosel_id) * dose_params->size_of_dosels_ + convert_float3((dose_params->number_of_dosels_-1)) * (-0.5f*dose_params->size_of_dosels_);
 
-  // Get index of voxelized phantom, x, y, z
-  GGint3 voxel_id = convert_int3((dosel_pos - voxelized_solid_data->obb_geometry_.border_min_xyz_) / voxelized_solid_data->voxel_sizes_xyz_);
-
   // Get the material that compose this volume
-  GGuchar material_id = label_data[
-    voxel_id.x +
-    voxel_id.y * voxelized_solid_data->number_of_voxels_xyz_.x +
-    voxel_id.z * voxelized_solid_data->number_of_voxels_xyz_.x * voxelized_solid_data->number_of_voxels_xyz_.y
-  ];
+  GGuchar material_id = 0;
 
   // Compute volume of dosel
   GGfloat dosel_vol = dose_params->size_of_dosels_.x * dose_params->size_of_dosels_.y * dose_params->size_of_dosels_.z;

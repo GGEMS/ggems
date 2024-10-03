@@ -117,6 +117,9 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
 
     void BuildOctree(GGint const& depth);
 
+    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const override;
+    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const override;
+
   private:
     /*!
       \fn void InitializeKernel(void)

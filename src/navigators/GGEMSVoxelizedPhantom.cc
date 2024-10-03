@@ -151,7 +151,7 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   GGEMSNavigator::Initialize();
 
   // Checking if dosimetry mode activated
-  if (is_dosimetry_mode_) dose_calculator_->Initialize();
+  if (is_dosimetry_mode_) dose_calculator_->Initialize("VOXELIZED");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

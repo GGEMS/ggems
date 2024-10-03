@@ -96,7 +96,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
       \fn void Initialize(void)
       \brief Initialize dosimetry calculator class
     */
-    void Initialize(void);
+    void Initialize(std::string const nav_type);
 
     /*!
       \fn void SetDoselSizes(GGfloat const& dosel_x, GGfloat const& dosel_y, GGfloat const& dosel_z, std::string const& unit = "mm")
@@ -243,7 +243,8 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
       \fn void InitializeKernel(void)
       \brief Initialize kernel for dose computation
     */
-    void InitializeKernel(void);
+    void InitializeVoxelizedKernel(void);
+    void InitializeMeshedKernel(void);
 
     /*!
       \fn void SavePhotonTracking(void) const

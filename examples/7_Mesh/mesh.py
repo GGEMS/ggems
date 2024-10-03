@@ -92,34 +92,6 @@ materials_database_manager.set_materials('data/materials.txt')
 # ------------------------------------------------------------------------------
 # STEP 5: Phantoms and systems
 
-# Generating box phantom
-#volume_creator_manager.set_dimensions(120, 120, 120)
-#volume_creator_manager.set_element_sizes(0.6, 0.6, 0.6, 'mm')
-#volume_creator_manager.set_output('data/phantom.mhd')
-#volume_creator_manager.set_range_output('data/range_phantom.txt')
-#volume_creator_manager.set_material('Air')
-#volume_creator_manager.set_data_type('MET_INT')
-#volume_creator_manager.initialize()
-
-#box_phantom = GGEMSBox(65.0, 65.0, 65.0, 'mm')
-#box_phantom.set_position(0.0, 0.0, 0.0, 'mm')
-#box_phantom.set_label_value(1)
-#box_phantom.set_material('Water')
-#box_phantom.initialize()
-#box_phantom.draw()
-#box_phantom.delete()
-
-#volume_creator_manager.write()
-
-# Loading voxelized phantom in GGEMS
-#vox_phantom = GGEMSVoxelizedPhantom('phantom')
-#vox_phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
-#vox_phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-#vox_phantom.set_position(0.0, 0.0, 100.0, 'mm')
-#vox_phantom.set_visible(True)
-#vox_phantom.set_material_visible('Air', False)
-#vox_phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
-
 # Loading phantom in GGEMS
 mesh_phantom = GGEMSMeshedPhantom('phantom_mesh')
 mesh_phantom.set_phantom('data/Stanford_Bunny.stl')
@@ -147,6 +119,21 @@ cbct_detector.store_scatter(True)
 cbct_detector.set_visible(True)
 cbct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
 #cbct_detector.set_material_color('GOS', color_name='blue') # Using registered color
+
+# ------------------------------------------------------------------------------
+# Dosimetry
+dosimetry = GGEMSDosimetryCalculator()
+dosimetry.attach_to_navigator('phantom_mesh')
+dosimetry.set_output_basename('data/dosimetry')
+dosimetry.set_dosel_size(1.0, 1.0, 1.0, 'mm')
+dosimetry.water_reference(False)
+dosimetry.minimum_density(0.1, 'g/cm3')
+
+dosimetry.uncertainty(True)
+dosimetry.photon_tracking(False)
+dosimetry.edep(True)
+dosimetry.hit(True)
+dosimetry.edep_squared(True)
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics

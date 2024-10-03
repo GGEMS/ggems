@@ -94,18 +94,20 @@ void GGEMSMeshedPhantom::Initialize(void)
   number_of_solids_ = 1;
 
   // Initializing meshed solid for geometric navigation
-  // if (is_dosimetry_mode_) {
-  //   solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_, "DOSIMETRY");
-  // }
-  // else {
-  solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_);
-  // }
+   if (is_dosimetry_mode_) {
+    solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_, "DOSIMETRY");
+   }
+   else {
+    solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_);
+   }
 
   // Enabling tracking if necessary
   if (is_tracking_) solids_[0]->EnableTracking();
 
   // Enabling TLE
-  // if (is_tle_) solids_[0]->EnableTLE();
+  if (is_tle_) {
+    GGwarn("GGEMSMeshedPhantom", "Initialize", 0)  << "TLE is not possible for meshed phantom" << GGendl;
+  }
 
   // Load meshed phantom from STL file and storing materials
   solids_[0]->Initialize(nullptr);
@@ -148,8 +150,8 @@ void GGEMSMeshedPhantom::Initialize(void)
   // Initialize parent class
   GGEMSNavigator::Initialize();
 
-  // // Checking if dosimetry mode activated
-  // if (is_dosimetry_mode_) dose_calculator_->Initialize();
+  // Checking if dosimetry mode activated
+  if (is_dosimetry_mode_) dose_calculator_->Initialize("MESHED");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

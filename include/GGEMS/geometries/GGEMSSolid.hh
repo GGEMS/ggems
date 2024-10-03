@@ -204,6 +204,9 @@ class GGEMS_EXPORT GGEMSSolid
     */
     virtual void PrintInfos(void) const = 0;
 
+    virtual GGfloat3 GetVoxelSizes(GGsize const& thread_index) const = 0;
+    virtual GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const = 0;
+
     /*!
       \fn std::string GetRegisteredDataType(void) const
       \return the type of registered data

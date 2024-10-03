@@ -317,14 +317,9 @@ void GGEMSMeshedSolid::BuildOctree(GGint const& depth)
     solid_data_device->total_nodes_ = octree_->GetTotalNodes();
 
 
-    //clSetKernelExecInfo((*kernel_track_through_solid_[d])(), CL_KERNEL_EXEC_INFO_SVM_PTRS, sizeof(GGEMSNode), nodes[d]);
-
     // Release the pointer
     opencl_manager.ReleaseDeviceBuffer(solid_data_[d], solid_data_device, d);
   }
-
-    //kernel_mesh_intersection_[thread_index]->SetKernelExecInfo(
-      //sizeof(TriangleGPU*), &triangle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -448,6 +443,32 @@ void GGEMSMeshedSolid::ComputeHalfWidthCenter(GGfloat* half_width) const
   half_width[0] = (hi.x_-lo.x_)*0.5f;
   half_width[1] = (hi.y_-lo.y_)*0.5f;
   half_width[2] = (hi.z_-lo.z_)*0.5f;
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGfloat3 GGEMSMeshedSolid::GetVoxelSizes(GGsize const& thread_index) const
+{
+  return {0.0f, 0.0f, 0.0f};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSOBB GGEMSMeshedSolid::GetOBBGeometry(GGsize const& thread_index) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  GGEMSMeshedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSMeshedSolidData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMeshedSolidData), thread_index);
+
+  GGEMSOBB obb_geometry = solid_data_device->obb_geometry_;
+
+  opencl_manager.ReleaseDeviceBuffer(solid_data_[thread_index], solid_data_device, thread_index);
+
+  return obb_geometry;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
