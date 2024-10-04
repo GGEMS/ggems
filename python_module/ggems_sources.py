@@ -61,6 +61,9 @@ class GGEMSXRaySource(object):
       ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_source_particle_type_ggems_xray_source.restype = ctypes.c_void_p
 
+      ggems_lib.set_source_direction_type_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+      ggems_lib.set_source_direction_type_ggems_xray_source.restype = ctypes.c_void_p
+
       ggems_lib.set_beam_aperture_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
       ggems_lib.set_beam_aperture_ggems_xray_source.restype = ctypes.c_void_p
 
@@ -76,6 +79,12 @@ class GGEMSXRaySource(object):
       ggems_lib.set_polyenergy_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_polyenergy_ggems_xray_source.restype = ctypes.c_void_p
 
+      ggems_lib.set_theta_histogram_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_size_t, ctypes.c_char_p]
+      ggems_lib.set_theta_histogram_ggems_xray_source.restype = ctypes.c_void_p
+
+      ggems_lib.set_phi_histogram_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_size_t, ctypes.c_char_p]
+      ggems_lib.set_phi_histogram_ggems_xray_source.restype = ctypes.c_void_p
+
       self.obj = ggems_lib.create_ggems_xray_source(source_name.encode('ASCII'))
 
   def set_position(self, x, y, z, unit):
@@ -86,6 +95,9 @@ class GGEMSXRaySource(object):
 
   def set_source_particle_type(self, particle_type):
       ggems_lib.set_source_particle_type_ggems_xray_source(self.obj, particle_type.encode('ASCII'))
+
+  def set_direction_type(self, direction_type):
+      ggems_lib.set_source_direction_type_ggems_xray_source(self.obj, direction_type.encode('ASCII'))
 
   def set_beam_aperture(self, beam_aperture, unit):
       ggems_lib.set_beam_aperture_ggems_xray_source(self.obj, beam_aperture, unit.encode('ASCII'))
@@ -101,3 +113,9 @@ class GGEMSXRaySource(object):
 
   def set_polyenergy(self, file):
       ggems_lib.set_polyenergy_ggems_xray_source(self.obj, file.encode('ASCII'))
+
+  def set_theta_histogram(self, theta_weights, theta_angles, unit):
+      ggems_lib.set_theta_histogram_ggems_xray_source(self.obj, (ctypes.c_float * len(theta_weights))(*theta_weights), (ctypes.c_float * len(theta_angles))(*theta_angles), len(theta_weights),unit.encode('ASCII'))
+
+  def set_phi_histogram(self, phi_weights, phi_angles, unit):
+      ggems_lib.set_phi_histogram_ggems_xray_source(self.obj, (ctypes.c_float * len(phi_weights))(*phi_weights), (ctypes.c_float * len(phi_angles))(*phi_angles), len(phi_weights),unit.encode('ASCII'))

@@ -18,6 +18,7 @@
 
 import argparse
 from ggems import *
+from anode_heel_effect_model import get_phi_distribution
 
 # ------------------------------------------------------------------------------
 # Read arguments
@@ -157,9 +158,21 @@ point_source.set_source_particle_type('gamma')
 point_source.set_number_of_particles(number_of_particles)
 point_source.set_position(-900.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
+#point_source.set_direction_type('isotropic')
+point_source.set_direction_type('histogram')
 point_source.set_beam_aperture(12.5, 'deg')
 point_source.set_focal_spot_size(0.2, 0.6, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
+
+# Set theta
+theta_weights = [0.0, 1.0]
+theta_angles = [82.68, 97.32]
+point_source.set_theta_histogram(theta_weights, theta_angles, 'deg')
+
+# Set phi
+kvp = 100
+phi_weights, phi_angles = get_phi_distribution(kvp)
+point_source.set_phi_histogram(phi_weights, phi_angles, 'rad')
 
 # ------------------------------------------------------------------------------
 # STEP 9: GGEMS simulation

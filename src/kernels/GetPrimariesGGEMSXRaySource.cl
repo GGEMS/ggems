@@ -33,10 +33,15 @@
 #include "GGEMS/maths/GGEMSReferentialTransformation.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
+#include "GGEMS/physics/GGEMSDirectionConstants.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
-  \fn kernel void get_primaries_ggems_xray_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf, GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
+  \fn kernel void get_primaries_ggems_xray_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf,
+  GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation,
+  GGchar const direction_type, global GGfloat const* theta_cdf, global GGfloat const* theta_angles, global GGfloat const* phi_cdf,
+  global GGfloat const* phi_angles, GGint const theta_angles_size, GGint const phi_angles_size)
   \param particle_id_limit - particle id limit
   \param primary_particle - buffer of primary particles
   \param random - buffer for random number
@@ -47,6 +52,13 @@
   \param aperture - source aperture
   \param focal_spot_size - focal spot size of xray-source
   \param matrix_transformation - matrix storing information about axis
+  \param direction_type - direction type for the source
+  \param theta_cdf - cumulative derivative function for theta weights
+  \param theta_angles - source theta angles
+  \param phi_cdf - cumulative derivative function for phi weights
+  \param phi_angles - source phi angles
+  \param theta_angles_size - size of the theta angles array
+  \param phi_angles_size - size of the phi angles array
   \brief Generate primaries for xray source
 */
 kernel void get_primaries_ggems_xray_source(
@@ -59,7 +71,14 @@ kernel void get_primaries_ggems_xray_source(
   GGint const number_of_energy_bins,
   GGfloat const aperture,
   GGfloat3 const focal_spot_size,
-  global GGfloat44 const* matrix_transformation
+  global GGfloat44 const* matrix_transformation,
+  GGchar const direction_type,
+  global GGfloat const* theta_cdf,
+  global GGfloat const* theta_angles,
+  global GGfloat const* phi_cdf,
+  global GGfloat const* phi_angles,
+  GGint const theta_angles_size,
+  GGint const phi_angles_size
 )
 {
   // Get the index of thread
@@ -68,31 +87,90 @@ kernel void get_primaries_ggems_xray_source(
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;
 
-  // Get random angles
-  GGdouble phi = KissUniform(random, global_id);
-  GGdouble theta = KissUniform(random, global_id);
-
-  phi *= (GGdouble)TWO_PI;
-  GGdouble new_aperture = 1.0 - cos((GGdouble)aperture);
-  theta = acos(1.0 - new_aperture*theta);
-
-  // Compute rotation
-  GGfloat3 rotation = {
-    cos(phi) * sin(theta),
-    sin(phi) * sin(theta),
-    cos(theta)
-  };
-
-  // Get direction of the cone beam. The beam is targeted to the isocenter, then
-  // the direction is directly related to the position of the source.
-  // Local position of xray source is 0 0 0
+  // Get direction of the cone beam. The beam is targeted to the isocenter,
+  // so the direction is directly related to the position of the source.
+  // Local position of X-ray source is 0 0 0
   GGfloat3 global_position = {0.0f, 0.0f, 0.0f};
   global_position = LocalToGlobalPosition(matrix_transformation, &global_position);
   GGfloat3 direction = normalize((GGfloat3)(0.0f, 0.0f, 0.0f) - global_position);
 
-  // Apply deflection (global coordinate)
-  direction = RotateUnitZ(&rotation, &direction);
-  direction = normalize(direction);
+  if (direction_type == 0) { // Isotropic
+    // Get random angles
+    GGdouble phi = KissUniform(random, global_id);
+    GGdouble theta = KissUniform(random, global_id);
+
+    phi *= (GGdouble)TWO_PI;
+    GGdouble new_aperture = 1.0 - cos((GGdouble)aperture);
+    theta = acos(1.0 - new_aperture*theta);
+
+    // Compute rotation
+    GGfloat3 rotation = {
+        cos(phi) * sin(theta),
+        sin(phi) * sin(theta),
+        cos(theta)
+    };
+
+    // Apply deflection (global coordinate)
+    direction = RotateUnitZ(&rotation, &direction);
+    direction = normalize(direction);
+  } else if (direction_type == 1) { //Histogram
+    GGint not_accepted_events = 0;
+    GGint max_not_accepted_events = 10000;
+    bool accept_angle = false;
+    while (!accept_angle) {
+      if(not_accepted_events > max_not_accepted_events) {
+        // "Too many events not accepted"
+        return;
+      }
+      not_accepted_events++;
+      // Getting a random for theta and phi angle
+      GGfloat rndm_for_theta = KissUniform(random, global_id);
+      GGfloat rndm_for_phi = KissUniform(random, global_id);
+
+      // Get index in cdf
+      GGint index_for_theta = BinarySearchLeft(rndm_for_theta, theta_cdf, theta_angles_size, 0, 0);
+      GGint index_for_phi = BinarySearchLeft(rndm_for_phi, phi_cdf, phi_angles_size, 0, 0);
+
+      // Setting theta and phi
+      GGdouble theta = (index_for_theta == theta_angles_size - 1) ?
+        theta_angles[index_for_theta] :
+        LinearInterpolation(theta_cdf[index_for_theta], theta_angles[index_for_theta],
+                            theta_cdf[index_for_theta + 1], theta_angles[index_for_theta + 1],
+                            rndm_for_theta);
+
+      GGdouble phi = (index_for_phi == phi_angles_size - 1) ?
+        phi_angles[index_for_phi] :
+        LinearInterpolation(phi_cdf[index_for_phi], phi_angles[index_for_phi],
+                            phi_cdf[index_for_phi + 1], phi_angles[index_for_phi + 1],
+                            rndm_for_phi);
+
+      // Compute rotation
+      GGfloat3 rotation = (GGfloat3)(
+          cos(phi) * sin(theta),
+          cos(theta),
+          sin(phi) * sin(theta)
+      );
+
+      // Apply deflection (global coordinate)
+      direction = normalize((GGfloat3)(0.0f, 0.0f, 0.0f) - global_position);
+      direction = RotateUnitZ(&rotation, &direction);
+      direction = normalize(direction);
+
+      GGfloat3 normal_vector = normalize((GGfloat3)(1.0f, 0.0f, 0.0f) - global_position);
+      GGfloat acceptance_angle = acos(dot(direction, normal_vector));
+
+      GGfloat epsilon = 1e-6f;
+      // Check if the angle is accepted or aperture is too small
+      if (acceptance_angle <= aperture || fabs(aperture) < epsilon) {
+          accept_angle = true;
+          not_accepted_events = 0;
+          primary_particle->dx_[global_id] = direction.x;
+          primary_particle->dy_[global_id] = direction.y;
+          primary_particle->dz_[global_id] = direction.z;
+      }
+    }
+  }
+  
 
   // Position with focal (local)
   global_position.x = focal_spot_size.x * (KissUniform(random, global_id) - 0.5f);

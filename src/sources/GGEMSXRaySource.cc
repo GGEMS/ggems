@@ -32,6 +32,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
+#include "GGEMS/physics/GGEMSDirectionConstants.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
@@ -48,7 +49,13 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   energy_spectrum_filename_(""),
   number_of_energy_bins_(0),
   energy_spectrum_(nullptr),
-  cdf_(nullptr)
+  cdf_(nullptr),
+  theta_cdf_(nullptr),
+  theta_angles_(nullptr),
+  phi_cdf_(nullptr),
+  phi_angles_(nullptr),
+  theta_angles_size_(0),
+  phi_angles_size_(0)
 {
   GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "GGEMSXRaySource creating..." << GGendl;
 
@@ -110,6 +117,36 @@ GGEMSXRaySource::~GGEMSXRaySource(void)
     cdf_ = nullptr;
   }
 
+  if (theta_cdf_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(theta_cdf_[i], theta_angles_size_*sizeof(GGfloat), i);
+    }
+    delete[] theta_cdf_;
+    theta_cdf_ = nullptr;
+  }
+
+  if (theta_angles_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(theta_angles_[i], theta_angles_size_*sizeof(GGfloat), i);
+    }
+    delete[] theta_angles_;
+  }
+
+  if (phi_cdf_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(phi_cdf_[i], phi_angles_size_*sizeof(GGfloat), i);
+    }
+    delete[] phi_cdf_;
+    phi_cdf_ = nullptr;
+  }
+
+  if (phi_angles_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(phi_angles_[i], phi_angles_size_*sizeof(GGfloat), i);
+    }
+    delete[] phi_angles_;
+  }
+
   GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "GGEMSXRaySource erased!!!" << GGendl;
 }
 
@@ -162,6 +199,11 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   cl::NDRange global_wi(number_of_work_items);
   cl::NDRange local_wi(work_group_size);
 
+  dummy_buffer = new cl::Buffer*[number_activated_devices_];
+
+  for (GGsize j = 0; j < number_activated_devices_; ++j)
+      dummy_buffer[j] = opencl_manager.Allocate(nullptr, sizeof(GGfloat), j, CL_MEM_READ_ONLY, "GGEMSXRaySource");
+
   // Set parameters for kernel
   kernel_get_primaries_[thread_index]->setArg(0, number_of_particles);
   kernel_get_primaries_[thread_index]->setArg(1, *particles);
@@ -173,6 +215,21 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   kernel_get_primaries_[thread_index]->setArg(7, beam_aperture_);
   kernel_get_primaries_[thread_index]->setArg(8, focal_spot_size_);
   kernel_get_primaries_[thread_index]->setArg(9, *matrix_transformation);
+  kernel_get_primaries_[thread_index]->setArg(10, direction_type_);
+  if (direction_type_ == ISOTROPIC) {
+    kernel_get_primaries_[thread_index]->setArg(11, *dummy_buffer[thread_index]);
+    kernel_get_primaries_[thread_index]->setArg(12, *dummy_buffer[thread_index]);
+    kernel_get_primaries_[thread_index]->setArg(13, *dummy_buffer[thread_index]);
+    kernel_get_primaries_[thread_index]->setArg(14, *dummy_buffer[thread_index]);
+  }
+  else if (direction_type_ == HISTOGRAM) {
+    kernel_get_primaries_[thread_index]->setArg(11, *theta_cdf_[thread_index]);
+    kernel_get_primaries_[thread_index]->setArg(12, *theta_angles_[thread_index]);
+    kernel_get_primaries_[thread_index]->setArg(13, *phi_cdf_[thread_index]);
+    kernel_get_primaries_[thread_index]->setArg(14, *phi_angles_[thread_index]);
+  }
+  kernel_get_primaries_[thread_index]->setArg(15, static_cast<GGint>(theta_angles_size_));
+  kernel_get_primaries_[thread_index]->setArg(16, static_cast<GGint>(phi_angles_size_));
 
   // Launching kernel
   cl::Event event;
@@ -219,6 +276,13 @@ void GGEMSXRaySource::PrintInfos(void) const
     }
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_by_device_[j] << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << number_of_batchs_[j] << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Direction type: ";
+    if (direction_type_ == ISOTROPIC) {
+      std::cout << "Isotropic" << std::endl;
+    }
+    else if (direction_type_ == HISTOGRAM) {
+      std::cout << "Histogram" << std::endl;
+    }
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
     if (is_monoenergy_mode_) {
       std::cout << "Monoenergy" << std::endl;
@@ -273,7 +337,7 @@ void GGEMSXRaySource::CheckParameters(void) const
   GGcout("GGEMSXRaySource", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
   // Checking the beam aperture
-  if (beam_aperture_ == std::numeric_limits<float>::min()) {
+  if (direction_type_ == ISOTROPIC && beam_aperture_ == std::numeric_limits<float>::min()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a beam aperture for the source!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
@@ -319,6 +383,22 @@ void GGEMSXRaySource::CheckParameters(void) const
       oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
       GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
     }
+  }
+
+  // Checking the type of direction
+  if (direction_type_ == 99) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a direction type for the source:" << std::endl;
+    oss << "    - isotropic" << std::endl;
+    oss << "    - histrogram" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
+  }
+
+  // phi and theta parameters should be set for histogram
+  if ((direction_type_ == HISTOGRAM && theta_cdf_ == nullptr) || (direction_type_ == HISTOGRAM && phi_cdf_ == nullptr)) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set theta and phi histogram" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
   }
 }
 
@@ -422,6 +502,93 @@ void GGEMSXRaySource::FillEnergy(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSXRaySource::SetTheta(const std::vector<GGfloat>& theta_weights, const std::vector<GGfloat>& theta_angles, std::string const& unit) 
+{
+    // Get the OpenCL manager
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+    theta_cdf_ = new cl::Buffer*[number_activated_devices_];
+    theta_angles_ = new cl::Buffer*[number_activated_devices_];
+    theta_angles_size_ = theta_angles.size();
+
+    // Allocate memory and copy CDF and angles to each device
+    for (GGsize j = 0; j < number_activated_devices_; ++j) {
+        theta_cdf_[j] = opencl_manager.Allocate(nullptr, theta_angles_size_ * sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
+        theta_angles_[j] = opencl_manager.Allocate(nullptr, theta_angles_size_ * sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
+
+        // Get the device pointers
+        GGfloat* theta_cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(theta_cdf_[j], CL_TRUE, CL_MAP_WRITE, theta_angles_size_ * sizeof(GGfloat), j);
+        GGfloat* theta_angles_device = opencl_manager.GetDeviceBuffer<GGfloat>(theta_angles_[j], CL_TRUE, CL_MAP_WRITE, theta_angles_size_ * sizeof(GGfloat), j);
+
+        // Create and normalize the CDF on the host
+        theta_cdf_device[0] = theta_weights[0];
+        for (GGsize i = 1; i < theta_angles_size_; ++i) {
+            theta_cdf_device[i] = theta_cdf_device[i - 1] + theta_weights[i];
+        }
+
+        GGfloat normalization_factor = theta_cdf_device[theta_angles_size_ - 1];
+
+        for (GGsize i = 0; i < theta_angles_size_; ++i) {
+            theta_cdf_device[i] /= normalization_factor;
+        }
+
+        // Copy the data from the host to the device buffer
+        std::memcpy(theta_angles_device, theta_angles.data(), theta_angles_size_ * sizeof(GGfloat));
+
+        // Release the mapped buffers
+        opencl_manager.ReleaseDeviceBuffer(theta_cdf_[j], theta_cdf_device, j);
+        opencl_manager.ReleaseDeviceBuffer(theta_angles_[j], theta_angles_device, j);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSXRaySource::SetPhi(const std::vector<GGfloat>& phi_weights, const std::vector<GGfloat>& phi_angles, std::string const& unit)
+{
+    // Get the OpenCL manager
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+       
+    phi_cdf_ = new cl::Buffer*[number_activated_devices_];
+    phi_angles_ = new cl::Buffer*[number_activated_devices_];
+    phi_angles_size_ = phi_angles.size();
+
+    // Allocate memory and copy CDF and angles to each device
+    for (GGsize j = 0; j < number_activated_devices_; ++j) {
+        phi_cdf_[j] = opencl_manager.Allocate(nullptr, phi_angles_size_ * sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
+        phi_angles_[j] = opencl_manager.Allocate(nullptr, phi_angles_size_ * sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
+
+        // Get the device pointers
+        GGfloat* phi_cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(phi_cdf_[j], CL_TRUE, CL_MAP_WRITE, phi_angles_size_ * sizeof(GGfloat), j);
+        GGfloat* phi_angles_device = opencl_manager.GetDeviceBuffer<GGfloat>(phi_angles_[j], CL_TRUE, CL_MAP_WRITE, phi_angles_size_ * sizeof(GGfloat), j);
+
+        // Create and normalize the CDF on the host
+        phi_cdf_device[0] = phi_weights[0];
+        for (GGsize i = 1; i < phi_angles_size_; ++i) {
+            phi_cdf_device[i] = phi_cdf_device[i - 1] + phi_weights[i];
+        }
+
+        GGfloat normalization_factor = phi_cdf_device[phi_angles_size_ - 1];
+
+        for (GGsize i = 0; i < phi_angles_size_; ++i) {
+            phi_cdf_device[i] /= normalization_factor;
+            std::cout << "phi_cdf_device[" << i << "] = "<< std::fixed << std::setprecision(6) << phi_cdf_device[i] << std::endl;
+        }
+
+        // Copy the data from the host to the device buffer
+        std::memcpy(phi_angles_device, phi_angles.data(), phi_angles_size_ * sizeof(GGfloat));
+
+        // Release the mapped buffers
+        opencl_manager.ReleaseDeviceBuffer(phi_cdf_[j], phi_cdf_device, j);
+        opencl_manager.ReleaseDeviceBuffer(phi_angles_[j], phi_angles_device, j);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSXRaySource::Initialize(bool const& is_tracking)
 {
   GGcout("GGEMSXRaySource", "Initialize", 3) << "Initializing the GGEMS X-Ray source..." << GGendl;
@@ -499,6 +666,15 @@ void set_source_particle_type_ggems_xray_source( GGEMSXRaySource* xray_source, c
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void set_source_direction_type_ggems_xray_source( GGEMSXRaySource* xray_source, char const* direction_type)
+{
+  xray_source->SetSourceDirectionType(direction_type);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const beam_aperture, char const* unit)
 {
   xray_source->SetBeamAperture(beam_aperture, unit);
@@ -538,4 +714,34 @@ void set_monoenergy_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat cons
 void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum)
 {
   xray_source->SetPolyenergy(energy_spectrum);
+}
+
+// ////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////
+
+void set_theta_histogram_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat* theta_weights, GGfloat* theta_angles, GGsize const theta_angles_size_, char const* unit)
+{
+  std::vector<GGfloat> theta_angles_vector;
+  for (GGsize i = 0; i < theta_angles_size_; ++i) {
+    GGfloat converted_angle = AngleUnit(theta_angles[i], unit);
+    theta_angles_vector.push_back(converted_angle);
+  }
+  std::vector<GGfloat> theta_weights_vector(theta_weights, theta_weights + theta_angles_size_);
+  xray_source->SetTheta(theta_weights_vector, theta_angles_vector, unit);
+}
+
+// ////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////
+
+void set_phi_histogram_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat* phi_weights, GGfloat* phi_angles, GGsize const phi_angles_size_, char const* unit)
+{
+  std::vector<GGfloat> phi_angles_vector;
+  for (GGsize i = 0; i < phi_angles_size_; ++i) {
+    GGfloat converted_angle = AngleUnit(phi_angles[i], unit);
+    phi_angles_vector.push_back(converted_angle);
+  }
+  std::vector<GGfloat> phi_weights_vector(phi_weights, phi_weights + phi_angles_size_);
+  xray_source->SetPhi(phi_weights_vector, phi_angles_vector, unit);
 }

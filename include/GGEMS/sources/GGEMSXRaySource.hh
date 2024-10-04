@@ -111,6 +111,8 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
       \brief set the energy spectrum file for polyenergy mode
     */
     void SetPolyenergy(std::string const& energy_spectrum_filename);
+    void SetTheta(const std::vector<float>& theta_weights, const std::vector<float>& theta_angles, std::string const& unit = "rad");
+    void SetPhi(const std::vector<float>& phi_weights, const std::vector<float>& phi_angles, std::string const& unit = "rad");
 
     /*!
       \fn void Initialize(bool const& is_tracking = false)
@@ -161,6 +163,13 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     GGsize number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
     cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
     cl::Buffer** cdf_; /*!< Cumulative distribution function to generate a random energy */
+    cl::Buffer** theta_cdf_;
+    cl::Buffer** theta_angles_;
+    cl::Buffer** phi_cdf_;
+    cl::Buffer** phi_angles_;
+    GGsize theta_angles_size_;
+    GGsize phi_angles_size_;
+    cl::Buffer** dummy_buffer;
 };
 
 /*!
@@ -197,6 +206,14 @@ extern "C" GGEMS_EXPORT void set_number_of_particles_xray_source(GGEMSXRaySource
   \brief Set the type of the source particle
 */
 extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_xray_source(GGEMSXRaySource* xray_source, char const* particle_name);
+
+/*!
+  \fn void set_source_direction_type_ggems_xray_source(GGEMSXRaySource* xray_source, char const* direction_type)
+  \param xray_source - pointer on the source
+  \param direction_type - type of direction: isotropic or histogram
+  \brief Set the type of the direction for the source
+*/
+extern "C" GGEMS_EXPORT void set_source_direction_type_ggems_xray_source(GGEMSXRaySource* xray_source, char const* direction_type);
 
 /*!
   \fn void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const beam_aperture, char const* unit)
@@ -245,5 +262,27 @@ extern "C" GGEMS_EXPORT void set_monoenergy_ggems_xray_source(GGEMSXRaySource* x
   \brief Set the polyenergetic spectrum value for the GGEMSXRaySource
 */
 extern "C" GGEMS_EXPORT void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum);
+
+/*!
+  \fn void set_theta_histogram_ggems_xray_source(GGEMSXRaySource* xray_source, float* theta_weights, float* theta_angles, GGsize const theta_angles_size, char const* unit)
+  \param xray_source - pointer on the source
+  \param theta_weights - list of theta weights
+  \param theta_angles - list of theta angles
+  \param theta_angles_size - theta angles list size
+  \param unit - unit of the energy
+  \brief Set theta angles and weights for the GGEMSXRaySource
+*/
+extern "C" GGEMS_EXPORT void set_theta_histogram_ggems_xray_source(GGEMSXRaySource* xray_source, float* theta_weights, float* theta_angles, GGsize const theta_angles_size, char const* unit);
+
+/*!
+  \fn void set_phi_histogram_ggems_xray_source(GGEMSXRaySource* xray_source, float* phi_weights, float* phi_angles, GGsize const phi_angles_size, char const* unit)
+  \param xray_source - pointer on the source
+  \param phi_weights - list of phi weights
+  \param phi_angles - list of phi angles
+  \param phi_angles_size - theta angles list size
+  \param unit - unit of the energy
+  \brief Set phi angles and weights for the GGEMSXRaySource
+*/
+extern "C" GGEMS_EXPORT void set_phi_histogram_ggems_xray_source(GGEMSXRaySource* xray_source, float* phi_weights, float* phi_angles, GGsize const phi_angles_size, char const* unit);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSXRAYSOURCE_HH

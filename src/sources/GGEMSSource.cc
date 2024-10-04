@@ -32,6 +32,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
+#include "GGEMS/physics/GGEMSDirectionConstants.hh"
 #include "GGEMS/randoms/GGEMSRandom.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,6 +46,7 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   number_of_particles_in_batch_(nullptr),
   number_of_batchs_(nullptr),
   particle_type_(99),
+  direction_type_(99),
   tracking_kernel_option_("")
 {
   GGcout("GGEMSSource", "GGEMSSource", 3) << "GGEMSSource creating..." << GGendl;
@@ -154,6 +156,24 @@ void GGEMSSource::SetSourceParticleType(std::string const& particle_type)
   else
   {
     GGEMSMisc::ThrowException("GGEMSSourceManager", "SetParticleType", "Unknown particle!!!");
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::SetSourceDirectionType(std::string const& direction_type)
+{
+  if (direction_type == "isotropic") {
+    direction_type_ = ISOTROPIC;
+  }
+  else if (direction_type == "histogram") {
+    direction_type_ = HISTOGRAM;
+  }
+  else
+  {
+    GGEMSMisc::ThrowException("GGEMSSourceManager", "SetDirectionType", "Unknown direction type !!! Use isotropic or histogram");
   }
 }
 

@@ -108,6 +108,13 @@ class GGEMS_EXPORT GGEMSSource
     void SetSourceParticleType(std::string const& particle_type);
 
     /*!
+      \fn void SetSourceDirectionType(std::string const& direction_type)
+      \param direction_type - Type of direction
+      \brief Set the direction type of the source: isotropic or histogram
+    */
+    void SetSourceDirectionType(std::string const& direction_type);
+
+    /*!
       \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis
@@ -204,6 +211,7 @@ class GGEMS_EXPORT GGEMSSource
     GGsize* number_of_batchs_; /*!< Number of batchs for each device */
 
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
+    GGchar direction_type_; /*!< Type of direction: isotropic or histogram */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     GGEMSGeometryTransformation* geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
