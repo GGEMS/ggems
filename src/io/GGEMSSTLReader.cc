@@ -34,13 +34,14 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSSTLReader.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
+#include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSTLReader::GGEMSSTLReader(void)
-: stl_filename_("")
 {
   GGcout("GGEMSSTLReader", "GGEMSSTLReader", 3) << "GGEMSSTLReader creating..." << GGendl;
 
@@ -55,6 +56,11 @@ GGEMSSTLReader::~GGEMSSTLReader(void)
 {
   GGcout("GGEMSSTLReader", "~GGEMSSTLReader", 3) << "GGEMSSTLReader erasing!!!" << GGendl;
 
+  if (triangles_) {
+    delete[] triangles_;
+    triangles_ = nullptr;
+  }
+
   GGcout("GGEMSSTLReader", "~GGEMSSTLReader", 3) << "GGEMSSTLReader erased!!!" << GGendl;
 }
 
@@ -64,111 +70,184 @@ GGEMSSTLReader::~GGEMSSTLReader(void)
 
 void GGEMSSTLReader::Read(std::string const& meshed_phantom_filename)
 {
-  GGcout("GGEMSSTLReader", "Read", 2) << "Reading STL Image..." << GGendl;
+  GGcout("GGEMSSTLReader", "Read", 2) << "Reading STL Image and loading mesh triangles..." << GGendl;
 
-  // Open STL file to stream
+  // Opening STL file
   std::ifstream stl_stream(meshed_phantom_filename, std::ios::in | std::ios::binary);
   GGEMSFileStream::CheckInputStream(stl_stream, meshed_phantom_filename);
 
-  stl_filename_ = meshed_phantom_filename;
+  stl_stream.read(reinterpret_cast<char*>(header_), sizeof(GGuchar) * 80);
+  stl_stream.read(reinterpret_cast<char*>(&number_of_triangles_), sizeof(GGuint) * 1);
 
-  GGcout("GGEMSSTLReader", "Read", 2) << "STL file loaded" << GGendl;
+  GGfloat data[12]; // Vertices for triangle from STL file
+  GGushort octet_attribut; // Useless parameter from STL file
 
-  // Reading file
-  stl_stream.read(reinterpret_cast<char*>(header_), sizeof(GGuchar)*80);
-  stl_stream.read(reinterpret_cast<char*>(&number_of_triangles_), sizeof(GGuint)*1);
+  triangles_ = new GGEMSMeshTriangle[number_of_triangles_];
 
-  // Initializing max and min points of mes
-  float high_point[] = {
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min()
-  };
+  for (GGuint i = 0; i < number_of_triangles_; ++i) {
+    stl_stream.read(reinterpret_cast<char*>(data), sizeof(float) * 12);
+    stl_stream.read(reinterpret_cast<char*>(&octet_attribut), sizeof(unsigned short) * 1);
 
-  float low_point[] = {
-    std::numeric_limits<float>::max(),
-    std::numeric_limits<float>::max(),
-    std::numeric_limits<float>::max()
-  };
+    GGEMSPoint3 p1, p2, p3;
+    p1.x_= data[3]; p1.y_ = data[4]; p1.z_ = data[5];
+    p2.x_= data[6]; p2.y_ = data[7]; p2.z_ = data[8];
+    p3.x_= data[9]; p3.y_ = data[10]; p3.z_ = data[11];
 
-
-
-  GGcout("GGEMSSTLReader", "Read", 1) << "STL filename: " << stl_filename_ << GGendl;
-  GGcout("GGEMSSTLReader", "Read", 1) << "Header: " << header_ << GGendl;
-  GGcout("GGEMSSTLReader", "Read", 1) << "Number of triangles: " << number_of_triangles_ << GGendl;
-
-
-
-/*
-  std::cout << "Center: " << center_.x_[0] << " " << center_.x_[1] << " " << center_.x_[2] << std::endl;
-  std::cout << "Half width: " << half_width_[0] << " " << half_width_[1] << " " << half_width_[2] << std::endl;
-  std::cout << "*****" << std::endl;
-*/
-
-
-
+    triangles_[i] = GGEMSMeshTriangle(p1, p2, p3);
+  }
 
   stl_stream.close();
+}
 
-/*
-  // Min and max points
-  Point lo(FLT_MAX, FLT_MAX, FLT_MAX);
-  Point hi(FLT_MIN, FLT_MIN, FLT_MIN);
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-  float data[12];
-  unsigned short octet_attribut;
-  triangles_ = new Triangle[number_of_triangles_];
-  for (unsigned int i = 0; i < number_of_triangles_; ++i) {
-    stl_stream.read(reinterpret_cast<char*>(data), sizeof(float)*12);
-    stl_stream.read(reinterpret_cast<char*>(&octet_attribut), sizeof(unsigned short)*1);
-    triangles_[i] = Triangle(
-      Point(data[3], data[4], data[5]),
-      Point(data[6], data[7], data[8]),
-      Point(data[9], data[10], data[11])
-    );
+GGEMSSTLReader::GGEMSMeshTriangle::GGEMSMeshTriangle(GGEMSPoint3 const& p0, GGEMSPoint3 const& p1, GGEMSPoint3 const& p2)
+{
+  pts_[0] = p0;
+  pts_[1] = p1;
+  pts_[2] = p2;
 
-    for (int j = 0; j < 3; ++j) { // Loop over points
-      for (int k = 0; k < 3; ++k) { // Loop over dimensions
-        if (triangles_[i].p_[j].x_[k] < lo.x_[k]) lo.x_[k] = triangles_[i].p_[j].x_[k];
-        if (triangles_[i].p_[j].x_[k] > hi.x_[k]) hi.x_[k] = triangles_[i].p_[j].x_[k];
-      }
-    }
-  }
-
-  // Expand it by 10% so that all points are well interior
+  GGEMSSphere3 sph;
+  SphereFromDistantPoints(sph, pts_);
   for (int i = 0; i < 3; ++i) {
-    float expanding = (hi.x_[i]-lo.x_[i])*0.1f;
-    lo.x_[i] -= expanding;
-    hi.x_[i] += expanding;
-
-    // Selecting correct integer
-    if (lo.x_[i] < 0.0f) lo.x_[i] = std::floor(lo.x_[i]);
-    else lo.x_[i] = std::ceil(lo.x_[i]);
-
-    if (hi.x_[i] < 0.0f) hi.x_[i] = std::floor(hi.x_[i]);
-    else hi.x_[i] = std::ceil(hi.x_[i]);
+    SphereOfSphereAndPoint(sph, pts_[i]);
   }
 
-  // Computing the center of octree box
-  center_ = Point(
-    (hi.x_[0]+lo.x_[0])*0.5f,
-    (hi.x_[1]+lo.x_[1])*0.5f,
-    (hi.x_[2]+lo.x_[2])*0.5f
-  );
+  bounding_sphere_.center_ = sph.center_;
+  bounding_sphere_.radius_ = sph.radius_;
+}
 
-  // Computing half width for each axes
-  half_width_[0] = (hi.x_[0]-lo.x_[0])*0.5f;
-  half_width_[1] = (hi.x_[1]-lo.x_[1])*0.5f;
-  half_width_[2] = (hi.x_[2]-lo.x_[2])*0.5f;
-*/
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-/*
-  std::cout << "*****" << std::endl;
-  std::cout << "STL filename: " << stl_filename_ << std::endl;
-  std::cout << "Header: " << header_<< std::endl;
-  std::cout << "Number of triangles: " << number_of_triangles_ << std::endl;
-  std::cout << "Center: " << center_.x_[0] << " " << center_.x_[1] << " " << center_.x_[2] << std::endl;
-  std::cout << "Half width: " << half_width_[0] << " " << half_width_[1] << " " << half_width_[2] << std::endl;
-  std::cout << "*****" << std::endl;
-*/
+void GGEMSSTLReader::GGEMSMeshTriangle::MostSeparatedPointsOnAABB(GGEMSPoint3 pts[3], GGint& min, GGint& max)
+{
+  // First find most extreme points along principal axes
+  GGint minx{0}, maxx{0};
+  GGint miny{0}, maxy{0};
+  GGint minz{0}, maxz{0};
+
+  for (GGint i = 1; i < 3; ++i) {
+    if (pts[i].x_ < pts[minx].x_) minx = i;
+    if (pts[i].x_ > pts[maxx].x_) maxx = i;
+    if (pts[i].y_ < pts[miny].y_) miny = i;
+    if (pts[i].y_ > pts[maxy].y_) maxy = i;
+    if (pts[i].z_ < pts[minz].z_) minz = i;
+    if (pts[i].z_ > pts[maxz].z_) maxz = i;
+  }
+
+  // Compute the squared distances for the three pairs of points
+  GGEMSPoint3 px, py, pz;
+
+  px.x_ = pts[maxx].x_ - pts[minx].x_;
+  px.y_ = pts[maxx].y_ - pts[minx].y_;
+  px.z_ = pts[maxx].z_ - pts[minx].z_;
+
+  py.x_ = pts[maxy].x_ - pts[miny].x_;
+  py.y_ = pts[maxy].y_ - pts[miny].y_;
+  py.z_ = pts[maxy].z_ - pts[miny].z_;
+
+  pz.x_ = pts[maxz].x_ - pts[minz].x_;
+  pz.y_ = pts[maxz].y_ - pts[minz].y_;
+  pz.z_ = pts[maxz].z_ - pts[minz].z_;
+
+  GGfloat dist2x = Dot(px, px);
+  GGfloat dist2y = Dot(py, py);
+  GGfloat dist2z = Dot(pz, pz);
+
+  // Pick the pair (min,max) of points most distant
+  min = minx;
+  max = maxx;
+  if (dist2y > dist2x && dist2y > dist2z) {
+    min = miny;
+    max = maxy;
+  }
+  else if (dist2z > dist2y && dist2z > dist2x) {
+    min = minz;
+    max = maxz;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSTLReader::GGEMSMeshTriangle::SphereFromDistantPoints(GGEMSSphere3& sph, GGEMSPoint3 pts[3])
+{
+  // Find the most separated point pair defining the encompassing AABB
+  GGint min{0};
+  GGint max{0};
+
+  MostSeparatedPointsOnAABB(pts, min, max);
+
+  GGEMSPoint3 center;
+  center.x_ = (pts[min].x_ + pts[max].x_) * 0.5f;
+  center.y_ = (pts[min].y_ + pts[max].y_) * 0.5f;
+  center.z_ = (pts[min].z_ + pts[max].z_) * 0.5f;
+
+  // Set up sphere to just encompass these two points
+  sph.center_ = center;
+
+  GGEMSPoint3 distance;
+  distance.x_ = pts[max].x_ - center.x_;
+  distance.y_ = pts[max].y_ - center.y_;
+  distance.z_ = pts[max].z_ - center.z_;
+
+  sph.radius_ = Dot(distance, distance);
+  sph.radius_ = sqrtf(sph.radius_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSTLReader::GGEMSMeshTriangle::SphereOfSphereAndPoint(GGEMSSphere3& sph, GGEMSPoint3& p)
+{
+  // Compute squared distance between point and sphere center
+  GGEMSPoint3 p_scenter;
+  p_scenter.x_ = p.x_ - sph.center_.x_;
+  p_scenter.y_ = p.y_ - sph.center_.y_;
+  p_scenter.z_ = p.z_ - sph.center_.z_;
+
+  GGfloat dist2 = Dot(p_scenter, p_scenter);
+
+  if (dist2 > sph.radius_ * sph.radius_) {
+    GGfloat dist = sqrtf(dist2);
+    GGfloat new_radius = (sph.radius_ + dist) * 0.5f;
+    GGfloat k = (new_radius - sph.radius_) / dist;
+    sph.radius_ = new_radius;
+    sph.center_.x_ += p_scenter.x_ * k;
+    sph.center_.y_ += p_scenter.y_ * k;
+    sph.center_.z_ += p_scenter.z_ * k;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSTLReader::LoadTriangles(GGEMSTriangle3* triangles)
+{
+  for (GGuint i = 0; i < number_of_triangles_; ++i) {
+    triangles[i].pts_[0].x_ = triangles_[i].pts_[0].x_;
+    triangles[i].pts_[0].y_ = triangles_[i].pts_[0].y_;
+    triangles[i].pts_[0].z_ = triangles_[i].pts_[0].z_;
+
+    triangles[i].pts_[1].x_ = triangles_[i].pts_[1].x_;
+    triangles[i].pts_[1].y_ = triangles_[i].pts_[1].y_;
+    triangles[i].pts_[1].z_ = triangles_[i].pts_[1].z_;
+
+    triangles[i].pts_[2].x_ = triangles_[i].pts_[2].x_;
+    triangles[i].pts_[2].y_ = triangles_[i].pts_[2].y_;
+    triangles[i].pts_[2].z_ = triangles_[i].pts_[2].z_;
+
+    triangles[i].bounding_sphere_.center_.x_ = triangles_[i].bounding_sphere_.center_.x_;
+    triangles[i].bounding_sphere_.center_.y_ = triangles_[i].bounding_sphere_.center_.y_;
+    triangles[i].bounding_sphere_.center_.z_ = triangles_[i].bounding_sphere_.center_.z_;
+
+    triangles[i].bounding_sphere_.radius_ = triangles_[i].bounding_sphere_.radius_;
+  }
 }

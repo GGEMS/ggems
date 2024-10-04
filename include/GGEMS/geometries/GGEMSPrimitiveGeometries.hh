@@ -44,4 +44,94 @@ typedef struct GGEMSOBB_t
   GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
 } GGEMSOBB; /*!< Using C convention name of struct to C++ (_t deletion) */
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSPoint3_t
+  \brief Structure storing Point geometry
+*/
+typedef struct GGEMSPoint3_t
+{
+  GGfloat x_; /*!< X position of point */
+  GGfloat y_; /*!< Y position of point */
+  GGfloat z_; /*!< Z position of point */
+} GGEMSPoint3; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSVector3_t
+  \brief Structure storing Vector geometry
+*/
+typedef struct GGEMSVector3_t
+{
+  GGfloat x_; /*!< X position of vector */
+  GGfloat y_; /*!< Y position of vector */
+  GGfloat z_; /*!< Z position of vector */
+} GGEMSVector3; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSSphere3_t
+  \brief Structure storing Sphere geometry
+*/
+typedef struct GGEMSSphere3_t
+{
+  GGEMSPoint3 center_; /*!< Center of sphere */
+  GGfloat     radius_; /*!< Radius of sphere */
+} GGEMSSphere3; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSPlane3_t
+  \brief Structure storing Plane geometry
+*/
+typedef struct GGEMSPlane3_t
+{
+  GGEMSVector3 n_; /*!< normal plane. Points x on the plane satisfy dot(n, x) = d */
+  GGfloat      d_; /*!< d = dot(n, p) for a given point p on the plane */
+} GGEMSPlane3; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSTriangle3_t
+  \brief Structure storing Triangle geometry
+*/
+typedef struct GGEMSTriangle3_t
+{
+  GGEMSPoint3              pts_[3]; /*!< 3 points describing triangle */
+  GGEMSSphere3             bounding_sphere_; // sphere around triangle */
+  struct GGEMSTriangle3_t* next_triangle_; // use of next triangle (useful for meshed navigation) */
+} GGEMSTriangle3; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \struct GGEMSNode_t
+  \brief Structure storing Triangle geometry
+*/
+typedef struct GGEMSNode_t
+{
+  GGint           node_depth_;
+  GGEMSPoint3     center_;
+  GGint           first_child_node_id_;
+  GGfloat         half_width_[3];
+  GGEMSTriangle3* triangle_list_;
+} GGEMSNode;
+
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

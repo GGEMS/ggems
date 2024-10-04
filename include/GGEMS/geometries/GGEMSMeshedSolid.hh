@@ -34,6 +34,8 @@
 #include "GGEMS/geometries/GGEMSMeshedSolidData.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 
+class GGEMSOctree;
+
 /*!
   \class GGEMSMeshedSolid
   \brief GGEMS class for meshed solid
@@ -95,23 +97,35 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
 
     /*!
       \fn void PrintInfos(void) const
-      \brief printing infos about voxelized solid
+      \brief printing infos about meshed solid
     */
-    void PrintInfos(void) const override {}
+    void PrintInfos(void) const override;
 
     /*!
       \fn void UpdateTransformationMatrix(GGsize const& thread_index)
       \param thread_index - index of the thread (= activated device index)
       \brief Update transformation matrix for solid box object
     */
-    void UpdateTransformationMatrix(GGsize const& thread_index) override {}
+    void UpdateTransformationMatrix(GGsize const& thread_index) override;
+
+    /*!
+      \fn void UpdateTriangles(GGsize const& thread_index)
+      \param thread_index - index of the thread (= activated device index)
+      \brief Update triangles after position and rotation
+    */
+    void UpdateTriangles(GGsize const& thread_index);
+
+    void BuildOctree(GGint const& depth);
+
+    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const override;
+    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const override;
 
   private:
     /*!
       \fn void InitializeKernel(void)
       \brief Initialize kernel for particle solid distance
     */
-    void InitializeKernel(void) override {}
+    void InitializeKernel(void) override;
 
     /*!
       \fn void LoadVolumeImage(void)
@@ -119,8 +133,17 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
     */
     void LoadVolumeImage(void);
 
+    GGEMSPoint3 ComputeOctreeCenter(void) const;
+    void ComputeHalfWidthCenter(GGfloat* half_width) const;
+
   private:
     std::string meshed_phantom_name_; /*!< Filename of STL file for mesh */
+
+    GGEMSTriangle3** triangles_; /*!< Pointer to mesh triangles */
+    GGuint           number_of_triangles_; /*!< Number of the triangles */
+    GGEMSOctree*     octree_; /*!< Pointer to octree storing triangles */
+
+    // Storing infos about Octree and Node
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLID_HH

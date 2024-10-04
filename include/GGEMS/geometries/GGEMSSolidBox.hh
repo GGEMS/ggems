@@ -111,6 +111,9 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
     */
     void UpdateTransformationMatrix(GGsize const& thread_index) override;
 
+    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const override {return {{0.0f, 0.0f, 0.0f}};}
+    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const override {return GGEMSOBB{};}
+
   private:
     /*!
       \fn void InitializeKernel(void)

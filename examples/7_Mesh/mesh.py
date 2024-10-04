@@ -64,6 +64,7 @@ opencl_manager = GGEMSOpenCLManager()
 materials_database_manager = GGEMSMaterialsDatabaseManager()
 processes_manager = GGEMSProcessesManager()
 range_cuts_manager = GGEMSRangeCutsManager()
+volume_creator_manager = GGEMSVolumeCreatorManager()
 
 # ------------------------------------------------------------------------------
 # STEP 2: Params for visualization
@@ -73,7 +74,7 @@ if is_gl:
   opengl_manager.set_msaa(msaa)
   opengl_manager.set_background_color(window_color)
   opengl_manager.set_draw_axis(is_axis)
-  opengl_manager.set_world_size(3.0, 3.0, 3.0, 'm')
+  opengl_manager.set_world_size(2.0, 2.0, 2.0, 'm')
   opengl_manager.set_image_output('data/axis')
   opengl_manager.set_displayed_particles(number_of_displayed_particles)
   opengl_manager.set_particle_color('gamma', 152, 251, 152)
@@ -90,14 +91,17 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Phantoms and systems
+
 # Loading phantom in GGEMS
-phantom = GGEMSMeshedPhantom('phantom')
-phantom.set_phantom('data/Stanford_Bunny.stl')
-# phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-# phantom.set_position(0.0, 0.0, 0.0, 'mm')
-# phantom.set_visible(True)
-# phantom.set_material_visible('Air', True)
-# phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
+mesh_phantom = GGEMSMeshedPhantom('phantom_mesh')
+mesh_phantom.set_phantom('data/Stanford_Bunny.stl')
+mesh_phantom.set_rotation(90.0, 90.0, 0.0, 'deg')
+mesh_phantom.set_position(0.0, 0.0, 0.0, 'mm')
+mesh_phantom.set_mesh_octree_depth(4)
+mesh_phantom.set_visible(True)
+mesh_phantom.set_material('Water')
+mesh_phantom.set_material_color('Water', color_name='white') # Uncomment for automatic color
+#mesh_phantom.set_material_color('Water', 207, 160, 233)
 
 cbct_detector = GGEMSCTSystem('custom')
 cbct_detector.set_ct_type('flat')
@@ -108,13 +112,28 @@ cbct_detector.set_material('GOS')
 cbct_detector.set_source_detector_distance(1500.5, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
 cbct_detector.set_source_isocenter_distance(900.0, 'mm')
 cbct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
-cbct_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm');
+cbct_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm')
 cbct_detector.set_threshold(10.0, 'keV')
 cbct_detector.save('data/projection')
 cbct_detector.store_scatter(True)
 cbct_detector.set_visible(True)
 cbct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
-#cbct_detector.set_material_color('GOS', color_name='red') # Using registered color
+#cbct_detector.set_material_color('GOS', color_name='blue') # Using registered color
+
+# ------------------------------------------------------------------------------
+# Dosimetry
+dosimetry = GGEMSDosimetryCalculator()
+dosimetry.attach_to_navigator('phantom_mesh')
+dosimetry.set_output_basename('data/dosimetry')
+dosimetry.set_dosel_size(1.0, 1.0, 1.0, 'mm')
+dosimetry.water_reference(False)
+dosimetry.minimum_density(0.1, 'g/cm3')
+
+dosimetry.uncertainty(True)
+dosimetry.photon_tracking(False)
+dosimetry.edep(True)
+dosimetry.hit(True)
+dosimetry.edep_squared(True)
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics
@@ -147,14 +166,14 @@ point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 ggems = GGEMS()
 ggems.opencl_verbose(True)
 ggems.material_database_verbose(False)
-ggems.navigator_verbose(False)
+ggems.navigator_verbose(True)
 ggems.source_verbose(True)
 ggems.memory_verbose(True)
 ggems.process_verbose(True)
 ggems.range_cuts_verbose(True)
 ggems.random_verbose(True)
 ggems.profiling_verbose(True)
-ggems.tracking_verbose(False, 0)
+ggems.tracking_verbose(False, 112)
 
 # Initializing the GGEMS simulation
 ggems.initialize(seed)

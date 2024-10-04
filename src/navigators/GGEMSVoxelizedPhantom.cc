@@ -113,7 +113,7 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   if (is_tracking_) solids_[0]->EnableTracking();
 
   // Enabling TLE
-  if (is_tle_) solids_[0]->AddKernelOption(" -DTLE");
+  if (is_tle_) solids_[0]->EnableTLE();
 
   // Load voxelized phantom from MHD file and storing materials
   solids_[0]->Initialize(materials_);
@@ -129,7 +129,12 @@ void GGEMSVoxelizedPhantom::Initialize(void)
     solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
     #endif
   }
-  if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
+  if (is_update_pos_) {
+    solids_[0]->SetPosition(position_xyz_);
+    #ifdef OPENGL_VISUALIZATION
+    solids_[0]->SetPositionOpenGL(position_xyz_.s[0], position_xyz_.s[1], position_xyz_.s[2]);
+    #endif
+  }
 
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
     solids_[0]->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids, j);
@@ -146,7 +151,7 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   GGEMSNavigator::Initialize();
 
   // Checking if dosimetry mode activated
-  if (is_dosimetry_mode_) dose_calculator_->Initialize();
+  if (is_dosimetry_mode_) dose_calculator_->Initialize("VOXELIZED");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

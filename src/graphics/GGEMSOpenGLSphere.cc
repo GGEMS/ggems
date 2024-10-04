@@ -196,9 +196,9 @@ void GGEMSOpenGLSphere::Build(void)
   // Vertex
   glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
   glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GLfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
-  GLintptr offset_pointer = 0 * sizeof(GLfloat);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), reinterpret_cast<GLvoid*>(offset_pointer));
-  glEnableVertexAttribArray(0);
+  //GLintptr offset_pointer = 0 * sizeof(GLfloat);
+  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), reinterpret_cast<GLvoid*>(offset_pointer));
+  //glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Indices

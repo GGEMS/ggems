@@ -114,7 +114,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \return size of voxels in voxelized solid
       \brief get the size of voxels in voxelized solid
     */
-    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const;
+    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const override;
 
     /*!
       \fn GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const
@@ -122,7 +122,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \return OBB params for the object
       \brief return the parameters about OBB geometry
     */
-    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const;
+    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const override;
 
   private:
     /*!

@@ -299,9 +299,9 @@ void GGEMSDosimetryCalculator::CheckParameters(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::InitializeKernel(void)
+void GGEMSDosimetryCalculator::InitializeVoxelizedKernel(void)
 {
-  GGcout("GGEMSDosimetryCalculator", "InitializeKernel", 3) << "Initializing kernel for dose computation..." << GGendl;
+  GGcout("GGEMSDosimetryCalculator", "InitializeVoxelizedKernel", 3) << "Initializing kernel for dose computation in voxelized volume..." << GGendl;
 
   // Getting OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -315,6 +315,28 @@ void GGEMSDosimetryCalculator::InitializeKernel(void)
 
   // Compiling the kernels
   opencl_manager.CompileKernel(compute_dose_filename, "compute_dose_ggems_voxelized_solid", kernel_compute_dose_, nullptr, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSDosimetryCalculator::InitializeMeshedKernel(void)
+{
+  GGcout("GGEMSDosimetryCalculator", "InitializeMeshedKernel", 3) << "Initializing kernel for dose computation in meshed volume..." << GGendl;
+
+  // Getting OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Getting the path to kernel
+  std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
+  std::string compute_dose_filename = openCL_kernel_path + "/ComputeDoseGGEMSMeshSolid.cl";
+
+  // Storing a kernel for each device
+  kernel_compute_dose_ = new cl::Kernel*[number_activated_devices_];
+
+  // Compiling the kernels
+  opencl_manager.CompileKernel(compute_dose_filename, "compute_dose_ggems_meshed_solid", kernel_compute_dose_, nullptr, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +403,7 @@ void GGEMSDosimetryCalculator::ComputeDose(GGsize const& thread_index)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::Initialize(void)
+void GGEMSDosimetryCalculator::Initialize(std::string const nav_type)
 {
   GGcout("GGEMSDosimetryCalculator", "Initialize", 3) << "Initializing dosimetry calculator..." << GGendl;
 
@@ -401,14 +423,14 @@ void GGEMSDosimetryCalculator::Initialize(void)
     // Get the voxels size
     GGfloat3 voxel_sizes = dosel_sizes_;
     if (dosel_sizes_.s[0] < 0.0f && dosel_sizes_.s[1] < 0.0f && dosel_sizes_.s[2] < 0.0f) { // Custom dosel size
-      voxel_sizes = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j);
+      voxel_sizes = navigator_->GetSolids(0)->GetVoxelSizes(j);
     }
 
     // If photon tracking activated, voxel sizes of phantom and dosels size should be the same, otherwise artefacts!!!
     if (is_photon_tracking_) {
-      if (voxel_sizes.s[0] != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j).s[0] ||
-          voxel_sizes.s[1] != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j).s[1] ||
-          voxel_sizes.s[2] != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j).s[2]) {
+      if (voxel_sizes.s[0] != navigator_->GetSolids(0)->GetVoxelSizes(j).s[0] ||
+          voxel_sizes.s[1] != navigator_->GetSolids(0)->GetVoxelSizes(j).s[1] ||
+          voxel_sizes.s[2] != navigator_->GetSolids(0)->GetVoxelSizes(j).s[2]) {
         std::ostringstream oss(std::ostringstream::out);
         oss << "Dosel size and voxel size in voxelized phantom have to be the same when photon tracking is activated!!!";
         GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "Initialize", oss.str());
@@ -424,7 +446,7 @@ void GGEMSDosimetryCalculator::Initialize(void)
     dose_params_device->inv_size_of_dosels_.s[2] = 1.0f / voxel_sizes.s[2];
 
     // Get border of volumes from phantom
-    GGEMSOBB obb_geometry = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetOBBGeometry(j);
+    GGEMSOBB obb_geometry = navigator_->GetSolids(0)->GetOBBGeometry(j);
     dose_params_device->border_min_xyz_ = obb_geometry.border_min_xyz_;
     dose_params_device->border_max_xyz_ = obb_geometry.border_max_xyz_;
 
@@ -472,7 +494,10 @@ void GGEMSDosimetryCalculator::Initialize(void)
     if (is_photon_tracking_) opencl_manager.CleanBuffer(dose_recording_.photon_tracking_[j], total_number_of_dosels_*sizeof(GGint), j);
   }
 
-  InitializeKernel();
+  if (nav_type == "VOXELIZED")
+    InitializeVoxelizedKernel();
+  else if (nav_type == "MESHED")
+    InitializeMeshedKernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

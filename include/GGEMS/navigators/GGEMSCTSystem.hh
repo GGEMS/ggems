@@ -249,15 +249,6 @@ extern "C" GGEMS_EXPORT void store_scatter_ggems_ct_system(GGEMSCTSystem* ct_sys
 extern "C" GGEMS_EXPORT void set_visible_ggems_ct_system(GGEMSCTSystem* ct_system, bool const flag);
 
 /*!
-  \fn void set_material_visible_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, bool const flag)
-  \param ct_system - pointer on ct scanner
-  \param material_name - name of material to draw (or not)
-  \param flag - flag drawing ct scanner
-  \brief Set flag for each material to draw
-*/
-extern "C" GGEMS_EXPORT void set_material_visible_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, bool const flag);
-
-/*!
   \fn void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue)
   \param ct_system - pointer on ct scanner
   \param material_name - name of material to draw (or not)

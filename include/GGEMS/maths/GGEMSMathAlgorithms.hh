@@ -32,6 +32,7 @@
 */
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/geometries/GGEMSPrimitiveGeometries.hh"
 
 /*!
   \fn inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
@@ -117,6 +118,15 @@ inline GGfloat LogLogInterpolation(GGfloat x, GGfloat x0, GGfloat y0, GGfloat x1
   #else
   return std::pow(10.0f, std::log10(y0) + std::log10(y1/y0) * (std::log10(x*x0) / std::log10(x1*x0)));
   #endif
+}
+
+inline GGfloat Dot(GGEMSPoint3 p0, GGEMSPoint3 p1)
+{
+  GGfloat dot_product = 0.0f;
+  dot_product = p0.x_ * p1.x_;
+  dot_product += p0.y_ * p1.y_;
+  dot_product += p0.z_ * p1.z_;
+  return dot_product;
 }
 
 #endif // GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH

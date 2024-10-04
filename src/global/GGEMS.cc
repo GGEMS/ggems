@@ -302,9 +302,9 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   #endif
 
   // Printing progress bar
-  mutex.lock();
+  ::mutex.lock();
   static GGEMSProgressBar progress_bar(source_manager.GetTotalNumberOfBatchs());
-  mutex.unlock();
+  ::mutex.unlock();
 
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
@@ -337,9 +337,9 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       } while (source_manager.IsAlive(thread_index) && loop_counter < max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
 
       // Incrementing progress bar
-      mutex.lock();
+      ::mutex.lock();
       ++progress_bar;
-      mutex.unlock();
+      ::mutex.unlock();
 
       // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
       #ifdef OPENGL_VISUALIZATION

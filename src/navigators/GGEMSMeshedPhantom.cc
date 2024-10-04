@@ -38,7 +38,8 @@
 
 GGEMSMeshedPhantom::GGEMSMeshedPhantom(std::string const& meshed_phantom_name)
 : GGEMSNavigator(meshed_phantom_name),
-  meshed_phantom_filename_("")
+  meshed_phantom_filename_(""),
+  mesh_octree_depth_(1)
 {
   GGcout("GGEMSMeshedPhantom", "GGEMSMeshedPhantom", 3) << "GGEMSMeshedPhantom creating..." << GGendl;
 
@@ -93,51 +94,64 @@ void GGEMSMeshedPhantom::Initialize(void)
   number_of_solids_ = 1;
 
   // Initializing meshed solid for geometric navigation
-  // if (is_dosimetry_mode_) {
-  //   solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_, "DOSIMETRY");
-  // }
-  // else {
-  solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_);
-  // }
+   if (is_dosimetry_mode_) {
+    solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_, "DOSIMETRY");
+   }
+   else {
+    solids_[0] = new GGEMSMeshedSolid(meshed_phantom_filename_);
+   }
 
   // Enabling tracking if necessary
-  // if (is_tracking_) solids_[0]->EnableTracking();
+  if (is_tracking_) solids_[0]->EnableTracking();
 
   // Enabling TLE
-  // if (is_tle_) solids_[0]->AddKernelOption(" -DTLE");
+  if (is_tle_) {
+    GGwarn("GGEMSMeshedPhantom", "Initialize", 0)  << "TLE is not possible for meshed phantom" << GGendl;
+  }
 
   // Load meshed phantom from STL file and storing materials
-  solids_[0]->Initialize(materials_);
-  // solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
-  // solids_[0]->SetMaterialVisible(material_visible_);
+  solids_[0]->Initialize(nullptr);
+  solids_[0]->SetVisible(is_visible_);
+  solids_[0]->SetMaterialName(materials_->GetMaterialName(0));
+  solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
 
-  // // Perform rotation before position
-  // if (is_update_rot_) {
-  //   solids_[0]->SetRotation(rotation_xyz_);
-  //   #ifdef OPENGL_VISUALIZATION
-  //   solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.s[0]);
-  //   solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.s[1]);
-  //   solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.s[2]);
-  //   #endif
-  // }
-  // if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
+  // Perform rotation before translation
+  if (is_update_rot_) {
+    solids_[0]->SetRotation(rotation_xyz_); // For matrix transformation
+  }
+  if (is_update_pos_) {
+    solids_[0]->SetPosition(position_xyz_); // For matrix transformation
+  }
 
-  // for (GGsize j = 0; j < number_activated_devices_; ++j) {
-  //   solids_[0]->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids, j);
-  //   // Store the transformation matrix in solid object
-  //   solids_[0]->UpdateTransformationMatrix(j);
-  // }
+  // Update transformation matrix and triangles positions
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+     solids_[0]->SetSolidID<GGEMSMeshedSolidData>(number_of_registered_solids, j);
+     // Store the transformation matrix in solid object
+     // All triangles rotated, so the rotation angles are at initial value : 1
+     // OBB is also translated, so translation matrix is 0
+     solids_[0]->UpdateTransformationMatrix(j);
+  }
 
-  // #ifdef OPENGL_VISUALIZATION
-  // solids_[0]->SetVisible(is_visible_);
-  // solids_[0]->BuildOpenGL();
-  // #endif
+  // Update new position of mesh after translation and rotation
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    dynamic_cast<GGEMSMeshedSolid*>(solids_[0])->UpdateTriangles(j);
+  }
+
+  #ifdef OPENGL_VISUALIZATION
+  solids_[0]->SetVisible(is_visible_);
+  solids_[0]->BuildOpenGL();
+  #endif
+
+  // Build Octree
+  dynamic_cast<GGEMSMeshedSolid*>(solids_[0])->BuildOctree(mesh_octree_depth_);
+
+  // Mettre à jour les parametres sur les devices pour faire la navigation + processes physiques
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
 
-  // // Checking if dosimetry mode activated
-  // if (is_dosimetry_mode_) dose_calculator_->Initialize();
+  // Checking if dosimetry mode activated
+  if (is_dosimetry_mode_) dose_calculator_->Initialize("MESHED");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,6 +161,15 @@ void GGEMSMeshedPhantom::Initialize(void)
 void GGEMSMeshedPhantom::SetPhantomFile(std::string const& meshed_phantom_filename)
 {
   meshed_phantom_filename_ = meshed_phantom_filename;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMeshedPhantom::SetMeshOctreeDepth(GGint const& depth)
+{
+  mesh_octree_depth_ = depth;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +189,6 @@ void GGEMSMeshedPhantom::SaveResults(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
 GGEMSMeshedPhantom* create_ggems_meshed_phantom(char const* meshed_phantom_name)
 {
   return new(std::nothrow) GGEMSMeshedPhantom(meshed_phantom_name);
@@ -175,8 +197,63 @@ GGEMSMeshedPhantom* create_ggems_meshed_phantom(char const* meshed_phantom_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
 void set_phantom_file_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* phantom_filename)
 {
   meshed_phantom->SetPhantomFile(phantom_filename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_position_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+{
+  meshed_phantom->SetPosition(position_x, position_y, position_z, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_rotation_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+{
+  meshed_phantom->SetRotation(rx, ry, rz, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_visible_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, bool const flag)
+{
+  meshed_phantom->SetVisible(flag);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_color_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue)
+{
+  meshed_phantom->SetMaterialColor(material_name, red, green, blue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, char const* color_name)
+{
+  meshed_phantom->SetMaterialColor(material_name, color_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_material_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name)
+{
+  meshed_phantom->SetMaterialName(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void set_mesh_octree_depth_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, GGint const depth)
+{
+  meshed_phantom->SetMeshOctreeDepth(depth);
 }

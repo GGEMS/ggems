@@ -5,7 +5,6 @@ import sys
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-
 class CMakeExtension(Extension):
     def __init__(self, name):
         super().__init__(name, sources=[])
