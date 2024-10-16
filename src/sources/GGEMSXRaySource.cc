@@ -573,7 +573,6 @@ void GGEMSXRaySource::SetPhi(const std::vector<GGfloat>& phi_weights, const std:
 
         for (GGsize i = 0; i < phi_angles_size_; ++i) {
             phi_cdf_device[i] /= normalization_factor;
-            std::cout << "phi_cdf_device[" << i << "] = "<< std::fixed << std::setprecision(6) << phi_cdf_device[i] << std::endl;
         }
 
         // Copy the data from the host to the device buffer
