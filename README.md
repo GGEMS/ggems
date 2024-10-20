@@ -56,11 +56,12 @@ To use the docker image on your linux machine, the nvidia driver must be install
 
 ```console
 foo@bar~: sudo apt install curl
-foo@bar~: curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | sudo apt-key add -
-foo@bar~: distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-foo@bar~: curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
+foo@bar~: curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 foo@bar~: sudo apt update
-foo@bar~: sudo apt install nvidia-container-runtime
+foo@bar~: sudo apt-get install -y nvidia-container-toolkit
 ```
 
 To test the docker image, run this command:
