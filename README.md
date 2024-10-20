@@ -47,7 +47,7 @@ To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.2/b
 A docker image for GGEMS version 1.2 is available here:
 
 ```console
-foo@bar~: docker pull ggems/ggems:v1.2
+foo@bar~: docker pull ggems/ggems:v1.2.1
 ```
 
 ### Important
@@ -67,23 +67,41 @@ foo@bar~: sudo apt-get install -y nvidia-container-toolkit
 To test the docker image, run this command:
 
 ```console
-foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2 nvidia-smi
-Thu Jun  9 16:39:54 2022       
-+-----------------------------------------------------------------------------+
-| NVIDIA-SMI 510.39.01    Driver Version: 510.39.01    CUDA Version: 11.6     |
-|-------------------------------+----------------------+----------------------+
-| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-|                               |                      |               MIG M. |
-|===============================+======================+======================|
-|   0  NVIDIA GeForce ...  On   | 00000000:17:00.0 Off |                  N/A |
-| 30%   27C    P8    N/A /  75W |     11MiB /  4096MiB |      0%      Default |
-|                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------+
-|   1  Quadro P400         On   | 00000000:65:00.0  On |                  N/A |
-| 34%   35C    P8    N/A /  N/A |    280MiB /  2048MiB |      0%      Default |
-|                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------+
+foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2.1 nvidia-smi
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.5.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+Sun Oct 20 14:26:23 2024       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 555.52.04              Driver Version: 555.52.04      CUDA Version: 12.5     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce GTX 980 Ti      Off |   00000000:01:00.0 Off |                  N/A |
+| 20%   34C    P8             17W /  260W |       2MiB /   6144MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
 ```
 
 ## Copyright
