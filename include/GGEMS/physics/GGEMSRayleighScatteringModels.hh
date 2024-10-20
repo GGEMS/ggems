@@ -175,7 +175,7 @@ inline void LivermoreRayleighSampleSecondaries(
   GGint const particle_id
 )
 {
-  GGfloat kE0 = 0.009952493733686183f; //primary_particle->E_[particle_id];
+  GGfloat kE0 = primary_particle->E_[particle_id];
 
   if (kE0 <= 250.0e-6f) { // 250 eV
     primary_particle->status_[particle_id] = DEAD;
