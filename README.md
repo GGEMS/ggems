@@ -1,4 +1,4 @@
-## GGEMS
+# GGEMS
 
 website: <https://ggems.fr>
 
@@ -41,6 +41,16 @@ Tested compilers:
 ## Installation
 
 To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.2/building_and_installing.html>
+
+## Installation using Python
+
+On Windows or Linux system, GGEMS can be installed using a single python command:
+
+```console
+foo@bar~: python setup.py build_ext --generator=Ninja --opengl=ON --examples=ON install
+```
+
+By default, the options 'opengl' and 'examples' are set to 'OFF'. In the previous command line, the 'Ninja' generator is activated, a defaut navigator is selected if this option is not used.
 
 # GGEMS using Docker for Linux users
 
