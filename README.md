@@ -68,20 +68,6 @@ To test the docker image, run this command:
 
 ```console
 foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2.1 nvidia-smi
-==========
-== CUDA ==
-==========
-
-CUDA Version 12.5.1
-
-Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-
-This container image and its contents are governed by the NVIDIA Deep Learning Container License.
-By pulling and using the container, you accept the terms and conditions of this license:
-https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
-
-A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
-
 Sun Oct 20 14:26:23 2024       
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 555.52.04              Driver Version: 555.52.04      CUDA Version: 12.5     |
@@ -102,6 +88,14 @@ Sun Oct 20 14:26:23 2024
 |=========================================================================================|
 |  No running processes found                                                             |
 +-----------------------------------------------------------------------------------------+
+```
+
+Running CT scanner example in docker image:
+
+```console
+foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2.1
+foo@bar~: cd examples/2_CT_Scanner
+foo@bar~: python ct_scanner.py
 ```
 
 ## Copyright
