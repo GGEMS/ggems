@@ -101,3 +101,10 @@ class GGEMSXRaySource(object):
 
   def set_polyenergy(self, file):
       ggems_lib.set_polyenergy_ggems_xray_source(self.obj, file.encode('ASCII'))
+
+
+class GGEMSVoxelizedSource(object):
+  """GGEMS Voxelized source class managing vox source
+  """
+  def __init__(self, source_name):
+      self.obj = ggems_lib.create_ggems_voxelized_source(source_name.encode('ASCII'))

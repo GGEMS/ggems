@@ -22,7 +22,7 @@
 /*!
   \file GGEMSXRaySource.hh
 
-  \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
+  \brief This class defines a XRay source in GGEMS useful for CT/CBCT simulation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>

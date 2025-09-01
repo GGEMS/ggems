@@ -35,6 +35,7 @@ parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help
 parser.add_argument('-e', '--nogl', required=False, action='store_false', help='Disable OpenGL')
 parser.add_argument('-p', '--nparticlesgl', required=False, type=int, default=256, help='Number of displayed primary particles on OpenGL window (max: 65536)')
 parser.add_argument('-c', '--drawgeom', required=False, action='store_true', help='Draw geometry only on OpenGL window')
+parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
 
 args = parser.parse_args()
 
@@ -46,6 +47,7 @@ seed = args.seed
 number_of_displayed_particles = args.nparticlesgl
 is_draw_geom = args.drawgeom
 is_gl = args.nogl
+number_of_particles = args.nparticles
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
@@ -209,18 +211,28 @@ processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 
 # ------------------------------------------------------------------------------
+# STEP 8: Source
+vox_source = GGEMSVoxelizedSource('vox_source')
+vox_source.set_phantom_source('data/phantom_src.mhd')
+vox_source.set_number_of_particles(number_of_particles)
+vox_source.set_source_particle_type('gamma')
+vox_source.set_position(0.0, 0.0, 0.0, 'mm')
+vox_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
+#vox_source.set_monoenergy(125.0, 'keV')
+
+# ------------------------------------------------------------------------------
 # STEP 9: GGEMS simulation
-#ggems = GGEMS()
-#ggems.opencl_verbose(True)
-#ggems.material_database_verbose(False)
-#ggems.navigator_verbose(False)
-#ggems.source_verbose(True)
-#ggems.memory_verbose(True)
-#ggems.process_verbose(True)
-#ggems.range_cuts_verbose(True)
-#ggems.random_verbose(True)
-#ggems.profiling_verbose(True)
-#ggems.tracking_verbose(False, 0)
+ggems = GGEMS()
+ggems.opencl_verbose(True)
+ggems.material_database_verbose(False)
+ggems.navigator_verbose(False)
+ggems.source_verbose(True)
+ggems.memory_verbose(True)
+ggems.process_verbose(True)
+ggems.range_cuts_verbose(True)
+ggems.random_verbose(True)
+ggems.profiling_verbose(True)
+ggems.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation
 #ggems.initialize(seed)
