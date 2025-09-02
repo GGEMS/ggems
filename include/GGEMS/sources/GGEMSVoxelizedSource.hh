@@ -28,7 +28,7 @@
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday September 15, 2025
+  \date Monday September 1, 2025
 */
 
 #include "GGEMS/sources/GGEMSSource.hh"
@@ -114,10 +114,6 @@ class GGEMS_EXPORT GGEMSVoxelizedSource : public GGEMSSource
     void CheckParameters(void) const override;
 
   private:
-    GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
-    GGfloat monoenergy_; /*!< Monoenergy mode */
-    std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
-    GGsize number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
     cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
     cl::Buffer** energy_cdf_; /*!< Cumulative distribution function for energy to generate a random energy */
 };
@@ -129,5 +125,49 @@ class GGEMS_EXPORT GGEMSVoxelizedSource : public GGEMSSource
   \brief Get the GGEMSVoxelizedSource pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSVoxelizedSource* create_ggems_voxelized_source(char const* source_name);
+
+/*!
+  \fn void set_position_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
+  \param voxelized_source - pointer on the source
+  \param pos_x - Position of the source in X
+  \param pos_y - Position of the source in Y
+  \param pos_z - Position of the source in Z
+  \param unit - unit of the distance
+  \brief Set the position of the source in the global coordinates
+*/
+extern "C" GGEMS_EXPORT void set_position_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit);
+
+/*!
+  \fn void set_number_of_particles_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGsize const number_of_particles)
+  \param voxelized_source - pointer on the source
+  \param number_of_particles - number of particles to simulate
+  \brief Set the number of particles to simulate during the simulation
+*/
+extern "C" GGEMS_EXPORT void set_number_of_particles_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGsize const number_of_particles);
+
+/*!
+  \fn void set_source_particle_type_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* particle_name)
+  \param voxelized_source - pointer on the source
+  \param particle_name - name/type of the particle: photon or electron
+  \brief Set the type of the source particle
+*/
+extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* particle_name);
+
+/*!
+  \fn void set_monoenergy_ggems_voxelized_source(GGEMSVoxelizedSource* xray_source, GGfloat const monoenergy, char const* unit)
+  \param voxelized_source - pointer on the source
+  \param monoenergy - monoenergetic value
+  \param unit - unit of the energy
+  \brief Set the monoenergy value for the GGEMSVoxelizedSource
+*/
+extern "C" GGEMS_EXPORT void set_monoenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const monoenergy, char const* unit);
+
+/*!
+  \fn void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* xray_source, char const* energy_spectrum)
+  \param voxelized_source - pointer on the source
+  \param energy_spectrum - polyenergetic spectrum
+  \brief Set the polyenergetic spectrum value for the GGEMSVoxelizedSource
+*/
+extern "C" GGEMS_EXPORT void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* energy_spectrum);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSVOXELIZEDSOURCE_HH

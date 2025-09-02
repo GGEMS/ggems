@@ -175,9 +175,10 @@ volume_creator_manager.clean()
 
 # Loading phantom in GGEMS
 phantom = GGEMSVoxelizedPhantom('phantom')
-phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
+phantom.set_phantom('data/phantom_atn.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
+phantom.set_visible(True)
 
 # Creating a planar detector
 planar_detector = GGEMSCTSystem('custom')
@@ -186,8 +187,8 @@ planar_detector.set_number_of_modules(1, 1)
 planar_detector.set_number_of_detection_elements(100, 100, 1)
 planar_detector.set_size_of_detection_elements(4.0, 4.0, 10.0, 'mm')
 planar_detector.set_material('GOS')
-planar_detector.set_source_detector_distance(1005.0, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
-planar_detector.set_source_isocenter_distance(900.0, 'mm')
+planar_detector.set_source_detector_distance(505.0, 'mm')
+planar_detector.set_source_isocenter_distance(0.0, 'mm')
 planar_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 planar_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm')
 planar_detector.set_threshold(10.0, 'keV')
@@ -213,12 +214,12 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # ------------------------------------------------------------------------------
 # STEP 8: Source
 vox_source = GGEMSVoxelizedSource('vox_source')
-vox_source.set_phantom_source('data/phantom_src.mhd')
+#vox_source.set_phantom_source('data/phantom_src.mhd')
 vox_source.set_number_of_particles(number_of_particles)
 vox_source.set_source_particle_type('gamma')
 vox_source.set_position(0.0, 0.0, 0.0, 'mm')
 vox_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
-#vox_source.set_monoenergy(125.0, 'keV')
+#vox_source.set_monoenergy(140.51, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 9: GGEMS simulation
@@ -235,12 +236,12 @@ ggems.profiling_verbose(True)
 ggems.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation
-#ggems.initialize(seed)
+ggems.initialize(seed)
 
-#if is_draw_geom and is_gl: # Draw only geometry and do not run GGEMS
-#  opengl_manager.display()
-#else: # Running GGEMS and draw particles
-#  ggems.run()
+if is_draw_geom and is_gl: # Draw only geometry and do not run GGEMS
+  opengl_manager.display()
+else: # Running GGEMS and draw particles
+  ggems.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit safely

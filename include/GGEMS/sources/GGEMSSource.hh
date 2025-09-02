@@ -125,6 +125,21 @@ class GGEMS_EXPORT GGEMSSource
     void SetNumberOfParticles(GGsize const& number_of_particles);
 
     /*!
+      \fn void SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
+      \param monoenergy - Monoenergy value
+      \param unit - unit of the energy
+      \brief set the value of energy in monoenergy mode
+    */
+    void SetMonoenergy(GGfloat const& monoenergy, std::string const& unit = "keV");
+
+    /*!
+      \fn void SetPolyenergy(std::string const& energy_spectrum_filename)
+      \param energy_spectrum_filename - filename containing the energy spectrum
+      \brief set the energy spectrum file for polyenergy mode
+    */
+    void SetPolyenergy(std::string const& energy_spectrum_filename);
+
+    /*!
       \fn void EnableTracking(void)
       \brief Enabling tracking infos during simulation
     */
@@ -168,6 +183,12 @@ class GGEMS_EXPORT GGEMSSource
     virtual void Initialize(bool const& is_tracking = false);
 
     /*!
+      \fn void FillEnergy(void)
+      \brief fill energy for poly or mono energy mode
+    */
+    virtual void FillEnergy(void);
+
+    /*!
       \fn void GetPrimaries(GGsize const& thread_index, GGsize const& number_of particles) = 0
       \param thread_index - index of activated device (thread index)
       \param number_of_particles - number of particles to generate
@@ -202,6 +223,13 @@ class GGEMS_EXPORT GGEMSSource
 
     GGsize** number_of_particles_in_batch_; /*!< Number of particles in batch for each device */
     GGsize* number_of_batchs_; /*!< Number of batchs for each device */
+
+    GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
+    GGfloat monoenergy_; /*!< Monoenergy mode */
+    std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
+    GGsize number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
+    cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
+    cl::Buffer** energy_cdf_; /*!< Cumulative distribution function to generate a random energy */
 
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
