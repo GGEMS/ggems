@@ -89,6 +89,16 @@ GGEMSVoxelizedSolid::~GGEMSVoxelizedSolid(void)
 {
   GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid erasing..." << GGendl;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (solid_data_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(solid_data_[i], sizeof(GGEMSVoxelizedSolidData), i);
+    }
+    delete[] solid_data_;
+    solid_data_ = nullptr;
+  }
+
   GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid erased!!!" << GGendl;
 }
 

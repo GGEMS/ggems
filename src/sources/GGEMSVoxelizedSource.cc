@@ -35,6 +35,8 @@
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
+#include "GGEMS/io/GGEMSMHDImage.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,8 +44,8 @@
 
 GGEMSVoxelizedSource::GGEMSVoxelizedSource(std::string const& source_name)
 : GGEMSSource(source_name),
-  energy_spectrum_(nullptr),
-  energy_cdf_(nullptr)
+  phantom_source_filename_(""),
+  number_of_voxel_activity_(0)
 {
   GGcout("GGEMSVoxelizedSource", "GGEMSVoxelizedSource", 3) << "GGEMSVoxelizedSource creating..." << GGendl;
 
@@ -56,9 +58,19 @@ GGEMSVoxelizedSource::GGEMSVoxelizedSource(std::string const& source_name)
     }
   );
 
-  // Allocating memory for cdf and energy spectrum
-  energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
-  energy_cdf_ = new cl::Buffer*[number_activated_devices_];
+  // Allocating memory for phantom vox. data
+  phantom_vox_data_ = new cl::Buffer*[number_activated_devices_];
+
+  // Allocating memory for cdf and activity index
+  activity_index_ = new cl::Buffer*[number_activated_devices_];
+  activity_cdf_ = new cl::Buffer*[number_activated_devices_];
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Loop over the device
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    phantom_vox_data_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSource");
+  }
 
   GGcout("GGEMSVoxelizedSource", "GGEMSVoxelizedSource", 3) << "GGEMSVoxelizedSource created!!!" << GGendl;
 }
@@ -74,30 +86,28 @@ GGEMSVoxelizedSource::~GGEMSVoxelizedSource(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  if (energy_spectrum_) {
+  if (phantom_vox_data_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      if (is_monoenergy_mode_) {
-        opencl_manager.Deallocate(energy_spectrum_[i], 2*sizeof(GGfloat), i);
-      }
-      else {
-        opencl_manager.Deallocate(energy_spectrum_[i], number_of_energy_bins_*sizeof(GGfloat), i);
-      }
+      opencl_manager.Deallocate(phantom_vox_data_[i], sizeof(GGEMSVoxelizedSolidData), i);
     }
-    delete[] energy_spectrum_;
-    energy_spectrum_ = nullptr;
+    delete[] phantom_vox_data_;
+    phantom_vox_data_ = nullptr;
   }
 
-  if (energy_cdf_) {
+  if (activity_index_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      if (is_monoenergy_mode_) {
-        opencl_manager.Deallocate(energy_cdf_[i], 2*sizeof(GGfloat), i);
-      }
-      else {
-        opencl_manager.Deallocate(energy_cdf_[i], number_of_energy_bins_*sizeof(GGfloat), i);
-      }
+      opencl_manager.Deallocate(activity_index_[i], number_of_voxel_activity_*sizeof(GGint), i);
     }
-    delete[] energy_cdf_;
-    energy_cdf_ = nullptr;
+    delete[] activity_index_;
+    activity_index_ = nullptr;
+  }
+
+  if (activity_cdf_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(activity_cdf_[i], number_of_voxel_activity_*sizeof(GGfloat), i);
+    }
+    delete[] activity_cdf_;
+    activity_cdf_ = nullptr;
   }
 
   GGcout("GGEMSVoxelizedSource", "~GGEMSVoxelizedSource", 3) << "GGEMSVoxelizedSource erased!!!" << GGendl;
@@ -111,18 +121,25 @@ void GGEMSVoxelizedSource::CheckParameters(void) const
 {
   GGcout("GGEMSVoxelizedSource", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
+  // Checking phantom source file
+  if (phantom_source_filename_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a MHD phantom source file for voxelized source!!!";
+    GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
+  }
+
   // Checking the energy
   if (is_monoenergy_mode_) {
     if (monoenergy_ == -1.0f) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "You have to set an energy in monoenergetic mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
+      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
     }
 
     if (monoenergy_ < 0.0f) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "The energy must be a positive value!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
+      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
     }
   }
 
@@ -130,7 +147,7 @@ void GGEMSVoxelizedSource::CheckParameters(void) const
     if (energy_spectrum_filename_.empty()) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
+      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
     }
   }
 }
@@ -225,7 +242,7 @@ void GGEMSVoxelizedSource::PrintInfos(void) const
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(j);
 
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << GGendl;
-    GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "GGEMSXRaySource Infos: " << GGendl;
+    GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "GGEMSVoxelizedSource Infos: " << GGendl;
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "----------------------"  << GGendl;
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Source name: " << source_name_ << GGendl;
@@ -270,7 +287,7 @@ void GGEMSVoxelizedSource::PrintInfos(void) const
 
 void GGEMSVoxelizedSource::Initialize(bool const& is_tracking)
 {
-  GGcout("GGEMSVoxelizedSource", "Initialize", 3) << "Initializing the GGEMS X-Ray source..." << GGendl;
+  GGcout("GGEMSVoxelizedSource", "Initialize", 3) << "Initializing the GGEMS Voxelized source..." << GGendl;
 
   // Initialize GGEMS source
   GGEMSSource::Initialize(is_tracking);
@@ -285,7 +302,114 @@ void GGEMSVoxelizedSource::Initialize(bool const& is_tracking)
   FillEnergy();
 
   // Filling activity for each voxel
-  //FillVoxelActivity();
+  FillVoxelActivity();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedSource::FillVoxelActivity(void)
+{
+  GGcout("GGEMSVoxelizedSource", "FillVoxelActivity", 3) << "Filling activity for voxelized source..." << GGendl;
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Read MHD input file
+  GGEMSMHDImage mhd_input_phantom_source;
+
+  // Loop over the device
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    mhd_input_phantom_source.Read(phantom_source_filename_, phantom_vox_data_[d], d);
+
+    // Check the type of data
+    std::string data_type = mhd_input_phantom_source.GetDataMHDType();
+    if (data_type != "MET_FLOAT") {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "For voxelized source, data type is MET_FLOAT only!!!";
+      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "FillVoxelActivity", oss.str());
+    }
+
+    // Get the raw filename
+    std::string output_dir = mhd_input_phantom_source.GetOutputDirectory();
+    std::string phantom_src_raw_filename = output_dir + mhd_input_phantom_source.GetRawMDHfilename();
+
+    // Checking if file exists
+    std::ifstream phantom_src_raw_stream(phantom_src_raw_filename, std::ios::in | std::ios::binary);
+    GGEMSFileStream::CheckInputStream(phantom_src_raw_stream, phantom_src_raw_filename);
+
+    // Read file into a buffer
+    // Number of element for source
+    GGEMSVoxelizedSolidData* phantom_vox_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(phantom_vox_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), d);
+    GGint number_of_voxels =  phantom_vox_data_device->number_of_voxels_;
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(phantom_vox_data_[d], phantom_vox_data_device, d);
+
+    GGfloat* activity = new GGfloat[number_of_voxels];
+    phantom_src_raw_stream.read(reinterpret_cast<char*>(&activity[0]), number_of_voxels * sizeof(GGfloat));
+
+    // Closing file
+    phantom_src_raw_stream.close();
+
+    // count nb of non zeros activities
+    GGint nb_activity = 0; // Number of non zero activity
+    for (GGint i = 0; i < number_of_voxels; ++i) {
+      if (activity[i] != 0.0f) ++nb_activity;
+    }
+    number_of_voxel_activity_ = nb_activity;
+
+    // Allocation of buffers
+    activity_cdf_[d] = opencl_manager.Allocate(nullptr, number_of_voxel_activity_ * sizeof(GGfloat), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSource");
+    activity_index_[d] = opencl_manager.Allocate(nullptr, number_of_voxel_activity_ * sizeof(GGint), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSource");
+
+    // Get the index pointer on OpenCL device
+    GGint* activity_index_device = opencl_manager.GetDeviceBuffer<GGint>(activity_index_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxel_activity_ * sizeof(GGint), d);
+
+    // Get the cdf pointer on OpenCL device
+    GGfloat* activity_cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(activity_cdf_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxel_activity_ * sizeof(GGfloat), d);
+
+    // Storing index activity and computing cdf
+    GGint index = 0;
+    GGfloat sum_cdf = 0.0f;
+    GGfloat* tmp_cdf = new GGfloat[number_of_voxel_activity_];
+    for (GGint i = 0; i < number_of_voxels; ++i) {
+      if (activity[i] != 0.0f) {
+        activity_index_device[index] = i;
+        tmp_cdf[index] = activity[i];
+        sum_cdf += activity[i];
+        ++index;
+      }
+    }
+
+    // compute cummulative density function
+    activity_cdf_device[0] = tmp_cdf[0] / sum_cdf;
+
+    for (GGint i = 0; i < number_of_voxel_activity_; ++i) {
+      tmp_cdf[i] = tmp_cdf[i] + tmp_cdf[i - 1];
+      activity_cdf_device[i]= tmp_cdf[i] / sum_cdf;
+    }
+
+    // By security, final value of cdf must be 1 !!!
+    activity_cdf_device[number_of_voxel_activity_ - 1] = 1.0f;
+
+    // Release the pointers
+    opencl_manager.ReleaseDeviceBuffer(activity_index_[d], activity_index_device, d);
+    opencl_manager.ReleaseDeviceBuffer(activity_cdf_[d], activity_cdf_device, d);
+
+    // Freeing memory
+    delete[] activity;
+    delete[] tmp_cdf;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedSource::SetPhantomSourceFile(std::string const& phantom_source_filename)
+{
+  phantom_source_filename_ = phantom_source_filename;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -342,6 +466,14 @@ void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_sourc
   voxelized_source->SetPolyenergy(energy_spectrum);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_phantom_source_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* phantom_source_file)
+{
+  voxelized_source->SetPhantomSourceFile(phantom_source_file);
+}
 
 /*
 
@@ -507,84 +639,6 @@ void VoxelizedSource::set_source_name(std::string vsource_name) {
 
 //// MHD //////////////////////////////////////////////////////:
 
-// Skip comment starting with "#"
-void VoxelizedSource::skip_comment(std::istream & is) {
-    i8 c;
-    i8 line[1024];
-    if (is.eof()) return;
-    is >> c;
-    while (is && (c=='#')) {
-        is.getline(line, 1024);
-        is >> c;
-        if (is.eof()) return;
-    }
-    is.unget();
-}
-
-// Remove all white space
-std::string VoxelizedSource::remove_white_space(std::string txt) {
-    txt.erase(remove_if(txt.begin(), txt.end(), isspace), txt.end());
-    return txt;
-}
-
-// Read mhd key
-std::string VoxelizedSource::read_mhd_key(std::string txt) {
-    txt = txt.substr(0, txt.find("="));
-    return remove_white_space(txt);
-}
-
-// Read string mhd arg
-std::string VoxelizedSource::read_mhd_string_arg(std::string txt) {
-    txt = txt.substr(txt.find("=")+1);
-    return remove_white_space(txt);
-}
-
-// Read i32 mhd arg
-i32 VoxelizedSource::read_mhd_int(std::string txt) {
-    i32 res;
-    txt = txt.substr(txt.find("=")+1);
-    txt = remove_white_space(txt);
-    std::stringstream(txt) >> res;
-    return res;
-}
-
-// Read int mhd arg
-i32 VoxelizedSource::read_mhd_int_atpos(std::string txt, i32 pos) {
-    i32 res;
-    txt = txt.substr(txt.find("=")+2);
-    if (pos==0) {
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==1) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==2) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(txt.find(" ")+1);
-    }
-    std::stringstream(txt) >> res;
-    return res;
-}
-
-// Read f32 mhd arg
-f32 VoxelizedSource::read_mhd_f32_atpos(std::string txt, i32 pos) {
-    f32 res;
-    txt = txt.substr(txt.find("=")+2);
-    if (pos==0) {
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==1) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==2) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(txt.find(" ")+1);
-    }
-    std::stringstream(txt) >> res;
-    return res;
-}
 
 // Load activities from mhd file (only f32 data)
 void VoxelizedSource::load_from_mhd(std::string filename) {
@@ -634,36 +688,6 @@ void VoxelizedSource::load_from_mhd(std::string filename) {
         }
 
     } // read file
-
-    // Check header
-    if (ObjectType != "Image") {
-        printf("Error, mhd header: ObjectType = %s\n", ObjectType.c_str());
-        exit(EXIT_FAILURE);
-    }
-    if (BinaryData != "True") {
-        printf("Error, mhd header: BinaryData = %s\n", BinaryData.c_str());
-        exit(EXIT_FAILURE);
-    }
-    if (BinaryDataByteOrderMSB != "False") {
-        printf("Error, mhd header: BinaryDataByteOrderMSB = %s\n", BinaryDataByteOrderMSB.c_str());
-        exit(EXIT_FAILURE);
-    }
-    if (CompressedData != "False") {
-        printf("Error, mhd header: CompressedData = %s\n", CompressedData.c_str());
-        exit(EXIT_FAILURE);
-    }
-    if (ElementType != "MET_FLOAT") {
-        printf("Error, mhd header: ElementType = %s\n", ElementType.c_str());
-        exit(EXIT_FAILURE);
-    }
-    if (ElementDataFile == "") {
-        printf("Error, mhd header: ElementDataFile = %s\n", ElementDataFile.c_str());
-        exit(EXIT_FAILURE);
-    }
-    if (NDims != 3) {
-        printf("Error, mhd header: NDims = %i\n", NDims);
-        exit(EXIT_FAILURE);
-    }
 
     if (nb_vox_x == 0 || nb_vox_y == 0 || nb_vox_z == 0 ||
             spacing_x == 0 || spacing_y == 0 || spacing_z == 0) {

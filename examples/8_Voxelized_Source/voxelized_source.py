@@ -214,7 +214,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # ------------------------------------------------------------------------------
 # STEP 8: Source
 vox_source = GGEMSVoxelizedSource('vox_source')
-#vox_source.set_phantom_source('data/phantom_src.mhd')
+vox_source.set_phantom_source('data/phantom_src.mhd')
 vox_source.set_number_of_particles(number_of_particles)
 vox_source.set_source_particle_type('gamma')
 vox_source.set_position(0.0, 0.0, 0.0, 'mm')

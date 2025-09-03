@@ -106,6 +106,14 @@ GGEMSMeshedSolid::~GGEMSMeshedSolid(void)
     delete octree_;
   }
 
+  if (solid_data_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(solid_data_[i], sizeof(GGEMSMeshedSolidData), i);
+    }
+    delete[] solid_data_;
+    solid_data_ = nullptr;
+  }
+
   GGcout("GGEMSMeshedSolid", "GGEMSMeshedSolid", 3) << "GGEMSMeshedSolid erased!!!" << GGendl;
 }
 

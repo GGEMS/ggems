@@ -125,6 +125,9 @@ class GGEMSVoxelizedSource(object):
       ggems_lib.set_polyenergy_ggems_voxelized_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_polyenergy_ggems_voxelized_source.restype = ctypes.c_void_p
 
+      ggems_lib.set_phantom_source_ggems_voxelized_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+      ggems_lib.set_phantom_source_ggems_voxelized_source.restype = ctypes.c_void_p
+
       self.obj = ggems_lib.create_ggems_voxelized_source(source_name.encode('ASCII'))
 
   def set_position(self, x, y, z, unit):
@@ -141,3 +144,6 @@ class GGEMSVoxelizedSource(object):
 
   def set_polyenergy(self, file):
       ggems_lib.set_polyenergy_ggems_voxelized_source(self.obj, file.encode('ASCII'))
+
+  def set_phantom_source(self, file):
+      ggems_lib.set_phantom_source_ggems_voxelized_source(self.obj, file.encode('ASCII'))

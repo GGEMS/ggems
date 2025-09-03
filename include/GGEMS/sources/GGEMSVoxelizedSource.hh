@@ -100,6 +100,13 @@ class GGEMS_EXPORT GGEMSVoxelizedSource : public GGEMSSource
     */
     void GetPrimaries(GGsize const& thread_index, GGsize const& number_of_particles) override;
 
+    /*!
+      \fn void SetPhantomSourceFile(std::string const& phantom_source_filename)
+      \param phantom_source_filename - phantom source file for vox. source
+      \brief Set phantom source file in MHD format for voxelized source
+    */
+    void SetPhantomSourceFile(std::string const& phantom_source_filename);
+
   private:
     /*!
       \fn void InitializeKernel(void)
@@ -113,9 +120,18 @@ class GGEMS_EXPORT GGEMSVoxelizedSource : public GGEMSSource
     */
     void CheckParameters(void) const override;
 
+    /*!
+      \fn void FillVoxelActivity(void)
+      \brief fill activity source for phantom file to compute cdf
+    */
+    void FillVoxelActivity(void);
+
   private:
-    cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
-    cl::Buffer** energy_cdf_; /*!< Cumulative distribution function for energy to generate a random energy */
+    std::string phantom_source_filename_; /*!< The phantom source filename for voxelized source */
+    cl::Buffer** phantom_vox_data_; /*!< Data about voxelized source */
+    GGint number_of_voxel_activity_; /*!< Number of voxels with non zero activity */
+    cl::Buffer** activity_index_; /*!< Activity index of voxel */
+    cl::Buffer** activity_cdf_; /*!< Cumulative distribution function to generate a particle in a certain voxel */
 };
 
 /*!
@@ -154,7 +170,7 @@ extern "C" GGEMS_EXPORT void set_number_of_particles_voxelized_source(GGEMSVoxel
 extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* particle_name);
 
 /*!
-  \fn void set_monoenergy_ggems_voxelized_source(GGEMSVoxelizedSource* xray_source, GGfloat const monoenergy, char const* unit)
+  \fn void set_monoenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const monoenergy, char const* unit)
   \param voxelized_source - pointer on the source
   \param monoenergy - monoenergetic value
   \param unit - unit of the energy
@@ -163,11 +179,19 @@ extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_voxelized_source(GGE
 extern "C" GGEMS_EXPORT void set_monoenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const monoenergy, char const* unit);
 
 /*!
-  \fn void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* xray_source, char const* energy_spectrum)
+  \fn void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* energy_spectrum)
   \param voxelized_source - pointer on the source
   \param energy_spectrum - polyenergetic spectrum
   \brief Set the polyenergetic spectrum value for the GGEMSVoxelizedSource
 */
 extern "C" GGEMS_EXPORT void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* energy_spectrum);
+
+/*!
+  \fn void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* phantom_source_file)
+  \param voxelized_source - pointer on the source
+  \param phantom_source_file - phantom source file
+  \brief Set the phantom source file for vox. source
+*/
+extern "C" GGEMS_EXPORT void set_phantom_source_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* phantom_source_file);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSVOXELIZEDSOURCE_HH

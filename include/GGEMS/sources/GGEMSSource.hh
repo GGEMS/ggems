@@ -170,23 +170,11 @@ class GGEMS_EXPORT GGEMSSource
     inline GGsize GetNumberOfParticlesInBatch(GGsize const& device_index, GGsize const& batch_index) {return number_of_particles_in_batch_[device_index][batch_index];}
 
     /*!
-      \fn void CheckParameters(void) const
-      \brief Check mandatory parameters for a source
-    */
-    virtual void CheckParameters(void) const;
-
-    /*!
       \fn void Initialize(const bool &is_tracking = false)
       \param is_tracking - flag activating tracking
       \brief Initialize a GGEMS source
     */
     virtual void Initialize(bool const& is_tracking = false);
-
-    /*!
-      \fn void FillEnergy(void)
-      \brief fill energy for poly or mono energy mode
-    */
-    virtual void FillEnergy(void);
 
     /*!
       \fn void GetPrimaries(GGsize const& thread_index, GGsize const& number_of particles) = 0
@@ -208,6 +196,18 @@ class GGEMS_EXPORT GGEMSSource
       \brief Initialize kernel for specific source in OpenCL
     */
     virtual void InitializeKernel(void) = 0;
+
+    /*!
+      \fn void CheckParameters(void) const
+      \brief Check mandatory parameters for a source
+    */
+    virtual void CheckParameters(void) const;
+
+    /*!
+      \fn void FillEnergy(void)
+      \brief fill energy for poly or mono energy mode
+    */
+    virtual void FillEnergy(void);
 
   private:
     /*!

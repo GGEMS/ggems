@@ -306,14 +306,21 @@ void GGEMSSource::FillEnergy(void)
         ++line_index;
       }
 
+      // Filling a tmp buffer
+      GGfloat* tmp_cdf = new GGfloat[number_of_energy_bins_];
+      for (GGint i = 0; i < number_of_energy_bins_; ++i) {
+        tmp_cdf[i] = cdf_device[i];
+      }
+
       // Compute CDF and normalized it
-      cdf_device[0] /= sum_cdf;
+      cdf_device[0] /= tmp_cdf[0] / sum_cdf;
       for (GGsize i = 1; i < number_of_energy_bins_; ++i) {
-        cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
+        tmp_cdf[i] = tmp_cdf[i] + tmp_cdf[i - 1];
+        cdf_device[i] = tmp_cdf[i]/sum_cdf;
       }
 
       // By security, final value of cdf must be 1 !!!
-      cdf_device[number_of_energy_bins_-1] = 1.0;
+      cdf_device[number_of_energy_bins_ - 1] = 1.0;
 
       // Release the pointers
       opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
