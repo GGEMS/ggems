@@ -129,7 +129,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSource : public GGEMSSource
   private:
     std::string phantom_source_filename_; /*!< The phantom source filename for voxelized source */
     cl::Buffer** phantom_vox_data_; /*!< Data about voxelized source */
-    GGint number_of_voxel_activity_; /*!< Number of voxels with non zero activity */
+    GGint number_of_activity_bins_; /*!< Number of bins for cdf activity with non zero activity */
     cl::Buffer** activity_index_; /*!< Activity index of voxel */
     cl::Buffer** activity_cdf_; /*!< Cumulative distribution function to generate a particle in a certain voxel */
 };

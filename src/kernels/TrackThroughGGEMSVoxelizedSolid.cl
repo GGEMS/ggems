@@ -151,7 +151,7 @@ kernel void track_through_ggems_voxelized_solid(
     GGchar next_discrete_process = primary_particle->next_discrete_process_[global_id];
 
     // Get the borders of the current voxel
-    GGfloat3 voxel_border_min = border_min +  convert_float3(voxel_id)*voxel_size;
+    GGfloat3 voxel_border_min = border_min + convert_float3(voxel_id)*voxel_size;
     GGfloat3 voxel_border_max = voxel_border_min + voxel_size;
 
     // Get safety position of particle to be sure particle is inside voxel
