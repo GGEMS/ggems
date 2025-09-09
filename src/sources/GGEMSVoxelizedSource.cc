@@ -127,29 +127,6 @@ void GGEMSVoxelizedSource::CheckParameters(void) const
     oss << "You have to set a MHD phantom source file for voxelized source!!!";
     GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
   }
-
-  // Checking the energy
-  if (is_monoenergy_mode_) {
-    if (monoenergy_ == -1.0f) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to set an energy in monoenergetic mode!!!";
-      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
-    }
-
-    if (monoenergy_ < 0.0f) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "The energy must be a positive value!!!";
-      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
-    }
-  }
-
-  if (!is_monoenergy_mode_) {
-    if (energy_spectrum_filename_.empty()) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
-      GGEMSMisc::ThrowException("GGEMSVoxelizedSource", "CheckParameters", oss.str());
-    }
-  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -209,11 +186,12 @@ void GGEMSVoxelizedSource::GetPrimaries(GGsize const& thread_index, GGsize const
   kernel_get_primaries_[thread_index]->setArg(4, *energy_spectrum_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(5, *energy_cdf_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_));
-  kernel_get_primaries_[thread_index]->setArg(7, *activity_index_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(8, *activity_cdf_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(9, number_of_activity_bins_);
-  kernel_get_primaries_[thread_index]->setArg(10, *phantom_vox_data_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(11, *matrix_transformation);
+  kernel_get_primaries_[thread_index]->setArg(7, is_interp_);
+  kernel_get_primaries_[thread_index]->setArg(8, *activity_index_[thread_index]);
+  kernel_get_primaries_[thread_index]->setArg(9, *activity_cdf_[thread_index]);
+  kernel_get_primaries_[thread_index]->setArg(10, number_of_activity_bins_);
+  kernel_get_primaries_[thread_index]->setArg(11, *phantom_vox_data_[thread_index]);
+  kernel_get_primaries_[thread_index]->setArg(12, *matrix_transformation);
 
   // Launching kernel
   cl::Event event;
@@ -260,13 +238,6 @@ void GGEMSVoxelizedSource::PrintInfos(void) const
     }
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_by_device_[j] << GGendl;
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Number of batches: " << number_of_batchs_[j] << GGendl;
-    GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Energy mode: ";
-    if (is_monoenergy_mode_) {
-      std::cout << "Monoenergy" << std::endl;
-    }
-    else {
-      std::cout << "Polyenergy" << std::endl;
-    }
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
     GGcout("GGEMSVoxelizedSource", "PrintInfos", 0) << "* Transformation matrix: " << GGendl;
@@ -475,4 +446,13 @@ void set_polyenergy_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_sourc
 void set_phantom_source_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* phantom_source_file)
 {
   voxelized_source->SetPhantomSourceFile(phantom_source_file);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_energy_peak_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const energy, char const* unit, GGfloat const intensity)
+{
+  voxelized_source->SetEnergyPeak(energy, intensity, unit);
 }

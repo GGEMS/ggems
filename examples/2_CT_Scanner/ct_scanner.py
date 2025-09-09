@@ -137,8 +137,7 @@ point_source.set_number_of_particles(number_of_particles)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.5, 'deg')
-point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
+point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')#point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
 # STEP 8: GGEMS simulation

@@ -219,4 +219,14 @@ extern "C" GGEMS_EXPORT void set_monoenergy_ggems_xray_source(GGEMSXRaySource* x
 */
 extern "C" GGEMS_EXPORT void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum);
 
+/*!
+  \fn void set_energy_peak_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const energy, char const* unit, GGfloat const intensity)
+  \param xray_source - pointer on the source
+  \param energy - energy value
+  \param unit - unit of the energy
+  \param intensity - intensity of bin
+  \brief Set the energy peak spectrum value for the GGEMSXRaySource
+*/
+extern "C" GGEMS_EXPORT void set_energy_peak_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const energy, char const* unit, GGfloat const intensity);
+
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSXRAYSOURCE_HH

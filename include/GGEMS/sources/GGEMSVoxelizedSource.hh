@@ -194,4 +194,14 @@ extern "C" GGEMS_EXPORT void set_polyenergy_ggems_voxelized_source(GGEMSVoxelize
 */
 extern "C" GGEMS_EXPORT void set_phantom_source_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, char const* phantom_source_file);
 
+/*!
+  \fn void set_energy_peak_ggems_xray_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const energy, char const* unit, GGfloat const intensity)
+  \param voxelized_source - pointer on the source
+  \param energy - energy value
+  \param unit - unit of the energy
+  \param intensity - intensity of bin
+  \brief Set the energy peak spectrum value for the GGEMSVoxelizedSource
+*/
+extern "C" GGEMS_EXPORT void set_energy_peak_ggems_voxelized_source(GGEMSVoxelizedSource* voxelized_source, GGfloat const energy, char const* unit, GGfloat const intensity);
+
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSVOXELIZEDSOURCE_HH

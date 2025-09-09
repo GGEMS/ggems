@@ -68,7 +68,7 @@ inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint con
   }
 
   // Checking the min elements
-  if (min > min_check) min--;
+  //if (min > min_check) min--;
 
   // Return the min element
   return min;

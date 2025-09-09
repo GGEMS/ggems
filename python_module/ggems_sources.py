@@ -76,6 +76,9 @@ class GGEMSXRaySource(object):
       ggems_lib.set_polyenergy_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_polyenergy_ggems_xray_source.restype = ctypes.c_void_p
 
+      ggems_lib.set_energy_peak_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p, ctypes.c_float]
+      ggems_lib.set_energy_peak_ggems_xray_source.restype = ctypes.c_void_p
+
       self.obj = ggems_lib.create_ggems_xray_source(source_name.encode('ASCII'))
 
   def set_position(self, x, y, z, unit):
@@ -101,6 +104,9 @@ class GGEMSXRaySource(object):
 
   def set_polyenergy(self, file):
       ggems_lib.set_polyenergy_ggems_xray_source(self.obj, file.encode('ASCII'))
+
+  def set_energy_peak(self, e, unit, i):
+      ggems_lib.set_energy_peak_ggems_xray_source(self.obj, e, unit.encode('ASCII'), i)
 
 
 class GGEMSVoxelizedSource(object):
@@ -128,6 +134,9 @@ class GGEMSVoxelizedSource(object):
       ggems_lib.set_phantom_source_ggems_voxelized_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_phantom_source_ggems_voxelized_source.restype = ctypes.c_void_p
 
+      ggems_lib.set_energy_peak_ggems_voxelized_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p, ctypes.c_float]
+      ggems_lib.set_energy_peak_ggems_voxelized_source.restype = ctypes.c_void_p
+
       self.obj = ggems_lib.create_ggems_voxelized_source(source_name.encode('ASCII'))
 
   def set_position(self, x, y, z, unit):
@@ -147,3 +156,7 @@ class GGEMSVoxelizedSource(object):
 
   def set_phantom_source(self, file):
       ggems_lib.set_phantom_source_ggems_voxelized_source(self.obj, file.encode('ASCII'))
+
+  def set_energy_peak(self, e, unit, i):
+      ggems_lib.set_energy_peak_ggems_voxelized_source(self.obj, e, unit.encode('ASCII'), i)
+

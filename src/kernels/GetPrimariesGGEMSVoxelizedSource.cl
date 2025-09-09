@@ -38,7 +38,7 @@
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
 
 /*!
-  \fn kernel void get_primaries_ggems_voxelized_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* energy_cdf, GGint const number_of_energy_bins, global GGint const* activity_index, global GGfloat const* activity_cdf, GGint const number_of_activity_bins, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGfloat44 const* matrix_transformation)
+  \fn kernel void get_primaries_ggems_voxelized_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* energy_cdf, GGint const number_of_energy_bins, GGchar const is_interp, global GGint const* activity_index, global GGfloat const* activity_cdf, GGint const number_of_activity_bins, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGfloat44 const* matrix_transformation)
   \param particle_id_limit - particle id limit
   \param primary_particle - buffer of primary particles
   \param random - buffer for random number
@@ -46,6 +46,7 @@
   \param energy_spectrum - energy spectrum
   \param energy_cdf - cumulative derivative function for energy
   \param number_of_energy_bins - number of energy bins
+  \param is_interp - linear interpolation of energy or not
   \param activity_index - index of cdf activity
   \param activity_cdf - cdf of activity
   \param number_of_activity_bins - number of bins for cdf activity
@@ -61,6 +62,7 @@ kernel void get_primaries_ggems_voxelized_source(
   global GGfloat const* energy_spectrum,
   global GGfloat const* energy_cdf,
   GGint const number_of_energy_bins,
+  GGchar const is_interp,
   global GGint const* activity_index,
   global GGfloat const* activity_cdf,
   GGint const number_of_activity_bins,
@@ -136,7 +138,7 @@ kernel void get_primaries_ggems_voxelized_source(
   GGint index_for_energy = BinarySearchLeft(rndm_for_energy, energy_cdf, number_of_energy_bins, 0, 0);
 
   // Setting the energy for particles
-  primary_particle->E_[global_id] = (index_for_energy == number_of_energy_bins - 1) ?
+  primary_particle->E_[global_id] = (!is_interp) ?
     energy_spectrum[index_for_energy] :
     LinearInterpolation(
       energy_cdf[index_for_energy],

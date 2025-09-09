@@ -131,9 +131,10 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   kernel_get_primaries_[thread_index]->setArg(4, *energy_spectrum_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(5, *energy_cdf_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_));
-  kernel_get_primaries_[thread_index]->setArg(7, beam_aperture_);
-  kernel_get_primaries_[thread_index]->setArg(8, focal_spot_size_);
-  kernel_get_primaries_[thread_index]->setArg(9, *matrix_transformation);
+  kernel_get_primaries_[thread_index]->setArg(7, is_interp_);
+  kernel_get_primaries_[thread_index]->setArg(8, beam_aperture_);
+  kernel_get_primaries_[thread_index]->setArg(9, focal_spot_size_);
+  kernel_get_primaries_[thread_index]->setArg(10, *matrix_transformation);
 
   // Launching kernel
   cl::Event event;
@@ -180,13 +181,6 @@ void GGEMSXRaySource::PrintInfos(void) const
     }
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_by_device_[j] << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << number_of_batchs_[j] << GGendl;
-    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
-    if (is_monoenergy_mode_) {
-      std::cout << "Monoenergy" << std::endl;
-    }
-    else {
-      std::cout << "Polyenergy" << std::endl;
-    }
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
@@ -237,29 +231,6 @@ void GGEMSXRaySource::CheckParameters(void) const
     std::ostringstream oss(std::ostringstream::out);
     oss << "The focal spot size is a posivite value!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-  }
-
-  // Checking the energy
-  if (is_monoenergy_mode_) {
-    if (monoenergy_ == -1.0f) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to set an energy in monoenergetic mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-    }
-
-    if (monoenergy_ < 0.0f) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "The energy must be a positive value!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-    }
-  }
-
-  if (!is_monoenergy_mode_) {
-    if (energy_spectrum_filename_.empty()) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-    }
   }
 }
 
@@ -383,4 +354,13 @@ void set_monoenergy_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat cons
 void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum)
 {
   xray_source->SetPolyenergy(energy_spectrum);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_energy_peak_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const energy, char const* unit, GGfloat const intensity)
+{
+  xray_source->SetEnergyPeak(energy, intensity, unit);
 }

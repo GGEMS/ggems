@@ -140,6 +140,22 @@ class GGEMS_EXPORT GGEMSSource
     void SetPolyenergy(std::string const& energy_spectrum_filename);
 
     /*!
+      \fn void SetEnergyPeak(GGfloat const& energy, GGfloat const& intensity, std::string const& unit = "keV")
+      \param energy - Energy value
+      \param intensity - intensity of the bin
+      \param unit - unit of the energy
+      \brief set the value of energy and intensity for a peak
+    */
+    void SetEnergyPeak(GGfloat const& energy, GGfloat const& intensity, std::string const& unit = "keV");
+
+    /*!
+      \fn SetInterpolation(GGbool const& is_interpolation)
+      \param is_interpolation - flag for interpolation of spectrum
+      \brief Select interpolation of not for energy
+    */
+    void SetInterpolation(GGbool const& is_interpolation);
+
+    /*!
       \fn void EnableTracking(void)
       \brief Enabling tracking infos during simulation
     */
@@ -216,6 +232,16 @@ class GGEMS_EXPORT GGEMSSource
     */
     void OrganizeParticlesInBatch(void);
 
+  private:
+    /*!
+      \struct GGEMSEnergyMapping
+      \brief GGEMS structure storing bin energy/intensity
+    */
+    struct GGEMSEnergyMapping {
+      GGdouble energy_; /*!< energy bin */
+      GGdouble intensity_; /*!< intensity of energy bin */
+    };
+
   protected:
     std::string source_name_; /*!< Name of the source */
     GGsize number_of_particles_; /*!< Number of particles */
@@ -224,12 +250,11 @@ class GGEMS_EXPORT GGEMSSource
     GGsize** number_of_particles_in_batch_; /*!< Number of particles in batch for each device */
     GGsize* number_of_batchs_; /*!< Number of batchs for each device */
 
-    GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
-    GGfloat monoenergy_; /*!< Monoenergy mode */
-    std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
+    GGchar is_interp_; /*!< Boolean for energy interpolation */
     GGsize number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
     cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
     cl::Buffer** energy_cdf_; /*!< Cumulative distribution function to generate a random energy */
+    std::vector<GGEMSEnergyMapping> energy_mappings_; /*!< Vector storing whole spectrum */
 
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
