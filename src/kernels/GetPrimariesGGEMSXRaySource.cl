@@ -104,16 +104,24 @@ kernel void get_primaries_ggems_xray_source(
   // Apply transformation (local to global frame)
   global_position = LocalToGlobalPosition(matrix_transformation, &global_position);
 
-  // Getting a random energy
-  GGfloat rndm_for_energy = KissUniform(random, global_id);
-
-  // Get index in cdf
-  GGint index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins, 0, 0);
+  GGint index_for_energy = 0;
+  GGfloat rndm_for_energy = 0.0f;
+  // For non monoenergy
+  if (number_of_energy_bins != 1) {
+    rndm_for_energy = KissUniform(random, global_id);
+    index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins+1, 0, 0);
+  }
 
   // Setting the energy for particles
   primary_particle->E_[global_id] = (!is_interp) ?
     energy_spectrum[index_for_energy] :
-    LinearInterpolation(cdf[index_for_energy], energy_spectrum[index_for_energy], cdf[index_for_energy + 1], energy_spectrum[index_for_energy + 1], rndm_for_energy);
+    LinearInterpolation(
+      cdf[index_for_energy],
+      energy_spectrum[index_for_energy],
+      cdf[index_for_energy + 1],
+      energy_spectrum[index_for_energy + 1],
+      rndm_for_energy
+    );
 
   // Then set the mandatory field to create a new particle
   primary_particle->px_[global_id] = global_position.x;

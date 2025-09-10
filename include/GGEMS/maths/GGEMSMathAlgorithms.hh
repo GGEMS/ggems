@@ -50,28 +50,22 @@ inline GGint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GG
 inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
 #endif
 {
-  GGint max = size - 1, mid = 0; // Max element, and median element
-  GGint min_check = min; // Min element
+  GGint low = 0;
+  GGint mid = 0;
+  GGint high = size - 1;
+  while (low <= high) {
+    mid = low + (high - low) / 2;
 
-  while (min < max) {
-    // Computing median index
-    mid = (min + max) >> 1;
-    if (key == array[mid + offset]) {
-      return mid;
-    }
-    else if (key > array[mid + offset]) {
-      min = mid + 1;
-    }
-    else {
-      max = mid;
+    // Check if x at mid
+    if (array[mid] == key) return mid;
+
+    if (array[mid] < key) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
     }
   }
-
-  // Checking the min elements
-  //if (min > min_check) min--;
-
-  // Return the min element
-  return min;
+  return low - 1;
 }
 
 /*!

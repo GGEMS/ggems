@@ -130,7 +130,7 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   kernel_get_primaries_[thread_index]->setArg(3, particle_type_);
   kernel_get_primaries_[thread_index]->setArg(4, *energy_spectrum_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(5, *energy_cdf_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_));
+  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_+1));
   kernel_get_primaries_[thread_index]->setArg(7, is_interp_);
   kernel_get_primaries_[thread_index]->setArg(8, beam_aperture_);
   kernel_get_primaries_[thread_index]->setArg(9, focal_spot_size_);

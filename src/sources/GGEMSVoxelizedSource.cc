@@ -38,6 +38,8 @@
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 
+#include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +106,7 @@ GGEMSVoxelizedSource::~GGEMSVoxelizedSource(void)
 
   if (activity_cdf_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(activity_cdf_[i], number_of_activity_bins_*sizeof(GGfloat), i);
+      opencl_manager.Deallocate(activity_cdf_[i], (number_of_activity_bins_+1)*sizeof(GGfloat), i);
     }
     delete[] activity_cdf_;
     activity_cdf_ = nullptr;
@@ -185,11 +187,11 @@ void GGEMSVoxelizedSource::GetPrimaries(GGsize const& thread_index, GGsize const
   kernel_get_primaries_[thread_index]->setArg(3, particle_type_);
   kernel_get_primaries_[thread_index]->setArg(4, *energy_spectrum_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(5, *energy_cdf_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_));
+  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_+1));
   kernel_get_primaries_[thread_index]->setArg(7, is_interp_);
   kernel_get_primaries_[thread_index]->setArg(8, *activity_index_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(9, *activity_cdf_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(10, number_of_activity_bins_);
+  kernel_get_primaries_[thread_index]->setArg(10, static_cast<GGint>(number_of_activity_bins_+1));
   kernel_get_primaries_[thread_index]->setArg(11, *phantom_vox_data_[thread_index]);
   kernel_get_primaries_[thread_index]->setArg(12, *matrix_transformation);
 
@@ -333,19 +335,20 @@ void GGEMSVoxelizedSource::FillVoxelActivity(void)
     number_of_activity_bins_ = nb_activity;
 
     // Allocation of buffers
-    activity_cdf_[d] = opencl_manager.Allocate(nullptr, number_of_activity_bins_ * sizeof(GGfloat), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSource");
+    activity_cdf_[d] = opencl_manager.Allocate(nullptr, (number_of_activity_bins_+1) * sizeof(GGfloat), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSource");
     activity_index_[d] = opencl_manager.Allocate(nullptr, number_of_activity_bins_ * sizeof(GGint), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSource");
 
     // Get the index pointer on OpenCL device
     GGint* activity_index_device = opencl_manager.GetDeviceBuffer<GGint>(activity_index_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_activity_bins_ * sizeof(GGint), d);
 
     // Get the cdf pointer on OpenCL device
-    GGfloat* activity_cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(activity_cdf_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_activity_bins_ * sizeof(GGfloat), d);
+    GGfloat* activity_cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(activity_cdf_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, (number_of_activity_bins_+1) * sizeof(GGfloat), d);
 
     // Storing index activity and computing cdf
-    GGint index = 0;
+    GGint index = 1;
     GGfloat sum_cdf = 0.0f;
-    GGfloat* tmp_cdf = new GGfloat[number_of_activity_bins_];
+    GGfloat* tmp_cdf = new GGfloat[number_of_activity_bins_+1];
+    tmp_cdf[0] = 0.0f;
     for (GGint i = 0; i < number_of_voxels; ++i) {
       if (activity[i] != 0.0f) {
         activity_index_device[index] = i;
@@ -356,15 +359,15 @@ void GGEMSVoxelizedSource::FillVoxelActivity(void)
     }
 
     // compute cummulative density function
-    activity_cdf_device[0] = tmp_cdf[0] / sum_cdf;
+    activity_cdf_device[0] = tmp_cdf[0];
 
-    for (GGint i = 0; i < number_of_activity_bins_; ++i) {
+    for (GGint i = 1; i <= number_of_activity_bins_; ++i) {
       tmp_cdf[i] = tmp_cdf[i] + tmp_cdf[i - 1];
       activity_cdf_device[i]= tmp_cdf[i] / sum_cdf;
     }
 
     // By security, final value of cdf must be 1 !!!
-    activity_cdf_device[number_of_activity_bins_ - 1] = 1.0f;
+    activity_cdf_device[number_of_activity_bins_] = 1.0f;
 
     // Release the pointers
     opencl_manager.ReleaseDeviceBuffer(activity_index_[d], activity_index_device, d);

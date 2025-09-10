@@ -125,7 +125,7 @@ GGEMSSource::~GGEMSSource(void)
 
   if (energy_cdf_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(energy_cdf_[i], number_of_energy_bins_*sizeof(GGfloat), i);
+      opencl_manager.Deallocate(energy_cdf_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
     }
     delete[] energy_cdf_;
     energy_cdf_ = nullptr;
@@ -275,13 +275,13 @@ void GGEMSSource::FillEnergy(void)
     energy_spectrum_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
 
     // Cumulative distribution function
-    energy_cdf_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
+    energy_cdf_[j] = opencl_manager.Allocate(nullptr, (number_of_energy_bins_+1)*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
 
     // Get the energy pointer on OpenCL device
     GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
 
     // Get the cdf pointer on OpenCL device
-    GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
+    GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, (number_of_energy_bins_+1)*sizeof(GGfloat), j);
 
     // Computing sum of intensities
     GGdouble sum_cdf = 0.0;
@@ -290,21 +290,23 @@ void GGEMSSource::FillEnergy(void)
     }
 
     // Filling a tmp buffer
-    GGdouble* tmp_cdf = new GGdouble[number_of_energy_bins_];
+    GGdouble* tmp_cdf = new GGdouble[number_of_energy_bins_+1];
+    tmp_cdf[0] = 0.0f;
     for (GGsize i = 0; i < number_of_energy_bins_; ++i) {
-      tmp_cdf[i] = energy_mappings_[i].intensity_;
+      tmp_cdf[i+1] = energy_mappings_[i].intensity_;
       energy_spectrum_device[i] = energy_mappings_[i].energy_;
     }
 
     // Compute CDF and normalized it
-    cdf_device[0] = static_cast<GGfloat>(tmp_cdf[0] / sum_cdf);
-    for (GGsize i = 1; i < number_of_energy_bins_; ++i) {
+    cdf_device[0] = tmp_cdf[0];
+    //cdf_device[0] = static_cast<GGfloat>(tmp_cdf[0] / sum_cdf);
+    for (GGsize i = 1; i <= number_of_energy_bins_; ++i) {
       tmp_cdf[i] = tmp_cdf[i] + tmp_cdf[i - 1];
       cdf_device[i] = static_cast<GGfloat>(tmp_cdf[i] / sum_cdf);
     }
 
     // By security, final value of cdf must be 1 !!!
-    cdf_device[number_of_energy_bins_ - 1] = 1.0;
+    cdf_device[number_of_energy_bins_] = 1.0f;
 
     // Release the pointers
     opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
