@@ -284,7 +284,7 @@ kernel void track_through_ggems_voxelized_solid(
     }
 
     #if defined(DOSIMETRY) && defined(TLE)
-    GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
+    GGint E_index = BinarySearch(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_);
     GGfloat mu_en = 0.0f;
     if (E_index == 0) {
       mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];

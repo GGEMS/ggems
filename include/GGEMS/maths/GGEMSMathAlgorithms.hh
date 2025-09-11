@@ -35,37 +35,32 @@
 #include "GGEMS/geometries/GGEMSPrimitiveGeometries.hh"
 
 /*!
-  \fn inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
+  \fn inline GGint BinarySearch(GGfloat const key, GGfloat const* array, GGint const size)
   \param key - value in p_array to find
   \param array - p_array where is the key value
   \param size - size of p_array, number of elements
-  \param offset - apply offset when searching index (optionnal)
-  \param min - apply a min index (optionnal)
   \return index of key value in p_array buffer
   \brief Find the index of the key value in the p_array buffer
 */
 #ifdef __OPENCL_C_VERSION__
-inline GGint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGint const size, GGint const offset, GGint min)
+inline GGint BinarySearch(GGfloat const key, global GGfloat const* array, GGint const size)
 #else
-inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
+inline GGint BinarySearch(GGfloat const key, GGfloat const* array, GGint const size)
 #endif
 {
-  GGint low = 0;
-  GGint mid = 0;
+  GGint low = 0, mid = 0;
   GGint high = size - 1;
-  while (low <= high) {
-    mid = low + (high - low) / 2;
 
-    // Check if x at mid
+  while (high - low > 1) {
+    mid = (high + low) / 2;
     if (array[mid] == key) return mid;
-
     if (array[mid] < key) {
-      low = mid + 1;
+      low = mid;
     } else {
-      high = mid - 1;
+      high = mid;
     }
   }
-  return low - 1;
+  return low;
 }
 
 /*!

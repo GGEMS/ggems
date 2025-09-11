@@ -94,7 +94,7 @@ kernel void get_primaries_ggems_voxelized_source(
   GGdouble rdnm_for_act = KissUniform(random, global_id);
 
   // Getting index of cdf
-  GGint index_for_act = BinarySearchLeft(rdnm_for_act, activity_cdf, number_of_activity_bins, 0, 0);
+  GGint index_for_act = BinarySearch(rdnm_for_act, activity_cdf, number_of_activity_bins);
   // Getting index of vox. source
   GGint index_vox_src_total = activity_index[index_for_act];
 
@@ -136,7 +136,7 @@ kernel void get_primaries_ggems_voxelized_source(
   // For non monoenergy
   if (number_of_energy_bins != 1) {
     rndm_for_energy = KissUniform(random, global_id);
-    index_for_energy = BinarySearchLeft(rndm_for_energy, energy_cdf, number_of_energy_bins+1, 0, 0);
+    index_for_energy = BinarySearch(rndm_for_energy, energy_cdf, number_of_energy_bins+1);
   }
 
   // Setting the energy for particles

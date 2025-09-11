@@ -324,7 +324,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   GGfloat density = material_database_manager.GetMaterial(material_name).density_;
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearchLeft(e_MeV, particle_cross_sections_host_->energy_bins_, static_cast<GGint>(number_of_bins), 0, 0));
+  GGsize energy_bin = static_cast<GGsize>(BinarySearch(e_MeV, particle_cross_sections_host_->energy_bins_, static_cast<GGint>(number_of_bins)));
 
   // Compute cross section using linear interpolation
   GGfloat energy_a = particle_cross_sections_host_->energy_bins_[energy_bin];

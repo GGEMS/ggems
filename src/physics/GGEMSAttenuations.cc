@@ -199,7 +199,7 @@ void GGEMSAttenuations::Initialize(void)
 
           // Get energy index
           mu_index_E = GGEMSMuDataConstants::kMuIndexEnergy[Z];
-          E_index = BinarySearchLeft(energy, energies_, mu_index_E+GGEMSMuDataConstants::kMuNbEnergyBins[Z], 0, mu_index_E);
+          E_index = BinarySearch(energy, energies_, mu_index_E+GGEMSMuDataConstants::kMuNbEnergyBins[Z]);
 
           // Get mu an mu_en from interpolation
           if ( E_index == mu_index_E ) {
@@ -286,7 +286,7 @@ GGfloat GGEMSAttenuations::GetAttenuation(std::string const& material_name, GGfl
   ptrdiff_t material_id = materials_->GetMaterialIndex(material_name);
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearchLeft(e_MeV, attenuations_host_->energy_bins_, static_cast<GGint>(number_of_bins), 0, 0));
+  GGsize energy_bin = static_cast<GGsize>(BinarySearch(e_MeV, attenuations_host_->energy_bins_, static_cast<GGint>(number_of_bins)));
 
   // Computing attenuation
   GGfloat energy_a = attenuations_host_->energy_bins_[energy_bin];
@@ -323,7 +323,7 @@ GGfloat GGEMSAttenuations::GetEnergyAttenuation(std::string const& material_name
   ptrdiff_t material_id = materials_->GetMaterialIndex(material_name);
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearchLeft(e_MeV, attenuations_host_->energy_bins_, static_cast<GGint>(number_of_bins), 0, 0));
+  GGsize energy_bin = static_cast<GGsize>(BinarySearch(e_MeV, attenuations_host_->energy_bins_, static_cast<GGint>(number_of_bins)));
 
   // Computing attenuation
   GGfloat energy_a = attenuations_host_->energy_bins_[energy_bin];

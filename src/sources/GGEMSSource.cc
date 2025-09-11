@@ -117,7 +117,7 @@ GGEMSSource::~GGEMSSource(void)
 
   if (energy_spectrum_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(energy_spectrum_[i], number_of_energy_bins_*sizeof(GGfloat), i);
+      opencl_manager.Deallocate(energy_spectrum_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
     }
     delete[] energy_spectrum_;
     energy_spectrum_ = nullptr;
@@ -272,13 +272,13 @@ void GGEMSSource::FillEnergy(void)
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
     // Allocation of memory on OpenCL device
     // Energy
-    energy_spectrum_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
+    energy_spectrum_[j] = opencl_manager.Allocate(nullptr, (number_of_energy_bins_+1)*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
 
     // Cumulative distribution function
     energy_cdf_[j] = opencl_manager.Allocate(nullptr, (number_of_energy_bins_+1)*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
 
     // Get the energy pointer on OpenCL device
-    GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
+    GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, (number_of_energy_bins_+1)*sizeof(GGfloat), j);
 
     // Get the cdf pointer on OpenCL device
     GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, (number_of_energy_bins_+1)*sizeof(GGfloat), j);
@@ -296,6 +296,7 @@ void GGEMSSource::FillEnergy(void)
       tmp_cdf[i+1] = energy_mappings_[i].intensity_;
       energy_spectrum_device[i] = energy_mappings_[i].energy_;
     }
+    energy_spectrum_device[number_of_energy_bins_] = energy_spectrum_device[number_of_energy_bins_ - 1]; // copy second time the last value
 
     // Compute CDF and normalized it
     cdf_device[0] = tmp_cdf[0];

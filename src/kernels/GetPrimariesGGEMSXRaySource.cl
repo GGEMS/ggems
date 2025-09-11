@@ -109,7 +109,7 @@ kernel void get_primaries_ggems_xray_source(
   // For non monoenergy
   if (number_of_energy_bins != 1) {
     rndm_for_energy = KissUniform(random, global_id);
-    index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins+1, 0, 0);
+    index_for_energy = BinarySearch(rndm_for_energy, cdf, number_of_energy_bins+1);
   }
 
   // Setting the energy for particles
