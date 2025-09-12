@@ -128,6 +128,7 @@ void GGEMSMeshedSolid::Initialize(GGEMSMaterials*)
 
   // Initializing kernels and loading image
   InitializeKernel();
+
   LoadVolumeImage();
 
   // Creating volume for OpenGL
@@ -214,7 +215,7 @@ void GGEMSMeshedSolid::UpdateTriangles(GGsize const& thread_index)
   opencl_manager.GetSVMData(
     triangles_[thread_index],
     sizeof(GGEMSTriangle3) * number_of_triangles_,
-    0,
+    thread_index,
     CL_TRUE,
     CL_MAP_READ | CL_MAP_WRITE
   );

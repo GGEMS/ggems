@@ -418,8 +418,8 @@ void GGEMS::PrintBanner(void) const
   std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
-  std::cout << "$ Welcome to GGEMS v1.2   https://ggems.fr $" << std::endl;
-  std::cout << "$ Copyright (c) GGEMS Team 2022            $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.3   https://ggems.fr $" << std::endl;
+  std::cout << "$ Copyright (c) GGEMS Team 2025            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
 }

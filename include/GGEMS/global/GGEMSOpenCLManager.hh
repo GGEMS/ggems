@@ -742,7 +742,7 @@ void GGEMSOpenCLManager::SVMDeallocate(T* svm_ptr, GGsize const& size, GGsize co
 template <typename T>
 void GGEMSOpenCLManager::GetSVMData(T* svm_ptr, GGsize const& size, GGsize const& thread_index, GGbool const& blocking, cl_map_flags const& map_flags) const
 {
-  clEnqueueSVMMap((*computing_devices_[thread_index].queue_)(), blocking, map_flags, svm_ptr, size, 0, nullptr, nullptr);
+  int test = clEnqueueSVMMap((*computing_devices_[thread_index].queue_)(), blocking, map_flags, svm_ptr, size, 0, nullptr, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

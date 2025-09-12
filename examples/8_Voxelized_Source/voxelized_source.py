@@ -228,7 +228,6 @@ vox_source.set_phantom_source('data/phantom_src.mhd')
 vox_source.set_number_of_particles(number_of_particles)
 vox_source.set_source_particle_type('gamma')
 vox_source.set_position(0.0, 0.0, 0.0, 'mm')
-#vox_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 #vox_source.set_monoenergy(140.51, 'keV')
 vox_source.set_energy_peak(321.3, 'keV', 0.0021)
 vox_source.set_energy_peak(249.7, 'keV', 0.0020)
@@ -261,5 +260,4 @@ else: # Running GGEMS and draw particles
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit safely
-clean_safely()
 exit()
