@@ -2,7 +2,7 @@
 
 website: <https://ggems.fr>
 
-forum: <https://ggems.discourse.group>
+forum: <https://forum.ggems.fr>
 
 ## Description
 
@@ -10,44 +10,44 @@ GGEMS is an advanced Monte Carlo simulation platform using CPU and GPU architect
 
 Features:
 * Photon particle tracking
-* Multithreaded CPU (Intel, AMD not tested)
-* GPU (NVIDIA, Intel, AMD not tested)
+* Multithreaded CPU
+* GPU (NVIDIA, Intel)
 * Multi devices (GPUs+CPU) approach
-* Single or double float precision for dosimetry application
 * External X-ray source
-* Navigation in simple box volume or voxelized volume
+* Voxelized source
+* Navigation in : box, voxelized or meshed volume
 * Flat or curved detector for CBCT/CT application
 * OpenGL visualization
-* Dosimetry application (photon)
+* Dosimetry application (photon tracking only)
 * TLE (Track Length Estimator) method for dosimetry
 
 ## Requirements
 
-GGEMS is a multiplatform application using OpenCL.
+GGEMS is a multi-architecture application using OpenCL.
 
-OpenCL v1.2 or more must be installed on your system.
+OpenCL v3.0 must be installed on your system. This OpenCL version could be downloaded from CUDA Toolkit 12.6.
 
-Supported operating system:
+Supported and tested operating system:
 
-* Windows
-* Linux
+* Windows 11
+* Ubuntu 24.04 LTS
 
 Tested compilers:
 
-* gcc 7/8/9 on Linux
-* clang from version 9 to 13 on Linux and Windows
-* Visual C++ 2022 on Windows
+* GNU Compiler Collection (GCC) Version 13.3 for Linux
+* Clang version 18.1.3 for Linux
+* Visual C/C++ Compiler Version 19.44.35216 for x64 for Windows
 
 ## Installation
 
-To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.2/building_and_installing.html>
+To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.3/building_and_installing.html>
 
 # GGEMS using Docker for Linux users
 
-A docker image for GGEMS version 1.2 is available here:
+A docker image for GGEMS version 1.3 is available here:
 
 ```console
-foo@bar~: docker pull ggems/ggems:v1.2
+foo@bar~: docker pull ggems/ggems:v1.3
 ```
 
 ### Important

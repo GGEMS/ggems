@@ -13,20 +13,17 @@ class CMakeExtension(Extension):
 class build_ext(build_ext_orig):
     user_options = build_ext_orig.user_options + \
             [('generator=', None, 'The CMake generator to use.'),
-             ('opengl=', None, 'Whether to build with OpenGL visualization.'),
-             ('examples=', None, 'Whether to build examples.')]
+             ('opengl=', None, 'Whether to build with OpenGL visualization.')]
 
     def initialize_options(self):
         super().initialize_options()
         self.generator = None
         self.opengl = "OFF"
-        self.examples = "OFF"
     
     def finalize_options(self):
         super().finalize_options()
         self.generator = self.distribution.get_command_obj('build_ext').generator
         self.opengl = self.distribution.get_command_obj('build_ext').opengl
-        self.examples = self.distribution.get_command_obj('build_ext').examples
 
     def run(self):
         for ext in self.extensions:
@@ -46,13 +43,10 @@ class build_ext(build_ext_orig):
         cmake_args = [
             '-DCMAKE_BUILD_TYPE=' + config,
         ]
-        
+
         # OpenGL
         cmake_args.append('-DOPENGL_VISUALIZATION=' + self.opengl)
 
-        # Examples
-        cmake_args.append('-DBUILD_EXAMPLES=' + self.examples)
-  
         # Output Directory
         if sys.platform == 'win32':
             cmake_args.extend([
@@ -83,7 +77,7 @@ class build_ext(build_ext_orig):
 
 setup(
     name='ggems',
-    version='1.2',
+    version='1.3',
     packages=['ggems'],
     package_dir={'ggems': 'python_module'},
     ext_modules=[CMakeExtension('.')],

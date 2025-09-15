@@ -179,33 +179,6 @@ phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 phantom.set_visible(True)
 
-# Loading collimator phantom
-mesh_collimator = GGEMSMeshedPhantom('colli_mesh')
-mesh_collimator.set_phantom('data/ColimatorMEGP-GENM670.stl')
-mesh_collimator.set_rotation(0.0, 90.0, 0.0, 'deg')
-mesh_collimator.set_position(870.0, 0.0, 0.0, 'mm')
-mesh_collimator.set_mesh_octree_depth(4)
-mesh_collimator.set_visible(True)
-mesh_collimator.set_material('Lead')
-mesh_collimator.set_material_color('Lead', color_name='yellow')
-
-# Creating a planar detector
-planar_detector = GGEMSCTSystem('custom')
-planar_detector.set_ct_type('flat')
-planar_detector.set_number_of_modules(1, 1)
-planar_detector.set_number_of_detection_elements(100, 100, 1)
-planar_detector.set_size_of_detection_elements(4.0, 4.0, 10.0, 'mm')
-planar_detector.set_material('GOS')
-planar_detector.set_source_detector_distance(905.0, 'mm')
-planar_detector.set_source_isocenter_distance(0.0, 'mm')
-planar_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
-planar_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm')
-planar_detector.set_threshold(100.0, 'keV')
-planar_detector.save('data/projection')
-planar_detector.store_scatter(True)
-planar_detector.set_visible(True)
-planar_detector.set_material_color('GOS', color_name='red')
-
 # ------------------------------------------------------------------------------
 # STEP 6: Physics
 processes_manager.add_process('Compton', 'gamma', 'all')
@@ -228,7 +201,7 @@ vox_source.set_phantom_source('data/phantom_src.mhd')
 vox_source.set_number_of_particles(number_of_particles)
 vox_source.set_source_particle_type('gamma')
 vox_source.set_position(0.0, 0.0, 0.0, 'mm')
-#vox_source.set_monoenergy(140.51, 'keV')
+#177Lu source
 vox_source.set_energy_peak(321.3, 'keV', 0.0021)
 vox_source.set_energy_peak(249.7, 'keV', 0.0020)
 vox_source.set_energy_peak(112.9, 'keV', 0.0617)

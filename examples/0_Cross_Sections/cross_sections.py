@@ -101,5 +101,4 @@ print('At ', energy_MeV, ' MeV, cross section is ', cross_sections.get_cs(proces
 # STEP 7: Exit safely
 materials.clean()
 cross_sections.clean()
-clean_safely()
 exit()

@@ -75,7 +75,7 @@ ENDIF()
 
 #-------------------------------------------------------------------------------
 # Name of the project and define the language
-PROJECT(GGEMS VERSION 1.2 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
+PROJECT(GGEMS VERSION 1.3 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
 # Give cmake-config directory to cmake
@@ -90,8 +90,6 @@ MESSAGE(STATUS "CUDA Toolkit INCLUDE DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
 MESSAGE(STATUS "CUDA Toolkit LIBRARY DIR: ${CUDAToolkit_LIBRARY_DIR}")
 ADD_DEFINITIONS("-DCL_TARGET_OPENCL_VERSION=300")
 ADD_DEFINITIONS("-DCL_HPP_TARGET_OPENCL_VERSION=300")
-
-#python setup.py build_ext --generator=Ninja --opengl=ON --examples=ON install --user
 
 #-------------------------------------------------------------------------------
 # Find libraries for OpenGL
@@ -150,10 +148,6 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Defining a configuration file
 CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGEMSConfiguration.hh.in" "${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSConfiguration.hh" @ONLY)
-
-#-------------------------------------------------------------------------------
-# Add an option for examples and benchmark building
-OPTION(BUILD_EXAMPLES "Build GGEMS examples" ON)
 
 #-------------------------------------------------------------------------------
 # Compilation options Windows
@@ -268,12 +262,6 @@ SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 #-------------------------------------------------------------------------------
 # DLL export for windows
 GENERATE_EXPORT_HEADER(ggems EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSExport.hh)
-
-#------------------------------------------------------------------------------
-# Building examples
-IF(BUILD_EXAMPLES)
-  ADD_SUBDIRECTORY(examples)
-ENDIF()
 
 #-------------------------------------------------------------------------------
 # Installing GGEMS library
