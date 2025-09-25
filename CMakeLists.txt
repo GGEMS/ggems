@@ -77,6 +77,8 @@ ENDIF()
 # Name of the project and define the language
 PROJECT(GGEMS VERSION 1.3 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 #-------------------------------------------------------------------------------
 # Give cmake-config directory to cmake
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-config")

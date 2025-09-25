@@ -50,14 +50,11 @@ class build_ext(build_ext_orig):
         # Output Directory
         if sys.platform == 'win32':
             cmake_args.extend([
-                '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=' + str(extdir.parent.absolute()),
-                '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=' + str(extdir.parent.absolute())
-                ])
+                '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=' + str(extdir.parent.absolute())])
         else:
             cmake_args.extend([
-                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute())
-                ])
-        
+                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(extdir.parent.absolute())])
+
         # Generator
         if self.generator is not None:
             cmake_args.append('-G' + self.generator)
@@ -83,5 +80,4 @@ setup(
     ext_modules=[CMakeExtension('.')],
     cmdclass={
         'build_ext': build_ext,
-    }
-)
+    })
