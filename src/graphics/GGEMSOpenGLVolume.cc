@@ -365,7 +365,7 @@ void GGEMSOpenGLVolume::Draw(void) const
     }
 
     // IMPLEMENT A BETTER SWITCH FOR COLOR!!!!
-    GLuint offset_for_rgb = 6;
+    GLsizei offset_for_rgb = 6;
     if (!is_color_in_vertex_buffer_) offset_for_rgb = 3;
 
     GLintptr vertex_position_offset = 0 * sizeof(GLfloat);

@@ -48,8 +48,7 @@ GGEMSCrossSections::GGEMSCrossSections(GGEMSMaterials* materials)
   em_processes_list_ = new GGEMSEMProcess*[3]; // Maximum of 3 processes
   number_of_activated_processes_ = 0;
 
-  is_process_activated_.resize(NUMBER_PROCESSES);
-  for (auto&& i : is_process_activated_) i = false;
+  for(GGint i = 0; i < NUMBER_PROCESSES; ++i) is_process_activated_.push_back(false);
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

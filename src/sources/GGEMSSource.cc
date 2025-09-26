@@ -294,12 +294,12 @@ void GGEMSSource::FillEnergy(void)
     tmp_cdf[0] = 0.0f;
     for (GGsize i = 0; i < number_of_energy_bins_; ++i) {
       tmp_cdf[i+1] = energy_mappings_[i].intensity_;
-      energy_spectrum_device[i] = energy_mappings_[i].energy_;
+      energy_spectrum_device[i] = static_cast<GGfloat>(energy_mappings_[i].energy_);
     }
     energy_spectrum_device[number_of_energy_bins_] = energy_spectrum_device[number_of_energy_bins_ - 1]; // copy second time the last value
 
     // Compute CDF and normalized it
-    cdf_device[0] = tmp_cdf[0];
+    cdf_device[0] = static_cast<GGfloat>(tmp_cdf[0]);
     //cdf_device[0] = static_cast<GGfloat>(tmp_cdf[0] / sum_cdf);
     for (GGsize i = 1; i <= number_of_energy_bins_; ++i) {
       tmp_cdf[i] = tmp_cdf[i] + tmp_cdf[i - 1];
