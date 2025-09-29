@@ -32,8 +32,10 @@
   \date Tuesday February 4, 2020
 */
 
+/// \cond
 #include <fstream>
 #include <sstream>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 

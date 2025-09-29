@@ -32,7 +32,6 @@
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/maths/GGEMSReferentialTransformation.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
-#include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!

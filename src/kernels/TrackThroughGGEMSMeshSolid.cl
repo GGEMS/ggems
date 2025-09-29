@@ -17,7 +17,7 @@
 // ************************************************************************
 
 /*!
-  \file TrackThroughGGEMSMeshedSolid.cl
+  \file TrackThroughGGEMSMeshSolid.cl
 
   \brief OpenCL kernel tracking particles within voxelized solid
 
@@ -42,14 +42,26 @@
 #include "GGEMS/navigators/GGEMSDoseRecording.hh"
 #endif
 
+/*!
+  \def MAX_TRIANGLE_INTERACTION
+  \brief maximum of triangles intersected by a line
+*/
 #define MAX_TRIANGLE_INTERACTION 16
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-inline float DotMesh(GGfloat3 v0, GGfloat3 v1)
+
+/*!
+  \fn inline GGfloat DotMesh(GGfloat3 v0, GGfloat3 v1)
+  \param v0 - v0 vector
+  \param v1 - v1 vector
+  \brief compute dot product v0.v1
+  \return result of dot product v0.v1
+*/
+inline GGfloat DotMesh(GGfloat3 v0, GGfloat3 v1)
 {
-  float dot_product = 0.0f;
+  GGfloat dot_product = 0.0f;
   dot_product = v0.x * v1.x;
   dot_product += v0.y * v1.y;
   dot_product += v0.z * v1.z;
@@ -60,6 +72,13 @@ inline float DotMesh(GGfloat3 v0, GGfloat3 v1)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/*!
+  \fn inline GGfloat3 CrossMesh(GGfloat3 v0, GGfloat3 v1)
+  \param v0 - vector v0
+  \param v1 - vector v1
+  \brief compute cross product v0^v1
+  \return result of cross product v0^v1
+*/
 inline GGfloat3 CrossMesh(GGfloat3 v0, GGfloat3 v1)
 {
   GGfloat3 v = {
@@ -74,6 +93,13 @@ inline GGfloat3 CrossMesh(GGfloat3 v0, GGfloat3 v1)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/*!
+  \fn inline GGfloat DistanceSquare(GGfloat3 p0, GGfloat3 p1)
+  \param p0 - p0 point
+  \param p1 - p1 point
+  \brief compute the distance square between points p0 and p1
+  \return the distance squared between p0 and p1
+*/
 inline GGfloat DistanceSquare(GGfloat3 p0, GGfloat3 p1)
 {
   return (p1.x - p0.x)*(p1.x - p0.x) + (p1.y - p0.y)*(p1.y - p0.y) + (p1.z - p0.z)*(p1.z - p0.z);
@@ -83,7 +109,16 @@ inline GGfloat DistanceSquare(GGfloat3 p0, GGfloat3 p1)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-inline int MollerTrumboreRayTriangle(GGfloat3 pi, GGfloat3 d, GGEMSTriangle3* triangle, GGfloat3* po)
+/*!
+  \fn inline GGint MollerTrumboreRayTriangle(GGfloat3 pi, GGfloat3 d, GGEMSTriangle3* triangle, GGfloat3* po)
+  \param pi - incident position of particle
+  \param d - direction of particle
+  \param triangle - pointer to triangle
+  \param po - point of intersection of line/triangle
+  \brief Computing the intersection between a line and triangle
+  \return 0 if no intersection otherwise 1
+*/
+inline GGint MollerTrumboreRayTriangle(GGfloat3 pi, GGfloat3 d, GGEMSTriangle3* triangle, GGfloat3* po)
 {
   // E1 & E2
   GGfloat3 edge1 = {
@@ -145,6 +180,14 @@ inline int MollerTrumboreRayTriangle(GGfloat3 pi, GGfloat3 d, GGEMSTriangle3* tr
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/*!
+  \fn inline GGint TestLineNode(GGfloat3 p, GGfloat3 d, GGEMSNode node)
+  \param p - position of particle
+  \param d - direction of the particle
+  \param node - infos about node
+  \brief Compute the intersection between point and node
+  \return 0 if no intersection otherwise 1
+*/
 inline GGint TestLineNode(GGfloat3 p, GGfloat3 d, GGEMSNode node)
 {
   GGfloat min[3] = {
@@ -200,6 +243,15 @@ inline GGint TestLineNode(GGfloat3 p, GGfloat3 d, GGEMSNode node)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/*!
+  \fn inline GGint GetMeshIOPositions(GGfloat3 const p, GGfloat3 const d, GGEMSMeshedSolidData const* mesh_data, GGfloat3 mesh_pos[MAX_TRIANGLE_INTERACTION])
+  \param p - position of the particle
+  \param d - direction of the particle
+  \param mesh_data - Infos about nodes
+  \param mesh_pos - position of intersection line / mesh
+  \brief compute the positions of intersection line / mesh
+  \return the number of particle / mesh intersection
+*/
 inline GGint GetMeshIOPositions(GGfloat3 const p, GGfloat3 const d, GGEMSMeshedSolidData const* mesh_data, GGfloat3 mesh_pos[MAX_TRIANGLE_INTERACTION])
 {
   // Get infos about nodes
@@ -263,6 +315,10 @@ inline GGint GetMeshIOPositions(GGfloat3 const p, GGfloat3 const d, GGEMSMeshedS
 
   return index_mesh_pos; // Number of triangles interacting with line
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 /*!
   \fn kernel void track_through_ggems_meshed_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSMeshedSolidData const* meshed_solid_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, global GGEMSMuMuEnData const* attenuations, GGfloat const threshold)

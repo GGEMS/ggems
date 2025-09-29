@@ -109,6 +109,13 @@ inline GGfloat LogLogInterpolation(GGfloat x, GGfloat x0, GGfloat y0, GGfloat x1
   #endif
 }
 
+/*!
+  \fn inline GGfloat Dot(GGEMSPoint3 p0, GGEMSPoint3 p1)
+  \param p0 - Coordinate of the first point
+  \param p1 - Coordinate of the second point
+  \brief Compute dot product p0.p1
+  \return the result of dot product p0.p1
+*/
 inline GGfloat Dot(GGEMSPoint3 p0, GGEMSPoint3 p1)
 {
   GGfloat dot_product = 0.0f;

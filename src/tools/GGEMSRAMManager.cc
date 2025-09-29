@@ -30,7 +30,6 @@
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
-#include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -432,7 +432,7 @@ void GGEMSDosimetryCalculator::ComputeDose(GGsize const& thread_index)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::Initialize(std::string const nav_type)
+void GGEMSDosimetryCalculator::Initialize(std::string const& nav_type)
 {
   GGcout("GGEMSDosimetryCalculator", "Initialize", 3) << "Initializing dosimetry calculator..." << GGendl;
 

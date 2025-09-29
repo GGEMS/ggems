@@ -28,9 +28,11 @@
   \date Wednesday October 10, 2018
 */
 
+/// \cond
 #include <sstream>
 #include <cerrno>
 #include <cstring>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"

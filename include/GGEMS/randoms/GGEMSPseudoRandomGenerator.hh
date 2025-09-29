@@ -31,7 +31,6 @@
   \date Monday December 16, 2019
 */
 
-#include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!

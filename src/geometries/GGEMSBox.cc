@@ -30,7 +30,6 @@
 
 #include "GGEMS/geometries/GGEMSBox.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,15 +31,15 @@
 #ifdef OPENGL_VISUALIZATION
 
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
-#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
 
+/// \cond
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+/// \endcond
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

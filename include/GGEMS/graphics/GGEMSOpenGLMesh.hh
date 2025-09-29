@@ -97,7 +97,7 @@ class GGEMS_EXPORT GGEMSOpenGLMesh : public GGEMSOpenGLVolume
     void WriteShaders(void) override;
 
   private:
-    GGEMSTriangle3* triangles_;
+    GGEMSTriangle3* triangles_; /*!< List of triangles */
 };
 
 #endif

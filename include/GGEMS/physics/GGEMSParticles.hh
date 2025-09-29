@@ -31,7 +31,9 @@
   \date Thrusday October 3, 2019
 */
 
+/// \cond
 #include <map>
+/// \endcond
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"

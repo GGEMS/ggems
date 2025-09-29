@@ -113,8 +113,8 @@ typedef struct GGEMSPlane3_t
 typedef struct GGEMSTriangle3_t
 {
   GGEMSPoint3              pts_[3]; /*!< 3 points describing triangle */
-  GGEMSSphere3             bounding_sphere_; // sphere around triangle */
-  struct GGEMSTriangle3_t* next_triangle_; // use of next triangle (useful for meshed navigation) */
+  GGEMSSphere3             bounding_sphere_; /*!< sphere around triangle */
+  struct GGEMSTriangle3_t* next_triangle_; /*!< use of next triangle (useful for meshed navigation) */
 } GGEMSTriangle3; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,11 +127,11 @@ typedef struct GGEMSTriangle3_t
 */
 typedef struct GGEMSNode_t
 {
-  GGint           node_depth_;
-  GGEMSPoint3     center_;
-  GGint           first_child_node_id_;
-  GGfloat         half_width_[3];
-  GGEMSTriangle3* triangle_list_;
-} GGEMSNode;
+  GGint           node_depth_; /*!< Level of depth of the node */
+  GGEMSPoint3     center_; /*!< Center of the node */
+  GGint           first_child_node_id_; /*!< first child node id */
+  GGfloat         half_width_[3]; /*!< half width of each side of the node */
+  GGEMSTriangle3* triangle_list_; /*!< Pointer to first triangle in node */
+} GGEMSNode; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

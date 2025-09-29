@@ -31,7 +31,9 @@
   \date Tuesday March 2, 2020
 */
 
+/// \cond
 #include <limits>
+/// \endcond
 
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/io/GGEMSHistogramMode.hh"
@@ -204,7 +206,20 @@ class GGEMS_EXPORT GGEMSSolid
     */
     virtual void PrintInfos(void) const = 0;
 
+    /*!
+      \fn GGfloat3 GetVoxelSizes(GGsize const& thread_index) const
+      \param thread_index - index of thread
+      \brief Get the voxel sizes
+      \return the voxel sizes
+    */
     virtual GGfloat3 GetVoxelSizes(GGsize const& thread_index) const = 0;
+
+    /*!
+      \fn GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const
+      \param thread_index - index of thread
+      \brief Get the OBB Geometry
+      \return the OBB Geometry
+    */
     virtual GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const = 0;
 
     /*!

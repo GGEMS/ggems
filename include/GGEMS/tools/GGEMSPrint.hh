@@ -31,9 +31,11 @@
   \date Monday September 23, 2019
 */
 
+/// \cond
 #include <iostream>
 #include <ostream>
 #include <iomanip>
+/// \endcond
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
@@ -42,7 +44,9 @@
 #ifdef _MSC_VER
 #define NOMINMAX
 #endif
+/// \cond
 #include <Windows.h>
+/// \endcond
 #endif
 
 /*!
@@ -67,15 +71,50 @@
 */
 enum GGEMSConsoleColor : GGuchar
 {
+  /*!
+    \brief black color flag
+  */
   black = 0,
+
+  /*!
+    \brief blue color flag
+  */
   blue,
+
+  /*!
+    \brief green color flag
+  */
   green,
+
+  /*!
+    \brief aqua color flag
+  */
   aqua,
+
+  /*!
+    \brief red color flag
+  */
   red,
+
+  /*!
+    \brief purple color flag
+  */
   purple,
+
+  /*!
+    \brief yellow color flag
+  */
   yellow,
+
+  /*!
+    \brief white color flag
+  */
   white,
-  gray
+
+  /*!
+    \brief gray color flag
+  */
+  gray /*!< gray color */
 };
 
 /*!

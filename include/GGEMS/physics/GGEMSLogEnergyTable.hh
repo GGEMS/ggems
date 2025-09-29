@@ -39,7 +39,9 @@
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 
+/// \cond
 #include <vector>
+/// \endcond
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"

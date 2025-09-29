@@ -28,16 +28,24 @@
   \date Monday September 30, 2019
 */
 
+/// \cond
 #include <fcntl.h>
 #include <thread>
+/// \endcond
 
 #ifdef _WIN32
+/// \cond
 #include <Windows.h>
 #include <wincrypt.h>
+/// \endcond
 #else
+/// \cond
 #include <unistd.h>
+/// \endcond
 #endif
+/// \cond
 #include <mutex>
+/// \endcond
 
 /*!
   \brief empty namespace storing mutex

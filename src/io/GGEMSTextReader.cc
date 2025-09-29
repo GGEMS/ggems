@@ -29,7 +29,9 @@
   \date Tuesday February 4, 2020
 */
 
+/// \cond
 #include <string>
+/// \endcond
 
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"

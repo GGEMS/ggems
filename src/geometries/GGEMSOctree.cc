@@ -28,11 +28,11 @@
   \date Wednesday September 25, 2024
 */
 
+/// \cond
 #include <thread>
+/// \endcond
 
 #include "GGEMS/geometries/GGEMSOctree.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

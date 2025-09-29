@@ -31,7 +31,9 @@
   \date Tuesday March 10, 2020
 */
 
+/// \cond
 #include <memory>
+/// \endcond
 
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
@@ -139,7 +141,7 @@ namespace GGEMSDensityParams
     {66.607f, 1.552f,  6.2813f,  0.2274f, 3.5021f, 0.203080f, 2.7615f, 0.14f, 0.056f},
     {66.022f, 1.559f,  6.3097f,  0.2484f, 3.5160f, 0.202570f, 2.7579f, 0.14f, 0.056f},
     {67.557f, 1.574f,  6.2912f,  0.2378f, 3.5186f, 0.201920f, 2.7560f, 0.14f, 0.062f}
-  };
+  }; /*!< Density params for each elements */
 }
 
 /*!

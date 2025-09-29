@@ -31,11 +31,14 @@
   \date Monday September 30, 2019
 */
 
-#include <fstream>
-#include <cmath>
-
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+
+#ifndef __OPENCL_C_VERSION__
+/// \cond
+#include <fstream>
+#include <cmath>
+/// \endcond
 
 /*!
   \namespace GGEMSFileStream
@@ -68,4 +71,5 @@ namespace GGEMSMisc
   [[noreturn]] void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message);
 }
 
+#endif
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
