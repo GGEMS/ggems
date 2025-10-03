@@ -6,20 +6,19 @@ forum: <https://forum.ggems.fr>
 
 ## Description
 
-GGEMS is an advanced Monte Carlo simulation platform using CPU and GPU architecture targeting medical applications (imaging and particle therapy). This code is based on the well-validated Geant4 physics model and capable to be executed in both CPU and GPU devices using the OpenCL library.
+GGEMS is an advanced Monte Carlo simulation platform using the OpenCL library managing CPU and GPU architecture. GGEMS is fully developed in C++ and accessible via Python command line. Well-validated Geant4 physic models are used in GGEMS and implemented using OpenCL. The aim of GGEMS is to provide a fast simulation platform for imaging application (CT/CBCT for moment) and particle therapy. To favor speed of computation, GGEMS is not a very generic platform as Geant4 or GATE. For very realistic simulation with lot of information results, Geant4 and GATE are still recommended.
 
-Features:
+GGEMS features:
 * Photon particle tracking
 * Multithreaded CPU
-* GPU (NVIDIA, Intel)
+* GPU (NVIDIA or Intel HD Graphics)
 * Multi devices (GPUs+CPU) approach
+* Single or double float precision for dosimetry application
 * External X-ray source
 * Voxelized source
-* Navigation in : box, voxelized or meshed volume
+* Navigation in simple box volume, voxelized volume or meshed volume
 * Flat or curved detector for CBCT/CT application
-* OpenGL visualization
-* Dosimetry application (photon tracking only)
-* TLE (Track Length Estimator) method for dosimetry
+* Visualisation using OpenGL
 
 ## Requirements
 
@@ -36,11 +35,17 @@ Tested compilers:
 
 * GNU Compiler Collection (GCC) Version 13.3 for Linux
 * Clang version 18.1.3 for Linux
-* Visual C/C++ Compiler Version 19.44.35216 for x64 for Windows
+* Visual C/C++ Compiler Version 19.44 or 19.50 for x64 for Windows
 
 ## Installation
 
-To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.3/building_and_installing.html>
+GGEMS can be install on Linux or Windows system using setuptools. Simply use the following command in the GGEMS directory:
+
+```console
+foo@bar~: python setup.py build_ext --opengl=ON install
+```
+
+For more details, please read the installation recommendation <https://doc.ggems.fr/v1.3/building_and_installing.html>
 
 # GGEMS using Docker for Linux users
 
