@@ -151,7 +151,7 @@ kernel void track_through_ggems_voxelized_solid(
     GGchar next_discrete_process = primary_particle->next_discrete_process_[global_id];
 
     // Get the borders of the current voxel
-    GGfloat3 voxel_border_min = border_min +  convert_float3(voxel_id)*voxel_size;
+    GGfloat3 voxel_border_min = border_min + convert_float3(voxel_id)*voxel_size;
     GGfloat3 voxel_border_max = voxel_border_min + voxel_size;
 
     // Get safety position of particle to be sure particle is inside voxel
@@ -284,7 +284,7 @@ kernel void track_through_ggems_voxelized_solid(
     }
 
     #if defined(DOSIMETRY) && defined(TLE)
-    GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
+    GGint E_index = BinarySearch(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_);
     GGfloat mu_en = 0.0f;
     if (E_index == 0) {
       mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];

@@ -77,7 +77,6 @@ kernel void compute_dose_ggems_voxelized_solid(
   dosel_id.x = (global_id - dosel_id.z*dose_params->slice_number_of_dosels_)%dose_params->number_of_dosels_.x;
   dosel_id.y = (global_id - dosel_id.z*dose_params->slice_number_of_dosels_)/dose_params->number_of_dosels_.x;
 
-
   // Convert doxel_id into position
   GGfloat3 dosel_pos = convert_float3(dosel_id) * dose_params->size_of_dosels_ + convert_float3((dose_params->number_of_dosels_-1)) * (-0.5f*dose_params->size_of_dosels_);
 

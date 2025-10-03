@@ -31,7 +31,9 @@
   \date Thursday December 3, 2020
 */
 
+/// \cond
 #include <memory>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 

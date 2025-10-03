@@ -28,16 +28,24 @@
   \date Monday September 30, 2019
 */
 
+/// \cond
 #include <fcntl.h>
 #include <thread>
+/// \endcond
 
 #ifdef _WIN32
+/// \cond
 #include <Windows.h>
 #include <wincrypt.h>
+/// \endcond
 #else
+/// \cond
 #include <unistd.h>
+/// \endcond
 #endif
+/// \cond
 #include <mutex>
+/// \endcond
 
 /*!
   \brief empty namespace storing mutex
@@ -418,8 +426,8 @@ void GGEMS::PrintBanner(void) const
   std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
-  std::cout << "$ Welcome to GGEMS v1.2   https://ggems.fr $" << std::endl;
-  std::cout << "$ Copyright (c) GGEMS Team 2022            $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.3   https://ggems.fr $" << std::endl;
+  std::cout << "$ Copyright (c) GGEMS Team 2025            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
 }

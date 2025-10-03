@@ -48,8 +48,7 @@ GGEMSCrossSections::GGEMSCrossSections(GGEMSMaterials* materials)
   em_processes_list_ = new GGEMSEMProcess*[3]; // Maximum of 3 processes
   number_of_activated_processes_ = 0;
 
-  is_process_activated_.resize(NUMBER_PROCESSES);
-  for (auto&& i : is_process_activated_) i = false;
+  for(GGint i = 0; i < NUMBER_PROCESSES; ++i) is_process_activated_.push_back(false);
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -324,7 +323,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   GGfloat density = material_database_manager.GetMaterial(material_name).density_;
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearchLeft(e_MeV, particle_cross_sections_host_->energy_bins_, static_cast<GGint>(number_of_bins), 0, 0));
+  GGsize energy_bin = static_cast<GGsize>(BinarySearch(e_MeV, particle_cross_sections_host_->energy_bins_, static_cast<GGint>(number_of_bins)));
 
   // Compute cross section using linear interpolation
   GGfloat energy_a = particle_cross_sections_host_->energy_bins_[energy_bin];

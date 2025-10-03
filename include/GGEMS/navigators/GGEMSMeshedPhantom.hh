@@ -79,9 +79,8 @@ class GGEMS_EXPORT GGEMSMeshedPhantom : public GGEMSNavigator
     GGEMSMeshedPhantom& operator=(GGEMSMeshedPhantom const&& meshed_phantom_name) = delete;
 
     /*!
-      \fn void SetPhantomFile(std::string const& voxelized_phantom_filename, std::string const& range_data_filename)
-      \param voxelized_phantom_filename - MHD filename for voxelized phantom
-      \param range_data_filename - text file with range to material data
+      \fn void SetPhantomFile(std::string const& meshed_phantom_filename)
+      \param meshed_phantom_filename - meshed phantom filename
       \brief set the mhd filename for voxelized phantom and the range data file
     */
     void SetPhantomFile(std::string const& meshed_phantom_filename);
@@ -183,7 +182,7 @@ extern "C" GGEMS_EXPORT void set_material_name_ggems_meshed_phantom(GGEMSMeshedP
 extern "C" GGEMS_EXPORT void set_material_color_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, GGuchar const red, GGuchar const green, GGuchar const blue);
 
 /*!
-  \fn void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* ct_system, char const* material_name, char const* color_name)
+  \fn void set_material_color_name_ggems_meshed_phantom(GGEMSMeshedPhantom* meshed_phantom, char const* material_name, char const* color_name)
   \param meshed_phantom - pointer on meshed phantom
   \param material_name - name of material to draw (or not)
   \param color_name - color name

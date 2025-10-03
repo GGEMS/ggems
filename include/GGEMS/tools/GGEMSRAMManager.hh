@@ -35,8 +35,10 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+/// \cond
 #include <vector>
 #include <unordered_map>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSExport.hh"

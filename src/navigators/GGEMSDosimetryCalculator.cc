@@ -363,47 +363,76 @@ void GGEMSDosimetryCalculator::ComputeDose(GGsize const& thread_index)
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(dose_params_[thread_index], dose_params_device, thread_index);
 
-  // Getting work group size, and work-item number
-  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
-  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_dosels);
-
-  // Parameters for work-item in kernel
-  cl::NDRange global_wi(number_of_work_items);
-  cl::NDRange local_wi(work_group_size);
-
   // Getting kernel, and setting parameters
-  kernel_compute_dose_[thread_index]->setArg(0, number_of_dosels);
-  kernel_compute_dose_[thread_index]->setArg(1, *dose_params_[thread_index]);
-  kernel_compute_dose_[thread_index]->setArg(2, *dose_recording_.edep_[thread_index]);
-  if (!dose_recording_.hit_[thread_index]) kernel_compute_dose_[thread_index]->setArg(3, sizeof(cl_mem), nullptr);
-  else kernel_compute_dose_[thread_index]->setArg(3, *dose_recording_.hit_[thread_index]);
-  if (!dose_recording_.edep_squared_[thread_index]) kernel_compute_dose_[thread_index]->setArg(4, sizeof(cl_mem), nullptr);
-  else kernel_compute_dose_[thread_index]->setArg(4, *dose_recording_.edep_squared_[thread_index]);
-  kernel_compute_dose_[thread_index]->setArg(5, *navigator_->GetSolids(0)->GetSolidData(thread_index)); // 1 solid in voxelized phantom
-  kernel_compute_dose_[thread_index]->setArg(6, *navigator_->GetSolids(0)->GetLabelData(thread_index));
-  kernel_compute_dose_[thread_index]->setArg(7, *navigator_->GetMaterials()->GetMaterialTables(thread_index));
-  kernel_compute_dose_[thread_index]->setArg(8, *dose_recording_.dose_[thread_index]);
-  if (!dose_recording_.uncertainty_dose_[thread_index]) kernel_compute_dose_[thread_index]->setArg(9, sizeof(cl_mem), nullptr);
-  else kernel_compute_dose_[thread_index]->setArg(9, *dose_recording_.uncertainty_dose_[thread_index]);
-  kernel_compute_dose_[thread_index]->setArg(10, scale_factor_);
-  kernel_compute_dose_[thread_index]->setArg(11, is_water_reference_);
-  kernel_compute_dose_[thread_index]->setArg(12, minimum_density_);
+  GGuint index_arg = 0;
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, number_of_dosels);
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, *dose_params_[thread_index]);
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, *dose_recording_.edep_[thread_index]);
 
-  // Launching kernel
-  cl::Event event;
-  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_compute_dose_[thread_index], 0, global_wi, local_wi, nullptr, &event);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSDosimetryCalculator", "ComputeDose");
-  queue->finish();
+  if (!dose_recording_.hit_[thread_index])
+    kernel_compute_dose_[thread_index]->setArg(index_arg++, sizeof(cl_mem), nullptr);
+  else
+    kernel_compute_dose_[thread_index]->setArg(index_arg++, *dose_recording_.hit_[thread_index]);
 
-  // GGEMS Profiling
-  GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
+  if (!dose_recording_.edep_squared_[thread_index])
+    kernel_compute_dose_[thread_index]->setArg(index_arg++, sizeof(cl_mem), nullptr);
+  else
+    kernel_compute_dose_[thread_index]->setArg(index_arg++, *dose_recording_.edep_squared_[thread_index]);
+
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, *navigator_->GetSolids(0)->GetSolidData(thread_index)); // 1 solid in voxelized phantom
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, *navigator_->GetSolids(0)->GetLabelData(thread_index));
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, *navigator_->GetMaterials()->GetMaterialTables(thread_index));
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, *dose_recording_.dose_[thread_index]);
+
+  if (!dose_recording_.uncertainty_dose_[thread_index])
+    kernel_compute_dose_[thread_index]->setArg(index_arg++, sizeof(cl_mem), nullptr);
+  else
+    kernel_compute_dose_[thread_index]->setArg(index_arg++, *dose_recording_.uncertainty_dose_[thread_index]);
+
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, scale_factor_);
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, is_water_reference_);
+  kernel_compute_dose_[thread_index]->setArg(index_arg++, minimum_density_);
+
+  GGsize work_group_size = opencl_manager.GetKernelWorkGroupSize(kernel_compute_dose_[thread_index]);
+  GGsize max_work_item = opencl_manager.GetDeviceMaxWorkItemSize(device_index, 0) * work_group_size;
+
+  // Number total of work items
+  GGsize number_of_work_item = (((number_of_dosels - 1) / work_group_size) + 1) * work_group_size; // Multiple of work group size
+
+  // Organize work item in batch
+  bool is_last_batch = false;
+  GGsize number_of_work_item_in_batch = max_work_item;
+  GGsize number_batchs_work_item = (number_of_work_item / (max_work_item + 1)) + 1;
+
+  for (GGsize i = 0; i < number_batchs_work_item; ++i) {
+    if (i == number_batchs_work_item - 1) is_last_batch = true;
+
+    if (is_last_batch) {
+      number_of_work_item_in_batch = (number_of_work_item % max_work_item) == 0 ?
+        max_work_item :
+        number_of_work_item % max_work_item;
+    }
+
+    cl::NDRange global_wi(number_of_work_item_in_batch);
+    cl::NDRange offset_wi(i * max_work_item);
+    cl::NDRange local_wi(number_of_work_item_in_batch / work_group_size);
+
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_compute_dose_[thread_index], offset_wi, global_wi, local_wi, nullptr, &event);
+    opencl_manager.CheckOpenCLError(kernel_status, "GGEMSDosimetryCalculator", "ComputeDose");
+
+    // GGEMS Profiling
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
+
+    queue->finish();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::Initialize(std::string const nav_type)
+void GGEMSDosimetryCalculator::Initialize(std::string const& nav_type)
 {
   GGcout("GGEMSDosimetryCalculator", "Initialize", 3) << "Initializing dosimetry calculator..." << GGendl;
 

@@ -185,5 +185,4 @@ else: # Running GGEMS and draw particles
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit safely
-clean_safely()
 exit()

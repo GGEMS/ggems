@@ -2,88 +2,50 @@
 
 website: <https://ggems.fr>
 
-forum: <https://ggems.discourse.group>
+forum: <https://forum.ggems.fr>
 
 ## Description
 
-GGEMS is an advanced Monte Carlo simulation platform using CPU and GPU architecture targeting medical applications (imaging and particle therapy). This code is based on the well-validated Geant4 physics model and capable to be executed in both CPU and GPU devices using the OpenCL library.
+GGEMS is an advanced Monte Carlo simulation platform using the OpenCL library managing CPU and GPU architecture. GGEMS is fully developed in C++ and accessible via Python command line. Well-validated Geant4 physic models are used in GGEMS and implemented using OpenCL. The aim of GGEMS is to provide a fast simulation platform for imaging application (CT/CBCT for moment) and particle therapy. To favor speed of computation, GGEMS is not a very generic platform as Geant4 or GATE. For very realistic simulation with lot of information results, Geant4 and GATE are still recommended.
 
-Features:
+GGEMS features:
 * Photon particle tracking
-* Multithreaded CPU (Intel, AMD not tested)
-* GPU (NVIDIA, Intel, AMD not tested)
+* Multithreaded CPU
+* GPU (NVIDIA or Intel HD Graphics)
 * Multi devices (GPUs+CPU) approach
 * Single or double float precision for dosimetry application
 * External X-ray source
-* Navigation in simple box volume or voxelized volume
+* Voxelized source
+* Navigation in simple box volume, voxelized volume or meshed volume
 * Flat or curved detector for CBCT/CT application
-* OpenGL visualization
-* Dosimetry application (photon)
-* TLE (Track Length Estimator) method for dosimetry
+* Visualisation using OpenGL
 
 ## Requirements
 
-GGEMS is a multiplatform application using OpenCL.
+GGEMS is a multi-architecture application using OpenCL.
 
-OpenCL v1.2 or more must be installed on your system.
+OpenCL v3.0 must be installed on your system. This OpenCL version could be downloaded from CUDA Toolkit 12.6.
 
-Supported operating system:
+Supported and tested operating system:
 
-* Windows
-* Linux
+* Windows 11
+* Ubuntu 24.04 LTS
 
 Tested compilers:
 
-* gcc 7/8/9 on Linux
-* clang from version 9 to 13 on Linux and Windows
-* Visual C++ 2022 on Windows
+* GNU Compiler Collection (GCC) Version 13.3 for Linux
+* Clang version 18.1.3 for Linux
+* Visual C/C++ Compiler Version 19.44 or 19.50 for x64 for Windows
 
 ## Installation
 
-To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.2/building_and_installing.html>
-
-# GGEMS using Docker for Linux users
-
-A docker image for GGEMS version 1.2 is available here:
+GGEMS can be install on Linux or Windows system using setuptools. Simply use the following command in the GGEMS directory:
 
 ```console
-foo@bar~: docker pull ggems/ggems:v1.2
+foo@bar~: python setup.py build_ext --opengl=ON install
 ```
 
-### Important
-
-To use the docker image on your linux machine, the nvidia driver must be installed as well as the 'nvidia-container' library. To install 'nvidia-container' run the following commands:
-
-```console
-foo@bar~: sudo apt install curl
-foo@bar~: curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | sudo apt-key add -
-foo@bar~: distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-foo@bar~: curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
-foo@bar~: sudo apt update
-foo@bar~: sudo apt install nvidia-container-runtime
-```
-
-To test the docker image, run this command:
-
-```console
-foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2 nvidia-smi
-Thu Jun  9 16:39:54 2022       
-+-----------------------------------------------------------------------------+
-| NVIDIA-SMI 510.39.01    Driver Version: 510.39.01    CUDA Version: 11.6     |
-|-------------------------------+----------------------+----------------------+
-| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-|                               |                      |               MIG M. |
-|===============================+======================+======================|
-|   0  NVIDIA GeForce ...  On   | 00000000:17:00.0 Off |                  N/A |
-| 30%   27C    P8    N/A /  75W |     11MiB /  4096MiB |      0%      Default |
-|                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------+
-|   1  Quadro P400         On   | 00000000:65:00.0  On |                  N/A |
-| 34%   35C    P8    N/A /  N/A |    280MiB /  2048MiB |      0%      Default |
-|                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------+
-```
+For more details, please read the installation recommendation <https://doc.ggems.fr/v1.3/building_and_installing.html>
 
 ## Copyright
 

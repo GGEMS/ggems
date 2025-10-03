@@ -33,7 +33,9 @@
 
 #ifndef __OPENCL_C_VERSION__
 
+/// \cond
 #include <memory>
+/// \endcond
 
 /*!
   \struct GGEMSDoseRecording_t

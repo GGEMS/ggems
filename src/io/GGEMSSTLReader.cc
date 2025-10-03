@@ -28,11 +28,11 @@
   \date Thrusday July 7, 2022
 */
 
+/// \cond
 #include <fstream>
 #include <limits>
+/// \endcond
 
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSSTLReader.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"

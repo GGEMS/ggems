@@ -30,7 +30,6 @@
 
 #ifdef OPENGL_VISUALIZATION
 
-#include "GGEMS/graphics/GGEMSOpenGLParticles.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"

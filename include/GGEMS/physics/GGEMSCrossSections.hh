@@ -35,8 +35,10 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+/// \cond
 #include <vector>
 #include <string>
+/// \endcond
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/physics/GGEMSParticleCrossSections.hh"

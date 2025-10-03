@@ -22,37 +22,36 @@ from ggems import *
 # ------------------------------------------------------------------------------
 # Read arguments
 parser = argparse.ArgumentParser(
-  prog='visualization.py',
-  description='''-->> 6 - OpenGL Visualization Example <<--''',
-  epilog='''''',
-  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  prog='voxelized_source.py',
+  description='-->> 8 - Voxelized Source for SPECT example <<--',
+  epilog='',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 
-parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help='Set level of verbosity')
-parser.add_argument('-e', '--nogl', required=False, action='store_false', help='Disable OpenGL')
-parser.add_argument('-w', '--wdims', required=False, default=[800, 800], type=int, nargs=2, help='OpenGL window dimensions')
-parser.add_argument('-m', '--msaa', required=False, type=int, default=8, help='MSAA factor (1x, 2x, 4x or 8x)')
-parser.add_argument('-a', '--axis', required=False, action='store_true', help='Drawing axis in OpenGL window')
-parser.add_argument('-p', '--nparticlesgl', required=False, type=int, default=256, help='Number of displayed primary particles on OpenGL window (max: 65536)')
-parser.add_argument('-b', '--drawgeom', required=False, action='store_true', help='Draw geometry only on OpenGL window')
-parser.add_argument('-c', '--wcolor', required=False, type=str, default='black', help='Background color of OpenGL window')
-parser.add_argument('-d', '--device', required=False, type=str, default='0', help="OpenCL device running visualization")
-parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
+parser.add_argument('-d', '--device', required=False, type=str, default='0', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
+parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected. -b \"0.5;0.5\" means 50 %% of computation on device 0, and 50 %% of computation on device 1")
 parser.add_argument('-s', '--seed', required=False, type=int, default=777, help="Seed of pseudo generator number")
+parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
+parser.add_argument('-e', '--nogl', required=False, action='store_false', help='Disable OpenGL')
+parser.add_argument('-p', '--nparticlesgl', required=False, type=int, default=256, help='Number of displayed primary particles on OpenGL window (max: 65536)')
+parser.add_argument('-c', '--drawgeom', required=False, action='store_true', help='Draw geometry only on OpenGL window')
+parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
 
 args = parser.parse_args()
 
-# Getting arguments
-verbosity_level = args.verbose
-seed = args.seed
+# Get argument
 device = args.device
-number_of_particles = args.nparticles
+verbosity_level = args.verbose
+device_balancing = args.balance
+seed = args.seed
 number_of_displayed_particles = args.nparticlesgl
-is_axis = args.axis
-msaa = args.msaa
-window_color = args.wcolor
-window_dims = args.wdims
 is_draw_geom = args.drawgeom
 is_gl = args.nogl
+number_of_particles = args.nparticles
+
+# ------------------------------------------------------------------------------
+# STEP 0: Level of verbosity during computation
+GGEMSVerbosity(verbosity_level)
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
@@ -67,23 +66,31 @@ range_cuts_manager = GGEMSRangeCutsManager()
 volume_creator_manager = GGEMSVolumeCreatorManager()
 
 # ------------------------------------------------------------------------------
-# STEP 2: Params for visualization
+# STEP 2: Choosing an OpenCL device
+if device == 'gpu_nvidia':
+  opencl_manager.set_device_to_activate('gpu', 'nvidia')
+elif device == 'gpu_amd':
+  opencl_manager.set_device_to_activate('gpu', 'amd')
+elif device == 'gpu_intel':
+  opencl_manager.set_device_to_activate('gpu', 'intel')
+else:
+  opencl_manager.set_device_to_activate(device)
+
+if (device_balancing):
+  opencl_manager.set_device_balancing(device_balancing)
+
+# ------------------------------------------------------------------------------
+# STEP 3: Params for visualization
 if is_gl:
   opengl_manager = GGEMSOpenGLManager()
-  opengl_manager.set_window_dimensions(window_dims[0], window_dims[1])
-  opengl_manager.set_msaa(msaa)
-  opengl_manager.set_background_color(window_color)
-  opengl_manager.set_draw_axis(is_axis)
+  opengl_manager.set_window_dimensions(800, 800)
+  opengl_manager.set_msaa(8)
+  opengl_manager.set_background_color('black')
+  opengl_manager.set_draw_axis(True)
   opengl_manager.set_world_size(3.0, 3.0, 3.0, 'm')
   opengl_manager.set_image_output('data/axis')
   opengl_manager.set_displayed_particles(number_of_displayed_particles)
-  opengl_manager.set_particle_color('gamma', 152, 251, 152)
-  # opengl_manager.set_particle_color('gamma', color_name='red') # Using registered color
   opengl_manager.initialize()
-
-# ------------------------------------------------------------------------------
-# STEP 3: Choosing an OpenCL device
-opencl_manager.set_device_to_activate(device)
 
 # ------------------------------------------------------------------------------
 # STEP 4: Setting GGEMS materials
@@ -92,65 +99,85 @@ materials_database_manager.set_materials('data/materials.txt')
 # ------------------------------------------------------------------------------
 # STEP 5: Phantoms and systems
 
-# Generating phantom
-volume_creator_manager.set_dimensions(120, 120, 120)
+# Generating ATTENUATION phantom
+volume_creator_manager.set_dimensions(200, 200, 150)
 volume_creator_manager.set_element_sizes(1.0, 1.0, 1.0, 'mm')
-volume_creator_manager.set_output('data/phantom.mhd')
+volume_creator_manager.set_output('data/phantom_atn.mhd')
 volume_creator_manager.set_range_output('data/range_phantom.txt')
 volume_creator_manager.set_material('Air')
 volume_creator_manager.set_data_type('MET_INT')
 volume_creator_manager.initialize()
 
-box_phantom = GGEMSBox(80.0, 80.0, 80.0, 'mm')
-box_phantom.set_position(0.0, 0.0, 0.0, 'mm')
-box_phantom.set_label_value(1)
-box_phantom.set_material('Water')
-box_phantom.initialize()
-box_phantom.draw()
-box_phantom.delete()
+# Block (Water)
+block_phantom = GGEMSTube(80.0, 80.0, 160.0, 'mm')
+block_phantom.set_position(0.0, 0.0, 0.0, 'mm')
+block_phantom.set_label_value(1)
+block_phantom.set_material('Water')
+block_phantom.initialize()
+block_phantom.draw()
+block_phantom.delete()
+
+# Insert 1 (RibBone)
+insert1_phantom = GGEMSTube(20.0, 20.0, 160.0, 'mm')
+insert1_phantom.set_position(-40.0, 0.0, 0.0, 'mm')
+insert1_phantom.set_label_value(2)
+insert1_phantom.set_material('RibBone')
+insert1_phantom.initialize()
+insert1_phantom.draw()
+insert1_phantom.delete()
+
+# Insert 2 (Lung)
+insert2_phantom = GGEMSTube(20.0, 20.0, 160.0, 'mm')
+insert2_phantom.set_position(40.0, 0.0, 0.0, 'mm')
+insert2_phantom.set_label_value(3)
+insert2_phantom.set_material('Lung')
+insert2_phantom.initialize()
+insert2_phantom.draw()
+insert2_phantom.delete()
 
 volume_creator_manager.write()
+volume_creator_manager.clean()
+
+# Generating SOURCE phantom
+volume_creator_manager.set_dimensions(200, 200, 150)
+volume_creator_manager.set_element_sizes(1.0, 1.0, 1.0, 'mm')
+volume_creator_manager.set_output('data/phantom_src.mhd')
+volume_creator_manager.set_data_type('MET_FLOAT')
+volume_creator_manager.initialize()
+
+# Block (Water)
+block_src_phantom = GGEMSTube(80.0, 80.0, 160.0, 'mm')
+block_src_phantom.set_position(0.0, 0.0, 0.0, 'mm')
+block_src_phantom.set_label_value(8.25) # Bq
+block_src_phantom.initialize()
+block_src_phantom.draw()
+block_src_phantom.delete()
+
+# Insert 1 (RibBone)
+insert1_src_phantom = GGEMSTube(20.0, 20.0, 160.0, 'mm')
+insert1_src_phantom.set_position(-40.0, 0.0, 0.0, 'mm')
+insert1_src_phantom.set_label_value(20.36) # Bq
+insert1_src_phantom.initialize()
+insert1_src_phantom.draw()
+insert1_src_phantom.delete()
+
+# Insert 2 (Lung)
+insert2_src_phantom = GGEMSTube(20.0, 20.0, 160.0, 'mm')
+insert2_src_phantom.set_position(40.0, 0.0, 0.0, 'mm')
+insert2_src_phantom.set_label_value(1.215) # Bq
+insert2_src_phantom.initialize()
+insert2_src_phantom.draw()
+insert2_src_phantom.delete()
+
+volume_creator_manager.write()
+volume_creator_manager.clean()
 
 # Loading phantom in GGEMS
 phantom = GGEMSVoxelizedPhantom('phantom')
-phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
+phantom.set_phantom('data/phantom_atn.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 phantom.set_visible(True)
-phantom.set_material_visible('Air', True)
-phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
-
-cbct_detector = GGEMSCTSystem('custom')
-cbct_detector.set_ct_type('flat')
-cbct_detector.set_number_of_modules(1, 1)
-cbct_detector.set_number_of_detection_elements(400, 400, 1)
-cbct_detector.set_size_of_detection_elements(1.0, 1.0, 10.0, 'mm')
-cbct_detector.set_material('GOS')
-cbct_detector.set_source_detector_distance(1500.5, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
-cbct_detector.set_source_isocenter_distance(900.0, 'mm')
-cbct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
-cbct_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm');
-cbct_detector.set_threshold(10.0, 'keV')
-cbct_detector.save('data/projection')
-cbct_detector.store_scatter(True)
-cbct_detector.set_visible(True)
-cbct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
-#cbct_detector.set_material_color('GOS', color_name='red') # Using registered color
-
-cbct_detector2 = GGEMSCTSystem('custom2')
-cbct_detector2.set_ct_type('flat')
-cbct_detector2.set_number_of_modules(1, 1)
-cbct_detector2.set_number_of_detection_elements(400, 400, 1)
-cbct_detector2.set_size_of_detection_elements(1.0, 1.0, 10.0, 'mm')
-cbct_detector2.set_material('Silicon')
-cbct_detector2.set_source_detector_distance(1605.0, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
-cbct_detector2.set_source_isocenter_distance(1200.0, 'mm')
-cbct_detector2.set_rotation(0.0, 0.0, 90.0, 'deg')
-cbct_detector2.set_global_system_position(0.0, 0.0, 0.0, 'mm');
-cbct_detector2.set_threshold(10.0, 'keV')
-cbct_detector2.save('data/projection2')
-cbct_detector2.store_scatter(True)
-cbct_detector2.set_visible(True)
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics
@@ -169,30 +196,25 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 
 # ------------------------------------------------------------------------------
 # STEP 8: Source
-point_source = GGEMSXRaySource('point_source')
-point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(number_of_particles)
-point_source.set_position(-900.0, 0.0, 0.0, 'mm')
-point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(12.5, 'deg')
-point_source.set_focal_spot_size(0.2, 0.6, 0.0, 'mm')
-point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
-
-point_source2 = GGEMSXRaySource('point_source2')
-point_source2.set_source_particle_type('gamma')
-point_source2.set_number_of_particles(number_of_particles)
-point_source2.set_position(-1200.0, 0.0, 0.0, 'mm')
-point_source2.set_rotation(0.0, 0.0, 90.0, 'deg')
-point_source2.set_beam_aperture(8.5, 'deg')
-point_source2.set_focal_spot_size(0.2, 0.6, 0.0, 'mm')
-point_source2.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
+vox_source = GGEMSVoxelizedSource('vox_source')
+vox_source.set_phantom_source('data/phantom_src.mhd')
+vox_source.set_number_of_particles(number_of_particles)
+vox_source.set_source_particle_type('gamma')
+vox_source.set_position(0.0, 0.0, 0.0, 'mm')
+#177Lu source
+vox_source.set_energy_peak(321.3, 'keV', 0.0021)
+vox_source.set_energy_peak(249.7, 'keV', 0.0020)
+vox_source.set_energy_peak(112.9, 'keV', 0.0617)
+vox_source.set_energy_peak( 71.6, 'keV', 0.0017)
+vox_source.set_energy_peak(208.4, 'keV', 0.1036)
+vox_source.set_energy_peak(136.7, 'keV', 0.0005)
 
 # ------------------------------------------------------------------------------
 # STEP 9: GGEMS simulation
 ggems = GGEMS()
 ggems.opencl_verbose(True)
 ggems.material_database_verbose(False)
-ggems.navigator_verbose(False)
+ggems.navigator_verbose(True)
 ggems.source_verbose(True)
 ggems.memory_verbose(True)
 ggems.process_verbose(True)

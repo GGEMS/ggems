@@ -1,3 +1,10 @@
 .vscode
+compile_commands.json
+.cache
+.git
+.ropeproject
+dist
+build
+ggems.egg-info
 include/GGEMS/global/GGEMSConfiguration.hh
 include/GGEMS/global/GGEMSExport.hh

@@ -31,8 +31,10 @@
   \date Friday October 4, 2019
 */
 
+/// \cond
 #include <chrono>
 #include <string>
+/// \endcond
 
 #include "GGEMS/global/GGEMSExport.hh"
 

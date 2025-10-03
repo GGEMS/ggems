@@ -83,6 +83,22 @@ void GGEMSVolumeCreatorManager::Clean(void)
   else if (!data_type_.compare("MET_UINT")) DeallocateImage<GGuint>();
   else if (!data_type_.compare("MET_FLOAT")) DeallocateImage<GGfloat>();
 
+  element_sizes_.s[0] = 0.0f;
+  element_sizes_.s[1] = 0.0f;
+  element_sizes_.s[2] = 0.0f;
+
+  volume_dimensions_.x_ = 0;
+  volume_dimensions_.y_ = 0;
+  volume_dimensions_.z_ = 0;
+
+  number_elements_ = 0;
+  data_type_ = "MET_FLOAT";
+
+  output_image_filename_ = "";
+  output_range_to_material_filename_ = "";
+
+  label_to_material_.clear();
+
   GGcout("GGEMSVolumeCreatorManager", "Clean", 3) << "GGEMSVolumeCreatorManager cleaned!!!" << GGendl;
 }
 
@@ -201,9 +217,9 @@ void GGEMSVolumeCreatorManager::CheckParameters(void) const
   }
 
   // Checking range to material data name
-  if (output_range_to_material_filename_.empty()) {
-    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "A output range to material data filename has to be done to phantom manager!!!");
-  }
+  //if (output_range_to_material_filename_.empty()) {
+    //GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "A output range to material data filename has to be done to phantom manager!!!");
+  //}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

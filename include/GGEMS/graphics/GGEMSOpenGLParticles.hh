@@ -37,7 +37,9 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+/// \cond
 #include <vector>
+/// \endcond
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"

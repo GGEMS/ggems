@@ -28,7 +28,9 @@
   \date Tuesday March 23, 2021
 */
 
+/// \cond
 #include <algorithm>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"

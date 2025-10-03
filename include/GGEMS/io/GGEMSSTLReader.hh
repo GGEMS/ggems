@@ -31,7 +31,10 @@
   \date Thrusday July 7, 2022
 */
 
+/// \cond
 #include <string>
+/// \endcond
+
 #include <GGEMS/geometries/GGEMSPrimitiveGeometries.hh>
 
 /*!
@@ -80,27 +83,11 @@ class GGEMSSTLReader
     GGEMSSTLReader& operator=(GGEMSSTLReader const&& stl) = delete;
 
     /*!
-      \fn void Read(std::string const& meshed_phantom_filename, cl::Buffer* solid_data, GGsize const& thread_index)
+      \fn void Read(std::string const& meshed_phantom_filename)
       \param meshed_phantom_filename - input stl file
-      \param solid_data - pointer on solid data
-      \param thread_index - index of the thread (= activated device index)
       \brief read the stl file and load triangles
     */
     void Read(std::string const& meshed_phantom_filename);
-
-    /*!
-      \fn GGfloat* GetHalfWidth(void)
-      \brief Get the half width of bounding box
-      \return the half width of bounding box
-    */
-   // GGfloat* GetHalfWidth(void) { return half_width_; }
-
-    /*!
-      \fn GGEMSPoint3 GetCenter(void)
-      \brief Get the center of the bounding box
-      \return the center of the bounding box
-    */
-   // GGEMSPoint3 GetCenter(void) const { return center_; }
 
     /*!
       \fn void LoadTriangles(GGEMSTriangle3* triangles)
@@ -118,21 +105,56 @@ class GGEMSSTLReader
 
 
   private:
+    /*!
+      \struct GGEMSMeshTriangle
+      \brief Mesh defined by a triangle
+    */
     struct GGEMSMeshTriangle {
+      /*!
+        \brief GGEMSMeshTriangle constructor
+      */
       GGEMSMeshTriangle(void) {}
+
+      /*!
+        \param p0 - point 0
+        \param p1 - point 1
+        \param p2 - point 2
+        \brief GGEMSMeshTriangle constructor
+      */
       GGEMSMeshTriangle(GGEMSPoint3 const& p0, GGEMSPoint3 const& p1, GGEMSPoint3 const& p2);
 
+      /*!
+        \fn void MostSeparatedPointsOnAABB(GGEMSPoint3 pts[3], GGint& min, GGint& max)
+        \param pts - coordinates of point
+        \param min - min position
+        \param max - max position
+        \brief get the min/max position
+      */
       void MostSeparatedPointsOnAABB(GGEMSPoint3 pts[3], GGint& min, GGint& max);
+
+      /*!
+        \fn void SphereFromDistantPoints(GGEMSSphere3& s, GGEMSPoint3 pts[3])
+        \param s - sphere object
+        \param pts - point
+        \brief compute the sphere
+      */
       void SphereFromDistantPoints(GGEMSSphere3& s, GGEMSPoint3 pts[3]);
+
+      /*!
+        \fn void SphereOfSphereAndPoint(GGEMSSphere3& s, GGEMSPoint3& p)
+        \param s - sphere object
+        \param p - point
+        \brief compute the sphere
+      */
       void SphereOfSphereAndPoint(GGEMSSphere3& s, GGEMSPoint3& p);
 
-      GGEMSPoint3        pts_[3];
-      GGEMSSphere3       bounding_sphere_;
+      GGEMSPoint3        pts_[3]; /*!< 3 points defining a triangle */
+      GGEMSSphere3       bounding_sphere_; /*!< Bounding sphere around the 3 points */
     };
 
   private:
     GGuchar            header_[80]; /*!< Header infos */
-    GGuint             number_of_triangles_; /*< Number of triangles in mesh file */
+    GGuint             number_of_triangles_; /*!< Number of triangles in mesh file */
     GGEMSMeshTriangle* triangles_; /*!< Triangle from STL file */
 };
 

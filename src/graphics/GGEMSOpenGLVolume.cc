@@ -31,15 +31,15 @@
 #ifdef OPENGL_VISUALIZATION
 
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
-#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
 
+/// \cond
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+/// \endcond
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,7 +365,7 @@ void GGEMSOpenGLVolume::Draw(void) const
     }
 
     // IMPLEMENT A BETTER SWITCH FOR COLOR!!!!
-    GLuint offset_for_rgb = 6;
+    GLsizei offset_for_rgb = 6;
     if (!is_color_in_vertex_buffer_) offset_for_rgb = 3;
 
     GLintptr vertex_position_offset = 0 * sizeof(GLfloat);

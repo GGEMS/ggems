@@ -32,7 +32,6 @@
   \date Monday June 10, 2020
 */
 
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!

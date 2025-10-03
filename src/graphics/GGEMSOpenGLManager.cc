@@ -12,9 +12,10 @@
 
 #ifdef OPENGL_VISUALIZATION
 
+/// \cond
 #include <filesystem>
+/// \endcond
 
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 #include "GGEMS/graphics/GGEMSOpenGLAxis.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"

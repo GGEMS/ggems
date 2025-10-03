@@ -35,8 +35,10 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+/// \cond
 #include <map>
-
+/// \endcond
+///
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 typedef std::map<GGfloat, std::string> LabelToMaterialMap; /*!< Map of label value to material */

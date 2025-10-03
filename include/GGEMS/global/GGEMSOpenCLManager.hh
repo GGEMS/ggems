@@ -31,10 +31,13 @@
   \date Tuesday March 23, 2021
 */
 
+/// \cond
 #include <unordered_map>
+#include <sstream>
+/// \endcond
+
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-#include <sstream>
 #include "GGEMS/tools/GGEMSTools.hh"
 
 #ifdef _MSC_VER
@@ -226,8 +229,28 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       return device_max_work_item_sizes_[dimension + 3 * device_index];
     }
 
+    /*!
+      \fn GGulong GetKernelLocalMemSize(cl::Kernel* kernel) const
+      \param kernel - pointer to kernel
+      \brief get the local memory size of a kernel
+      \return the local mem size of a kernel
+    */
     GGulong GetKernelLocalMemSize(cl::Kernel* kernel) const;
+
+    /*!
+      \fn GGulong GetKernelPrivateMemSize(cl::Kernel* kernel) const
+      \param kernel - pointer to kernel
+      \brief get the private memory size of a kernel
+      \return the private mem size of a kernel
+    */
     GGulong GetKernelPrivateMemSize(cl::Kernel* kernel) const;
+
+    /*!
+      \fn GGsize GetKernelWorkGroupSize(cl::Kernel* kernel) const
+      \param kernel - pointer to kernel
+      \brief get the work group size of a kernel
+      \return the work group size of a kernel
+    */
     GGsize GetKernelWorkGroupSize(cl::Kernel* kernel) const;
 
     /*!
@@ -409,6 +432,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \fn bool IsSVMAvailability(GGsize const& device_index) const
       \param device_index - device index
       \brief Check if SVM is available on OpenCL device
+      \return test if svm is available
     */
     bool IsSVMAvailability(GGsize const& device_index) const;
 
@@ -421,6 +445,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \param alignment - The minimum alignment in bytes that is required for the newly created buffer’s memory region. 0 by default
       \param class_name - name of class allocating memory
       \brief Allocating memory using SVM. The flag CL_MEM_SVM_FINE_GRAIN_BUFFER is added automatically if available
+      \return pointer to data
     */
     template <typename T>
     T* SVMAllocate(GGsize const& size, GGsize const& thread_index, cl_svm_mem_flags flags, GGuint const& alignment, std::string const& class_name = "Undefined") const;
@@ -438,21 +463,23 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void SVMDeallocate(T* svm_ptr, GGsize const& size, GGsize const& thread_index, std::string const& class_name = "Undefined") const;
 
     /*!
-      \fn template <typename T> void GetSVMData(T* device_ptr, cl_bool const& blocking, cl_map_flags const& map_flags, std::size_t const& size) const
+      \fn template <typename T> void GetSVMData(T* svm_ptr, GGsize const& size, GGsize const& thread_index, GGbool const& blocking, cl_map_flags const& map_flags) const
       \tparam T - type of the data
-      \param device_ptr - device pointer
-      \param blocking - CL_TRUE or CL_FALSE
-      \param map_flags - CL_MAP_READ or CL_MAP_WRITE
+      \param svm_ptr - svm pointer
       \param size - size in bytes
+      \param thread_index - index of threads
+      \param blocking - blocking access
+      \param map_flags - CL_MAP_READ or CL_MAP_WRITE
       \brief Get data using mmap for SVM memory
     */
     template <typename T>
     void GetSVMData(T* svm_ptr, GGsize const& size, GGsize const& thread_index, GGbool const& blocking, cl_map_flags const& map_flags) const;
 
     /*!
-      \fn template <typename T> void ReleaseSVMData(T* svm_ptr) const
+      \fn template <typename T> void ReleaseSVMData(T* svm_ptr, GGsize const& thread_index) const
       \tparam T - type of the data
       \param svm_ptr - pointer to SVM memory to release
+      \param thread_index - index of thread
       \brief Release SVM data
     */
     template <typename T>

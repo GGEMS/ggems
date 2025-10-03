@@ -28,11 +28,11 @@
   \date Wednesday September 25, 2024
 */
 
+/// \cond
 #include <thread>
+/// \endcond
 
 #include "GGEMS/geometries/GGEMSOctree.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,9 +183,9 @@ void GGEMSOctree::BuildOctreeOnDevice(GGEMSPoint3 const& center, GGsize const& t
       };
 
       GGfloat step[3] = {
-        static_cast<GGfloat>(half_width_[0] / std::pow(2.0f, i - 1)),
-        static_cast<GGfloat>(half_width_[1] / std::pow(2.0f, i - 1)),
-        static_cast<GGfloat>(half_width_[2] / std::pow(2.0f, i - 1))
+        static_cast<GGfloat>(half_width_[0] / std::pow(2.0f, static_cast<GGfloat>(i) - 1.0f)),
+        static_cast<GGfloat>(half_width_[1] / std::pow(2.0f, static_cast<GGfloat>(i) - 1.0f)),
+        static_cast<GGfloat>(half_width_[2] / std::pow(2.0f, static_cast<GGfloat>(i) - 1.0f))
       };
 
       // Compute offset by cluster of 8

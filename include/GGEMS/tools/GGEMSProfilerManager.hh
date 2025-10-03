@@ -35,7 +35,10 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+/// \cond
 #include <unordered_map>
+/// \endcond
+
 #include "GGEMS/tools/GGEMSProfiler.hh"
 
 typedef std::unordered_map<std::string, GGEMSProfiler> ProfilerUMap; /*!< Unordered map with key : name of profile, profile object */

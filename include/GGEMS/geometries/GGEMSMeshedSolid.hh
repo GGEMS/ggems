@@ -45,6 +45,7 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
   public:
     /*!
       \param meshed_phantom_name - header file for volume
+      \param data_reg_type - type of data
       \brief GGEMSMeshedSolid constructor
     */
     GGEMSMeshedSolid(std::string const& meshed_phantom_name, std::string const& data_reg_type = "");
@@ -115,9 +116,27 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
     */
     void UpdateTriangles(GGsize const& thread_index);
 
+    /*!
+      \fn void BuildOctree(GGint const& depth)
+      \param depth - number of level for the octree
+      \brief build the octree for mesh
+    */
     void BuildOctree(GGint const& depth);
 
+    /*!
+      \fn GGfloat3 GetVoxelSizes(GGsize const& thread_index) const
+      \param thread_index - index of the thread
+      \brief Get the voxel size
+      \return the voxel size in X, Y, Z
+    */
     GGfloat3 GetVoxelSizes(GGsize const& thread_index) const override;
+ 
+    /*!
+      \fn GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const
+      \param thread_index - index of the thread
+      \brief return the OBB Geometry
+      \return the OBBGeometry associated to mesh
+    */
     GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const override;
 
   private:
@@ -133,7 +152,18 @@ class GGEMS_EXPORT GGEMSMeshedSolid : public GGEMSSolid
     */
     void LoadVolumeImage(void);
 
+    /*!
+      \fn GGEMSPoint3 ComputeOctreeCenter(void) const
+      \brief Compute octree center
+      \return Get the octree center
+    */
     GGEMSPoint3 ComputeOctreeCenter(void) const;
+
+    /*!
+      \fn void ComputeHalfWidthCenter(GGfloat* half_width) const
+      \param half_width - half width
+      \brief Compute the half width center
+    */
     void ComputeHalfWidthCenter(GGfloat* half_width) const;
 
   private:

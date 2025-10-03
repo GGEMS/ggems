@@ -28,7 +28,9 @@
   \date Tuesday March 16, 2021
 */
 
+/// \cond
 #include <mutex>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"

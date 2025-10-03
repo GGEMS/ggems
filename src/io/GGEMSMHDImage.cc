@@ -28,12 +28,13 @@
   \date Tuesday January 14, 2020
 */
 
+/// \cond
 #include <vector>
+/// \endcond
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
