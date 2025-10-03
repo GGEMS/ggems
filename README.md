@@ -1,8 +1,8 @@
-# GGEMS
+## GGEMS
 
 website: <https://ggems.fr>
 
-forum: <https://ggems.discourse.group>
+forum: <https://forum.ggems.fr>
 
 ## Description
 
@@ -39,7 +39,7 @@ Tested compilers:
 
 ## Installation
 
-GEMS can be install on Linux or Windows system using setuptools. Simply use the following command in the GGEMS directory:
+GGEMS can be install on Linux or Windows system using setuptools. Simply use the following command in the GGEMS directory:
 
 ```console
 foo@bar~: python setup.py build_ext --opengl=ON install
