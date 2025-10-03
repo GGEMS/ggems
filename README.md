@@ -2,7 +2,7 @@
 
 website: <https://ggems.fr>
 
-forum: <https://forum.ggems.fr>
+forum: <https://ggems.discourse.group>
 
 ## Description
 
