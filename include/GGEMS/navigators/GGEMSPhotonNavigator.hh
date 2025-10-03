@@ -62,7 +62,7 @@ inline void GetPhotonNextInteraction(
   GGint const particle_id)
 {
   // Getting energy of the particle and the index of energy in cross section table
-  GGint energy_id = BinarySearchLeft(primary_particle->E_[particle_id], particle_cross_sections->energy_bins_, particle_cross_sections->number_of_bins_, 0, 0);
+  GGint energy_id = BinarySearch(primary_particle->E_[particle_id], particle_cross_sections->energy_bins_, particle_cross_sections->number_of_bins_);
 
   // Initialization of next interaction distance
   GGfloat next_interaction_distance = OUT_OF_WORLD;

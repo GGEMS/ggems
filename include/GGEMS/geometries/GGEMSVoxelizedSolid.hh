@@ -102,13 +102,6 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void PrintInfos(void) const override;
 
     /*!
-      \fn void LoadVolumeImage(GGEMSMaterials* materials)
-      \param materials - pointer on material for a phantom
-      \brief load volume image to GGEMS and create a volume of label in GGEMS for voxelized solid
-    */
-    void LoadVolumeImage(GGEMSMaterials* materials);
-
-    /*!
       \fn void UpdateTransformationMatrix(GGsize const& thread_index)
       \param thread_index - index of the thread (= activated device index)
       \brief Update transformation matrix for solid box object
@@ -121,7 +114,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \return size of voxels in voxelized solid
       \brief get the size of voxels in voxelized solid
     */
-    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const;
+    GGfloat3 GetVoxelSizes(GGsize const& thread_index) const override;
 
     /*!
       \fn GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const
@@ -129,7 +122,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \return OBB params for the object
       \brief return the parameters about OBB geometry
     */
-    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const;
+    GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const override;
 
   private:
     /*!
@@ -148,6 +141,13 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \brief Initialize kernel for particle solid distance
     */
     void InitializeKernel(void) override;
+
+    /*!
+      \fn void LoadVolumeImage(GGEMSMaterials* materials)
+      \param materials - pointer on material for a phantom
+      \brief load volume image to GGEMS and create a volume of label in GGEMS for voxelized solid
+    */
+    void LoadVolumeImage(GGEMSMaterials* materials);
 
   private:
     std::string volume_header_filename_; /*!< Filename of MHD file for phantom */

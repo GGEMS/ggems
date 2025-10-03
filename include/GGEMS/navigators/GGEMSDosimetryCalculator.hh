@@ -93,10 +93,11 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void AttachToNavigator(std::string const& navigator_name);
 
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(std::string const& nav_type )
+      \param nav_type - Type of navigator
       \brief Initialize dosimetry calculator class
     */
-    void Initialize(void);
+    void Initialize(std::string const& nav_type);
 
     /*!
       \fn void SetDoselSizes(GGfloat const& dosel_x, GGfloat const& dosel_y, GGfloat const& dosel_z, std::string const& unit = "mm")
@@ -240,10 +241,16 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void CheckParameters(void) const;
 
     /*!
-      \fn void InitializeKernel(void)
+      \fn void InitializeVoxelizedKernel(void)
       \brief Initialize kernel for dose computation
     */
-    void InitializeKernel(void);
+    void InitializeVoxelizedKernel(void);
+
+    /*!
+      \fn void InitializeMeshedKernel(void)
+      \brief Initialize kernel for dose computation in meshed volume
+    */
+    void InitializeMeshedKernel(void);
 
     /*!
       \fn void SavePhotonTracking(void) const

@@ -31,7 +31,9 @@
   \date Tuesday March 2, 2020
 */
 
+/// \cond
 #include <limits>
+/// \endcond
 
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/io/GGEMSHistogramMode.hh"
@@ -85,12 +87,6 @@ class GGEMS_EXPORT GGEMSSolid
       \brief Avoid copy by rvalue reference
     */
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
-
-    /*!
-      \fn void EnableTracking(void)
-      \brief Enabling tracking infos during simulation
-    */
-    void EnableTracking(void);
 
     /*!
       \fn inline cl::Buffer* GetSolidData(GGsize const& thread_index) const
@@ -157,6 +153,15 @@ class GGEMS_EXPORT GGEMSSolid
       \brief set angle of rotation in Z (after translation)
     */
     void SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const;
+
+    /*!
+      \fn void SetPositionOpenGL(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z)
+      \param position_x - position of volume in x for openGL
+      \param position_y - position of volume in y for openGL
+      \param position_z - position of volume in z for openGL
+      \brief set position of volume for OpenGL
+    */
+    void SetPositionOpenGL(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z);
     #endif
 
     /*!
@@ -200,6 +205,22 @@ class GGEMS_EXPORT GGEMSSolid
       \brief printing infos about solid
     */
     virtual void PrintInfos(void) const = 0;
+
+    /*!
+      \fn GGfloat3 GetVoxelSizes(GGsize const& thread_index) const
+      \param thread_index - index of thread
+      \brief Get the voxel sizes
+      \return the voxel sizes
+    */
+    virtual GGfloat3 GetVoxelSizes(GGsize const& thread_index) const = 0;
+
+    /*!
+      \fn GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const
+      \param thread_index - index of thread
+      \brief Get the OBB Geometry
+      \return the OBB Geometry
+    */
+    virtual GGEMSOBB GetOBBGeometry(GGsize const& thread_index) const = 0;
 
     /*!
       \fn std::string GetRegisteredDataType(void) const
@@ -281,6 +302,18 @@ class GGEMS_EXPORT GGEMSSolid
       \brief building OpenGL volume in GGEMS
     */
     void BuildOpenGL(void) const;
+
+    /*!
+      \fn void EnableTracking(void)
+      \brief Enabling tracking infos during simulation
+    */
+    void EnableTracking(void);
+
+    /*!
+      \fn void EnableTLE(void)
+      \brief Enabling TLE for dosimetry
+    */
+    void EnableTLE(void);
 
     /*!
       \fn void AddKernelOption(std::string const& option)

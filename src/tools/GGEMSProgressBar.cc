@@ -28,7 +28,10 @@
   \date Wednesday June 23, 2021
 */
 
+/// \cond
 #include <iostream>
+/// \endcond
+///
 #include "GGEMS/tools/GGEMSProgressBar.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -169,5 +169,4 @@ ggems.run()
 # STEP 9: Exit safely
 dosimetry.delete()
 ggems.delete()
-clean_safely()
 exit()

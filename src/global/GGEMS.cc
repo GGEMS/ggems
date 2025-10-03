@@ -28,16 +28,24 @@
   \date Monday September 30, 2019
 */
 
+/// \cond
 #include <fcntl.h>
 #include <thread>
+/// \endcond
 
 #ifdef _WIN32
+/// \cond
 #include <Windows.h>
 #include <wincrypt.h>
+/// \endcond
 #else
+/// \cond
 #include <unistd.h>
+/// \endcond
 #endif
+/// \cond
 #include <mutex>
+/// \endcond
 
 /*!
   \brief empty namespace storing mutex
@@ -302,9 +310,9 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   #endif
 
   // Printing progress bar
-  mutex.lock();
+  ::mutex.lock();
   static GGEMSProgressBar progress_bar(source_manager.GetTotalNumberOfBatchs());
-  mutex.unlock();
+  ::mutex.unlock();
 
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
@@ -337,9 +345,9 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       } while (source_manager.IsAlive(thread_index) && loop_counter < max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
 
       // Incrementing progress bar
-      mutex.lock();
+      ::mutex.lock();
       ++progress_bar;
-      mutex.unlock();
+      ::mutex.unlock();
 
       // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
       #ifdef OPENGL_VISUALIZATION
@@ -418,8 +426,8 @@ void GGEMS::PrintBanner(void) const
   std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
-  std::cout << "$ Welcome to GGEMS v1.2   https://ggems.fr $" << std::endl;
-  std::cout << "$ Copyright (c) GGEMS Team 2022            $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.3   https://ggems.fr $" << std::endl;
+  std::cout << "$ Copyright (c) GGEMS Team 2025            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
 }

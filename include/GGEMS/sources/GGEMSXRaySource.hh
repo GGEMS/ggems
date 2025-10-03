@@ -22,7 +22,7 @@
 /*!
   \file GGEMSXRaySource.hh
 
-  \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
+  \brief This class defines a XRay source in GGEMS useful for CT/CBCT simulation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -98,21 +98,6 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     void SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit = "mm");
 
     /*!
-      \fn void SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
-      \param monoenergy - Monoenergy value
-      \param unit - unit of the energy
-      \brief set the value of energy in monoenergy mode
-    */
-    void SetMonoenergy(GGfloat const& monoenergy, std::string const& unit = "keV");
-
-    /*!
-      \fn void SetPolyenergy(std::string const& energy_spectrum_filename)
-      \param energy_spectrum_filename - filename containing the energy spectrum
-      \brief set the energy spectrum file for polyenergy mode
-    */
-    void SetPolyenergy(std::string const& energy_spectrum_filename);
-
-    /*!
       \fn void Initialize(bool const& is_tracking = false)
       \param is_tracking - flag activating tracking
       \brief Initialize a GGEMS source
@@ -141,12 +126,6 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     void InitializeKernel(void) override;
 
     /*!
-      \fn void FillEnergy(void)
-      \brief fill energy for poly or mono energy mode
-    */
-    void FillEnergy(void);
-
-    /*!
       \fn void CheckParameters(void) const
       \brief Check mandatory parameters for a source
     */
@@ -155,12 +134,6 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
   private: // Specific members for GGEMSXRaySource
     GGfloat beam_aperture_; /*!< Beam aperture of the x-ray source */
     GGfloat3 focal_spot_size_; /*!< Focal spot size of the x-ray source */
-    GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
-    GGfloat monoenergy_; /*!< Monoenergy mode */
-    std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
-    GGsize number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
-    cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
-    cl::Buffer** cdf_; /*!< Cumulative distribution function to generate a random energy */
 };
 
 /*!
@@ -245,5 +218,15 @@ extern "C" GGEMS_EXPORT void set_monoenergy_ggems_xray_source(GGEMSXRaySource* x
   \brief Set the polyenergetic spectrum value for the GGEMSXRaySource
 */
 extern "C" GGEMS_EXPORT void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum);
+
+/*!
+  \fn void set_energy_peak_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const energy, char const* unit, GGfloat const intensity)
+  \param xray_source - pointer on the source
+  \param energy - energy value
+  \param unit - unit of the energy
+  \param intensity - intensity of bin
+  \brief Set the energy peak spectrum value for the GGEMSXRaySource
+*/
+extern "C" GGEMS_EXPORT void set_energy_peak_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const energy, char const* unit, GGfloat const intensity);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSXRAYSOURCE_HH

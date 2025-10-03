@@ -31,7 +31,9 @@
   \date Monday October 25, 2021
 */
 
+/// \cond
 #include <unordered_map>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
@@ -52,10 +54,12 @@ struct GGEMS_EXPORT GGEMSRGBColor
 #ifdef OPENGL_VISUALIZATION
 
 #define GLM_ENABLE_EXPERIMENTAL
+/// \cond
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
+/// \endcond
 
 class GGEMSOpenGLVolume;
 class GGEMSOpenGLAxis;

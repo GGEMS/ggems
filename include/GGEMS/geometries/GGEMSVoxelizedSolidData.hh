@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
-#define GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDDATA_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDDATA_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -46,4 +46,4 @@ typedef struct GGEMSVoxelizedSolidData_t
   GGint number_of_voxels_; /*!< Total number of voxels */
 } GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
 
-#endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
+#endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDDATA_HH

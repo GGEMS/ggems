@@ -31,15 +31,15 @@
 #ifdef OPENGL_VISUALIZATION
 
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
-#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
 
+/// \cond
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+/// \endcond
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +82,7 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
   number_of_triangles_ = 0;
 
   is_visible_ = true;
+  is_color_in_vertex_buffer_ = false;
 
   number_of_stacks_ = 0;
   number_of_sectors_ = 0;
@@ -363,13 +364,19 @@ void GGEMSOpenGLVolume::Draw(void) const
       glUniform3f(glGetUniformLocation(program_shader_id_, "color"), rgb_unique.red_, rgb_unique.green_, rgb_unique.blue_);
     }
 
+    // IMPLEMENT A BETTER SWITCH FOR COLOR!!!!
+    GLsizei offset_for_rgb = 6;
+    if (!is_color_in_vertex_buffer_) offset_for_rgb = 3;
+
     GLintptr vertex_position_offset = 0 * sizeof(GLfloat);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<GLvoid*>(vertex_position_offset));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, offset_for_rgb*sizeof(GLfloat), reinterpret_cast<GLvoid*>(vertex_position_offset));
     glEnableVertexAttribArray(0);
 
-    GLintptr vertex_color_offset = 3 * sizeof(GLfloat);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<GLvoid*>(vertex_color_offset));
-    glEnableVertexAttribArray(1);
+    if (is_color_in_vertex_buffer_) {
+      GLintptr vertex_color_offset = 3 * sizeof(GLfloat);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, offset_for_rgb*sizeof(GLfloat), reinterpret_cast<GLvoid*>(vertex_color_offset));
+      glEnableVertexAttribArray(1);
+    }
 
     glm::mat4 mvp_matrix = projection_matrix*view_matrix*rotation_matrix_after_translation*translate_matrix*rotation_matrix;
     glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);

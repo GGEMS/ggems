@@ -31,8 +31,14 @@
   \date Tuesday March 23, 2021
 */
 
+/// \cond
 #include <unordered_map>
+#include <sstream>
+/// \endcond
+
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
@@ -186,6 +192,66 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief Get the type of the activated device
     */
     inline cl_device_type GetDeviceType(GGsize const& device_index) const {return device_type_[device_index];}
+
+    /*!
+      \fn GGulong GetDeviceLocalMemSize(GGsize const& device_index) const
+      \param device_index - index of device
+      \return name of activated device
+      \brief Get the local memory size of device
+    */
+    inline GGulong GetDeviceLocalMemSize(GGsize const& device_index) const {return device_local_mem_size_[device_index];}
+
+    /*!
+      \fn GGsize GetDeviceMaxWorkGroupSize(GGsize const& device_index) const
+      \param device_index - index of device
+      \return name of activated device
+      \brief Get the max work group size
+    */
+    inline GGsize GetDeviceMaxWorkGroupSize(GGsize const& device_index) const {return device_max_work_group_size_[device_index];}
+
+    /*!
+      \fn GGuint GetDeviceMaxWorkItemDimensions(GGsize const& device_index) const
+      \param device_index - index of device
+      \return name of activated device
+      \brief Get the max work item dimensions
+    */
+    inline GGuint GetDeviceMaxWorkItemDimensions(GGsize const& device_index) const {return device_max_work_item_dimensions_[device_index];}
+
+    /*!
+      \fn GGsize GetDeviceMaxWorkItemSize(GGsize const& device_index, GGsize const& dimension)
+      \param device_index - index of device
+      \param dimension - which dimension of work item
+      \return max work item size
+      \brief Get the max work item size
+    */
+    inline GGsize GetDeviceMaxWorkItemSize(GGsize const& device_index, GGsize const& dimension) const
+    {
+      return device_max_work_item_sizes_[dimension + 3 * device_index];
+    }
+
+    /*!
+      \fn GGulong GetKernelLocalMemSize(cl::Kernel* kernel) const
+      \param kernel - pointer to kernel
+      \brief get the local memory size of a kernel
+      \return the local mem size of a kernel
+    */
+    GGulong GetKernelLocalMemSize(cl::Kernel* kernel) const;
+
+    /*!
+      \fn GGulong GetKernelPrivateMemSize(cl::Kernel* kernel) const
+      \param kernel - pointer to kernel
+      \brief get the private memory size of a kernel
+      \return the private mem size of a kernel
+    */
+    GGulong GetKernelPrivateMemSize(cl::Kernel* kernel) const;
+
+    /*!
+      \fn GGsize GetKernelWorkGroupSize(cl::Kernel* kernel) const
+      \param kernel - pointer to kernel
+      \brief get the work group size of a kernel
+      \return the work group size of a kernel
+    */
+    GGsize GetKernelWorkGroupSize(cl::Kernel* kernel) const;
 
     /*!
       \fn inline GGsize GetNumberOfDetectedDevice(void) const
@@ -363,6 +429,63 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& thread_index, std::string const& class_name = "Undefined");
 
     /*!
+      \fn bool IsSVMAvailability(GGsize const& device_index) const
+      \param device_index - device index
+      \brief Check if SVM is available on OpenCL device
+      \return test if svm is available
+    */
+    bool IsSVMAvailability(GGsize const& device_index) const;
+
+    /*!
+      \fn template <typename T> T* SVMAllocate(GGSize const& size, GGsize const& thread_index,cl_svm_mem_flags flags, cl_uint const& alignment, std::string const& class_name = "Undefined") const
+      \tparam T - type of the data
+      \param size - size in bytes to be allocated
+      \param thread_index - index of the thread (= activated device index)
+      \param flags - CL_MEM_READ_WRITE, CL_MEM_WRITE_ONLY, CL_MEM_READ_ONLY
+      \param alignment - The minimum alignment in bytes that is required for the newly created buffer’s memory region. 0 by default
+      \param class_name - name of class allocating memory
+      \brief Allocating memory using SVM. The flag CL_MEM_SVM_FINE_GRAIN_BUFFER is added automatically if available
+      \return pointer to data
+    */
+    template <typename T>
+    T* SVMAllocate(GGsize const& size, GGsize const& thread_index, cl_svm_mem_flags flags, GGuint const& alignment, std::string const& class_name = "Undefined") const;
+
+    /*!
+      \fn template <typename T> void SVMDeallocate(T* svm_ptr, GGSize const& size, GGsize const& thread_index, std::string const& class_name = "Undefined") const
+      \tparam T - type of the data
+      \param svm_ptr - pointer to SVM memory to free
+      \param size - size in bytes to be allocated
+      \param thread_index - index of the thread (= activated device index)
+      \param class_name - name of class allocating memory
+      \brief Freeing SVM memory
+    */
+    template <typename T>
+    void SVMDeallocate(T* svm_ptr, GGsize const& size, GGsize const& thread_index, std::string const& class_name = "Undefined") const;
+
+    /*!
+      \fn template <typename T> void GetSVMData(T* svm_ptr, GGsize const& size, GGsize const& thread_index, GGbool const& blocking, cl_map_flags const& map_flags) const
+      \tparam T - type of the data
+      \param svm_ptr - svm pointer
+      \param size - size in bytes
+      \param thread_index - index of threads
+      \param blocking - blocking access
+      \param map_flags - CL_MAP_READ or CL_MAP_WRITE
+      \brief Get data using mmap for SVM memory
+    */
+    template <typename T>
+    void GetSVMData(T* svm_ptr, GGsize const& size, GGsize const& thread_index, GGbool const& blocking, cl_map_flags const& map_flags) const;
+
+    /*!
+      \fn template <typename T> void ReleaseSVMData(T* svm_ptr, GGsize const& thread_index) const
+      \tparam T - type of the data
+      \param svm_ptr - pointer to SVM memory to release
+      \param thread_index - index of thread
+      \brief Release SVM data
+    */
+    template <typename T>
+    void ReleaseSVMData(T* svm_ptr, GGsize const& thread_index) const;
+
+    /*!
       \fn void CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index)
       \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
@@ -526,6 +649,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGuint> device_partition_max_sub_devices_; /*!< Partition affinity domain */
     std::vector<GGsize> device_profiling_timer_resolution_; /*!< Timer resolution */
     std::vector<GGfloat> device_balancing_; /*!< Device balancing */
+    std::vector<cl_device_svm_capabilities> device_svm_capabilities_; /*!< SVM device capabilities */
 
     // Custom OpenCL members
     GGsize work_group_size_; /*!< Work group size by GGEMS, here 64 */
@@ -584,6 +708,83 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
   char message[] = "Unmapping buffer";
   HandleEvent(event, message);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+T* GGEMSOpenCLManager::SVMAllocate(GGsize const& size, GGsize const& thread_index,cl_svm_mem_flags flags, GGuint const& alignment, std::string const& class_name) const
+{
+  GGcout("GGEMSOpenCLManager", "SVMAllocate", 3) << "Allocating SVM memory on OpenCL device memory..." << GGendl;
+
+  // Get the RAM manager and check memory
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
+  // Get index of the device
+  GGsize device_index = GetIndexOfActivatedDevice(thread_index);
+
+  // Check if buffer size depending on device parameters
+  if (!ram_manager.IsBufferSizeCorrect(device_index, size)) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Size of buffer: " << size << " bytes, is too big!!! The maximum size is " << GetMaxBufferAllocationSize(device_index) << " bytes";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", oss.str());
+  }
+
+  // Check if enough space on device
+  if (!ram_manager.IsEnoughAvailableRAMMemory(device_index, size)) {
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", "Not enough RAM memory for buffer allocation!!!");
+  }
+
+  if (IsSVMAvailability(device_index)) flags |= CL_MEM_SVM_FINE_GRAIN_BUFFER;
+  T* ptr = static_cast<T*>(clSVMAlloc((*computing_devices_[thread_index].context_)(), flags, size, alignment));
+
+  // Increment RAM memory
+  ram_manager.IncrementRAMMemory(class_name, thread_index, size);
+
+  return ptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+template <typename T>
+void GGEMSOpenCLManager::SVMDeallocate(T* svm_ptr, GGsize const& size, GGsize const& thread_index, std::string const& class_name) const
+{
+  GGcout("GGEMSOpenCLManager","SVMDeallocate", 3) << "Deallocating SVM memory on OpenCL device memory..." << GGendl;
+
+  // Get the RAM manager and check memory
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
+  // Decrement RAM memory
+  ram_manager.DecrementRAMMemory(class_name, thread_index, size);
+
+  clSVMFree((*computing_devices_[thread_index].context_)(), svm_ptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void GGEMSOpenCLManager::GetSVMData(T* svm_ptr, GGsize const& size, GGsize const& thread_index, GGbool const& blocking, cl_map_flags const& map_flags) const
+{
+  clEnqueueSVMMap((*computing_devices_[thread_index].queue_)(), blocking, map_flags, svm_ptr, size, 0, nullptr, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void GGEMSOpenCLManager::ReleaseSVMData(T* svm_ptr, GGsize const& thread_index) const
+{
+  clEnqueueSVMUnmap((*computing_devices_[thread_index].queue_)(), svm_ptr, 0, nullptr, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 /*!
   \fn GGEMSOpenCLManager* get_instance_ggems_opencl_manager(void)

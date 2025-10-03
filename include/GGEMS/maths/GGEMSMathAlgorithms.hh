@@ -32,45 +32,35 @@
 */
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/geometries/GGEMSPrimitiveGeometries.hh"
 
 /*!
-  \fn inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
+  \fn inline GGint BinarySearch(GGfloat const key, GGfloat const* array, GGint const size)
   \param key - value in p_array to find
   \param array - p_array where is the key value
   \param size - size of p_array, number of elements
-  \param offset - apply offset when searching index (optionnal)
-  \param min - apply a min index (optionnal)
   \return index of key value in p_array buffer
   \brief Find the index of the key value in the p_array buffer
 */
 #ifdef __OPENCL_C_VERSION__
-inline GGint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGint const size, GGint const offset, GGint min)
+inline GGint BinarySearch(GGfloat const key, global GGfloat const* array, GGint const size)
 #else
-inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
+inline GGint BinarySearch(GGfloat const key, GGfloat const* array, GGint const size)
 #endif
 {
-  GGint max = size - 1, mid = 0; // Max element, and median element
-  GGint min_check = min; // Min element
+  GGint low = 0, mid = 0;
+  GGint high = size - 1;
 
-  while (min < max) {
-    // Computing median index
-    mid = (min + max) >> 1;
-    if (key == array[mid + offset]) {
-      return mid;
-    }
-    else if (key > array[mid + offset]) {
-      min = mid + 1;
-    }
-    else {
-      max = mid;
+  while (high - low > 1) {
+    mid = (high + low) / 2;
+    if (array[mid] == key) return mid;
+    if (array[mid] < key) {
+      low = mid;
+    } else {
+      high = mid;
     }
   }
-
-  // Checking the min elements
-  if (min > min_check) min--;
-
-  // Return the min element
-  return min;
+  return low;
 }
 
 /*!
@@ -117,6 +107,22 @@ inline GGfloat LogLogInterpolation(GGfloat x, GGfloat x0, GGfloat y0, GGfloat x1
   #else
   return std::pow(10.0f, std::log10(y0) + std::log10(y1/y0) * (std::log10(x*x0) / std::log10(x1*x0)));
   #endif
+}
+
+/*!
+  \fn inline GGfloat Dot(GGEMSPoint3 p0, GGEMSPoint3 p1)
+  \param p0 - Coordinate of the first point
+  \param p1 - Coordinate of the second point
+  \brief Compute dot product p0.p1
+  \return the result of dot product p0.p1
+*/
+inline GGfloat Dot(GGEMSPoint3 p0, GGEMSPoint3 p1)
+{
+  GGfloat dot_product = 0.0f;
+  dot_product = p0.x_ * p1.x_;
+  dot_product += p0.y_ * p1.y_;
+  dot_product += p0.z_ * p1.z_;
+  return dot_product;
 }
 
 #endif // GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH

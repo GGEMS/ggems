@@ -235,6 +235,7 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     GGsize number_of_triangles_; /*!< Number of triangles for a volume */
 
     bool is_visible_; /*!< true: volume display */
+    bool is_color_in_vertex_buffer_; /*!< true: vertex display */
 };
 
 #endif

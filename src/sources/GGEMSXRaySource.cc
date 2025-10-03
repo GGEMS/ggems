@@ -42,13 +42,7 @@
 
 GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
 : GGEMSSource(source_name),
-  beam_aperture_(std::numeric_limits<float>::min()),
-  is_monoenergy_mode_(false),
-  monoenergy_(-1.0f),
-  energy_spectrum_filename_(""),
-  number_of_energy_bins_(0),
-  energy_spectrum_(nullptr),
-  cdf_(nullptr)
+  beam_aperture_(std::numeric_limits<float>::min())
 {
   GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "GGEMSXRaySource creating..." << GGendl;
 
@@ -66,10 +60,6 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   focal_spot_size_.s[1] = std::numeric_limits<float>::min();
   focal_spot_size_.s[2] = std::numeric_limits<float>::min();
 
-  // Allocating memory for cdf and energy spectrum
-  energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
-  cdf_ = new cl::Buffer*[number_activated_devices_];
-
   GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "GGEMSXRaySource created!!!" << GGendl;
 }
 
@@ -80,35 +70,6 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
 GGEMSXRaySource::~GGEMSXRaySource(void)
 {
   GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "GGEMSXRaySource erasing..." << GGendl;
-
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  if (energy_spectrum_) {
-    for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      if (is_monoenergy_mode_) {
-        opencl_manager.Deallocate(energy_spectrum_[i], 2*sizeof(GGfloat), i);
-      }
-      else {
-        opencl_manager.Deallocate(energy_spectrum_[i], number_of_energy_bins_*sizeof(GGfloat), i);
-      }
-    }
-    delete[] energy_spectrum_;
-    energy_spectrum_ = nullptr;
-  }
-
-  if (cdf_) {
-    for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      if (is_monoenergy_mode_) {
-        opencl_manager.Deallocate(cdf_[i], 2*sizeof(GGfloat), i);
-      }
-      else {
-        opencl_manager.Deallocate(cdf_[i], number_of_energy_bins_*sizeof(GGfloat), i);
-      }
-    }
-    delete[] cdf_;
-    cdf_ = nullptr;
-  }
 
   GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "GGEMSXRaySource erased!!!" << GGendl;
 }
@@ -168,11 +129,12 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   kernel_get_primaries_[thread_index]->setArg(2, *randoms);
   kernel_get_primaries_[thread_index]->setArg(3, particle_type_);
   kernel_get_primaries_[thread_index]->setArg(4, *energy_spectrum_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(5, *cdf_[thread_index]);
-  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_));
-  kernel_get_primaries_[thread_index]->setArg(7, beam_aperture_);
-  kernel_get_primaries_[thread_index]->setArg(8, focal_spot_size_);
-  kernel_get_primaries_[thread_index]->setArg(9, *matrix_transformation);
+  kernel_get_primaries_[thread_index]->setArg(5, *energy_cdf_[thread_index]);
+  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_+1));
+  kernel_get_primaries_[thread_index]->setArg(7, is_interp_);
+  kernel_get_primaries_[thread_index]->setArg(8, beam_aperture_);
+  kernel_get_primaries_[thread_index]->setArg(9, focal_spot_size_);
+  kernel_get_primaries_[thread_index]->setArg(10, *matrix_transformation);
 
   // Launching kernel
   cl::Event event;
@@ -219,13 +181,6 @@ void GGEMSXRaySource::PrintInfos(void) const
     }
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_by_device_[j] << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << number_of_batchs_[j] << GGendl;
-    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
-    if (is_monoenergy_mode_) {
-      std::cout << "Monoenergy" << std::endl;
-    }
-    else {
-      std::cout << "Polyenergy" << std::endl;
-    }
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
@@ -242,26 +197,6 @@ void GGEMSXRaySource::PrintInfos(void) const
     // Release the pointer
     opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(j), transformation_matrix_device, j);
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
-{
-  monoenergy_ = EnergyUnit(monoenergy, unit);
-  is_monoenergy_mode_ = true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSXRaySource::SetPolyenergy(std::string const& energy_spectrum_filename)
-{
-  energy_spectrum_filename_ = energy_spectrum_filename;
-  is_monoenergy_mode_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -296,125 +231,6 @@ void GGEMSXRaySource::CheckParameters(void) const
     std::ostringstream oss(std::ostringstream::out);
     oss << "The focal spot size is a posivite value!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-  }
-
-  // Checking the energy
-  if (is_monoenergy_mode_) {
-    if (monoenergy_ == -1.0f) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to set an energy in monoenergetic mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-    }
-
-    if (monoenergy_ < 0.0f) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "The energy must be a positive value!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-    }
-  }
-
-  if (!is_monoenergy_mode_) {
-    if (energy_spectrum_filename_.empty()) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSXRaySource::FillEnergy(void)
-{
-  GGcout("GGEMSXRaySource", "FillEnergy", 3) << "Filling energy..." << GGendl;
-
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    // Monoenergy mode
-    if (is_monoenergy_mode_) {
-      number_of_energy_bins_ = 2;
-
-      // Allocation of memory on OpenCL device
-      // Energy
-      energy_spectrum_[j] = opencl_manager.Allocate(nullptr, 2*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
-
-      // Cumulative distribution function
-      cdf_[j] = opencl_manager.Allocate(nullptr, 2*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
-
-      // Get the energy pointer on OpenCL device
-      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 2*sizeof(GGfloat), j);
-
-      // Get the cdf pointer on OpenCL device
-      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 2*sizeof(GGfloat), j);
-
-      energy_spectrum_device[0] = monoenergy_;
-      energy_spectrum_device[1] = monoenergy_;
-
-      cdf_device[0] = 1.0f;
-      cdf_device[1] = 1.0f;
-
-      // Release the pointers
-      opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
-      opencl_manager.ReleaseDeviceBuffer(cdf_[j], cdf_device, j);
-    }
-    else { // Polyenergy mode 
-      // Read a first time the spectrum file counting the number of lines
-      std::ifstream spectrum_stream(energy_spectrum_filename_, std::ios::in);
-      GGEMSFileStream::CheckInputStream(spectrum_stream, energy_spectrum_filename_);
-
-      // Compute number of energy bins
-      std::string line;
-      if (j == 0) { // Computing number of lines only for first device
-        while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
-      }
-
-      // Returning to beginning of the file to read it again
-      spectrum_stream.clear();
-      spectrum_stream.seekg(0, std::ios::beg);
-
-      // Allocation of memory on OpenCL device
-      // Energy
-      energy_spectrum_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
-
-      // Cumulative distribution function
-      cdf_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
-
-      // Get the energy pointer on OpenCL device
-      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
-
-      // Get the cdf pointer on OpenCL device
-      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
-
-      // Read the input spectrum and computing the sum for the cdf
-      GGint line_index = 0;
-      GGfloat sum_cdf = 0.0;
-      while (std::getline(spectrum_stream, line)) {
-        std::istringstream iss(line);
-        iss >> energy_spectrum_device[line_index] >> cdf_device[line_index];
-        sum_cdf += cdf_device[line_index];
-        ++line_index;
-      }
-
-      // Compute CDF and normalized it
-      cdf_device[0] /= sum_cdf;
-      for (GGsize i = 1; i < number_of_energy_bins_; ++i) {
-        cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
-      }
-
-      // By security, final value of cdf must be 1 !!!
-      cdf_device[number_of_energy_bins_-1] = 1.0;
-
-      // Release the pointers
-      opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
-      opencl_manager.ReleaseDeviceBuffer(cdf_[j], cdf_device, j);
-
-      // Closing file
-      spectrum_stream.close();
-    }
   }
 }
 
@@ -490,7 +306,7 @@ void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGsize co
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_source_particle_type_ggems_xray_source( GGEMSXRaySource* xray_source, char const* particle_name)
+void set_source_particle_type_ggems_xray_source(GGEMSXRaySource* xray_source, char const* particle_name)
 {
   xray_source->SetSourceParticleType(particle_name);
 }
@@ -538,4 +354,13 @@ void set_monoenergy_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat cons
 void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum)
 {
   xray_source->SetPolyenergy(energy_spectrum);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_energy_peak_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const energy, char const* unit, GGfloat const intensity)
+{
+  xray_source->SetEnergyPeak(energy, intensity, unit);
 }

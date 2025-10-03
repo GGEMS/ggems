@@ -30,7 +30,6 @@
 
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

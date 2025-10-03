@@ -28,12 +28,13 @@
   \date Tuesday January 14, 2020
 */
 
+/// \cond
 #include <vector>
+/// \endcond
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,6 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   mhd_data_type_("MET_FLOAT")
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "GGEMSMHDImage creating..." << GGendl;
-
 
   element_sizes_.s[0] = 0.0f;
   element_sizes_.s[1] = 0.0f;

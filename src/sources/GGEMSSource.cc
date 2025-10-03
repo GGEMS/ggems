@@ -44,6 +44,10 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   number_of_particles_by_device_(nullptr),
   number_of_particles_in_batch_(nullptr),
   number_of_batchs_(nullptr),
+  is_interp_(TRUE),
+  number_of_energy_bins_(0),
+  energy_spectrum_(nullptr),
+  energy_cdf_(nullptr),
   particle_type_(99),
   tracking_kernel_option_("")
 {
@@ -52,12 +56,18 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   // Allocation of geometry transformation
   geometry_transformation_ = new GGEMSGeometryTransformation();
 
+  // Allocating memory for cdf and energy spectrum
+  energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
+  energy_cdf_ = new cl::Buffer*[number_activated_devices_];
+
   // Get the number of activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
   // Storing a kernel for each device
   kernel_get_primaries_ = new cl::Kernel*[number_activated_devices_];
+
+  if (!energy_mappings_.empty()) energy_mappings_.clear();
 
   // Store the source in source manager
   GGEMSSourceManager::GetInstance().Store(this);
@@ -100,6 +110,25 @@ GGEMSSource::~GGEMSSource(void)
     }
     delete[] number_of_particles_in_batch_;
     number_of_particles_in_batch_ = nullptr;
+  }
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (energy_spectrum_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(energy_spectrum_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
+    }
+    delete[] energy_spectrum_;
+    energy_spectrum_ = nullptr;
+  }
+
+  if (energy_cdf_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(energy_cdf_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
+    }
+    delete[] energy_cdf_;
+    energy_cdf_ = nullptr;
   }
 
   GGcout("GGEMSSource", "~GGEMSSource", 3) << "GGEMSSource erased!!!" << GGendl;
@@ -168,6 +197,122 @@ void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat cons
   rotation.s[1] = AngleUnit(ry, unit);
   rotation.s[2] = AngleUnit(rz, unit);
   geometry_transformation_->SetRotation(rotation);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
+{
+  if (!energy_mappings_.empty()) energy_mappings_.clear();
+
+  energy_mappings_.push_back({ EnergyUnit(monoenergy, unit), 1.0 });
+
+  number_of_energy_bins_ = energy_mappings_.size();
+  is_interp_ = FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::SetPolyenergy(std::string const& energy_spectrum_filename)
+{
+  if (!energy_mappings_.empty()) energy_mappings_.clear();
+
+  // Read a first time the spectrum file counting the number of lines
+  std::ifstream spectrum_stream(energy_spectrum_filename, std::ios::in);
+  GGEMSFileStream::CheckInputStream(spectrum_stream, energy_spectrum_filename);
+
+  // Compute number of energy bins
+  std::string line;
+  while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
+
+  // Returning to beginning of the file to read it again
+  spectrum_stream.clear();
+  spectrum_stream.seekg(0, std::ios::beg);
+
+  // Storing spectrum from file
+  while (std::getline(spectrum_stream, line)) {
+    std::istringstream iss(line);
+    GGEMSEnergyMapping energy_mapping;
+    iss >> energy_mapping.energy_ >> energy_mapping.intensity_;
+    energy_mappings_.push_back(energy_mapping);
+  }
+
+  // Closing file
+  spectrum_stream.close();
+
+  number_of_energy_bins_ = energy_mappings_.size();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::SetEnergyPeak(GGfloat const& energy, GGfloat const& intensity, std::string const& unit)
+{
+  energy_mappings_.push_back({ EnergyUnit(energy, unit), intensity });
+  number_of_energy_bins_ += 1;
+  is_interp_ = FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::FillEnergy(void)
+{
+  GGcout("GGEMSSource", "FillEnergy", 3) << "Filling energy..." << GGendl;
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    // Allocation of memory on OpenCL device
+    // Energy
+    energy_spectrum_[j] = opencl_manager.Allocate(nullptr, (number_of_energy_bins_+1)*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
+
+    // Cumulative distribution function
+    energy_cdf_[j] = opencl_manager.Allocate(nullptr, (number_of_energy_bins_+1)*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSSource");
+
+    // Get the energy pointer on OpenCL device
+    GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, (number_of_energy_bins_+1)*sizeof(GGfloat), j);
+
+    // Get the cdf pointer on OpenCL device
+    GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, (number_of_energy_bins_+1)*sizeof(GGfloat), j);
+
+    // Computing sum of intensities
+    GGdouble sum_cdf = 0.0;
+    for (auto const& e_map : energy_mappings_) {
+      sum_cdf += e_map.intensity_;
+    }
+
+    // Filling a tmp buffer
+    GGdouble* tmp_cdf = new GGdouble[number_of_energy_bins_+1];
+    tmp_cdf[0] = 0.0f;
+    for (GGsize i = 0; i < number_of_energy_bins_; ++i) {
+      tmp_cdf[i+1] = energy_mappings_[i].intensity_;
+      energy_spectrum_device[i] = static_cast<GGfloat>(energy_mappings_[i].energy_);
+    }
+    energy_spectrum_device[number_of_energy_bins_] = energy_spectrum_device[number_of_energy_bins_ - 1]; // copy second time the last value
+
+    // Compute CDF and normalized it
+    cdf_device[0] = static_cast<GGfloat>(tmp_cdf[0]);
+    //cdf_device[0] = static_cast<GGfloat>(tmp_cdf[0] / sum_cdf);
+    for (GGsize i = 1; i <= number_of_energy_bins_; ++i) {
+      tmp_cdf[i] = tmp_cdf[i] + tmp_cdf[i - 1];
+      cdf_device[i] = static_cast<GGfloat>(tmp_cdf[i] / sum_cdf);
+    }
+
+    // By security, final value of cdf must be 1 !!!
+    cdf_device[number_of_energy_bins_] = 1.0f;
+
+    // Release the pointers
+    opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
+    opencl_manager.ReleaseDeviceBuffer(energy_cdf_[j], cdf_device, j);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

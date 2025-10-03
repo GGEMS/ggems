@@ -163,5 +163,4 @@ ggems.run()
 # ------------------------------------------------------------------------------
 # STEP 9: Exit safely
 ggems.delete()
-clean_safely()
 exit()

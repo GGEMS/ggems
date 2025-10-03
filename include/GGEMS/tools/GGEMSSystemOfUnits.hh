@@ -41,12 +41,14 @@
   \brief __constant is known for OpenCL, but for C++ we define __constant as a constexpr
 */
 #define __constant inline static constexpr
+/// \cond
 #include <algorithm>
 #include <sstream>
 #include <cfloat>
 #include <iostream>
-#include "GGEMS/tools/GGEMSTools.hh"
+/// \endcond
 #endif
+#include "GGEMS/tools/GGEMSTools.hh"
 
 // Lengths [L] (mm)
 __constant GGfloat nm  = 1.e-6f; /*!< Nanometer */

@@ -95,10 +95,27 @@ kernel void track_through_ggems_voxelized_solid(
   }
 
   // Get the position and direction in local OBB coordinate
-  GGfloat3 global_position = {primary_particle->px_[global_id], primary_particle->py_[global_id], primary_particle->pz_[global_id]};
-  GGfloat3 global_direction = {primary_particle->dx_[global_id], primary_particle->dy_[global_id], primary_particle->dz_[global_id]};
-  GGfloat3 local_position = GlobalToLocalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &global_position);
-  GGfloat3 local_direction = GlobalToLocalDirection(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &global_direction);
+  GGfloat3 global_position = {
+    primary_particle->px_[global_id],
+    primary_particle->py_[global_id],
+    primary_particle->pz_[global_id]
+  };
+
+  GGfloat3 global_direction = {
+    primary_particle->dx_[global_id],
+    primary_particle->dy_[global_id],
+    primary_particle->dz_[global_id]
+  };
+
+  GGfloat3 local_position = GlobalToLocalPosition(
+    &voxelized_solid_data->obb_geometry_.matrix_transformation_,
+    &global_position
+  );
+
+  GGfloat3 local_direction = GlobalToLocalDirection(
+    &voxelized_solid_data->obb_geometry_.matrix_transformation_,
+    &global_direction
+  );
 
   // Storing local direction in particles 
   primary_particle->dx_[global_id] = local_direction.x;
@@ -117,7 +134,9 @@ kernel void track_through_ggems_voxelized_solid(
     // Get index of voxelized phantom, x, y, z
     GGint3 voxel_id = convert_int3((local_position - border_min) / voxel_size);
 
-    if (voxel_id.x >= number_of_voxels.x || voxel_id.y >= number_of_voxels.y || voxel_id.z >= number_of_voxels.z) {
+    if (voxel_id.x >= number_of_voxels.x ||
+        voxel_id.y >= number_of_voxels.y ||
+        voxel_id.z >= number_of_voxels.z) {
       primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
       primary_particle->solid_id_[global_id] = -1; // Out of world
       break;
@@ -132,7 +151,7 @@ kernel void track_through_ggems_voxelized_solid(
     GGchar next_discrete_process = primary_particle->next_discrete_process_[global_id];
 
     // Get the borders of the current voxel
-    GGfloat3 voxel_border_min = border_min +  convert_float3(voxel_id)*voxel_size;
+    GGfloat3 voxel_border_min = border_min + convert_float3(voxel_id)*voxel_size;
     GGfloat3 voxel_border_max = voxel_border_min + voxel_size;
 
     // Get safety position of particle to be sure particle is inside voxel
@@ -265,7 +284,7 @@ kernel void track_through_ggems_voxelized_solid(
     }
 
     #if defined(DOSIMETRY) && defined(TLE)
-    GGint E_index = BinarySearchLeft(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_, 0, 0);
+    GGint E_index = BinarySearch(initial_energy, attenuations->energy_bins_, attenuations->number_of_bins_);
     GGfloat mu_en = 0.0f;
     if (E_index == 0) {
       mu_en = attenuations->mu_en_[material_id*attenuations->number_of_bins_];

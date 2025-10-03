@@ -69,6 +69,63 @@ class GGEMSVoxelizedPhantom(object):
         ggems_lib.set_rotation_ggems_voxelized_phantom(self.obj, rx, ry, rz, unit.encode('ASCII'))
 
 
+class GGEMSMeshedPhantom(object):
+    """Class for meshed phantom for GGEMS simulation
+    """
+    def __init__(self, meshed_phantom_name):
+        ggems_lib.create_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_phantom_file_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_phantom_file_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_position_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_position_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_rotation_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_rotation_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_visible_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_visible_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_color_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_ubyte, ctypes.c_ubyte, ctypes.c_ubyte]
+        ggems_lib.set_material_color_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_color_name_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.set_material_color_name_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_name_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_material_name_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_mesh_octree_depth_ggems_meshed_phantom.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        ggems_lib.set_mesh_octree_depth_ggems_meshed_phantom.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_meshed_phantom(meshed_phantom_name.encode('ASCII'))
+
+    def set_phantom(self, phantom_filename):
+        ggems_lib.set_phantom_file_ggems_meshed_phantom(self.obj, phantom_filename.encode('ASCII'))
+
+    def set_position(self, pos_x, pos_y, pos_z, unit):
+        ggems_lib.set_position_ggems_meshed_phantom(self.obj, pos_x, pos_y, pos_z, unit.encode('ASCII'))
+
+    def set_rotation(self, rx, ry, rz, unit):
+        ggems_lib.set_rotation_ggems_meshed_phantom(self.obj, rx, ry, rz, unit.encode('ASCII'))
+
+    def set_visible(self, flag):
+        ggems_lib.set_visible_ggems_meshed_phantom(self.obj, flag)
+
+    def set_material(self, material_name):
+        ggems_lib.set_material_name_ggems_meshed_phantom(self.obj, material_name.encode('ASCII'))
+
+    def set_mesh_octree_depth(self, depth):
+        ggems_lib.set_mesh_octree_depth_ggems_meshed_phantom(self.obj, depth)
+
+    def set_material_color(self, material_name, red=0, green=0, blue=0, color_name=''):
+        if color_name:
+            ggems_lib.set_material_color_name_ggems_meshed_phantom(self.obj, material_name.encode('ASCII'), color_name.encode('ASCII'))
+        else:
+            ggems_lib.set_material_color_ggems_meshed_phantom(self.obj, material_name.encode('ASCII'), red, green, blue)
+
+
 class GGEMSWorld(object):
     """Class for world volume for GGEMS simulation
     """

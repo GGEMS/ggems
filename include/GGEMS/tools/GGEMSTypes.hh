@@ -197,18 +197,21 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 
 #ifdef OPENGL_VISUALIZATION
 #define GLFW_INCLUDE_NONE /*!< Prevent the GLFW header from including the OpenGL header */
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+/// \cond
 #include <GLFW/glfw3.h>
+/// \endcond
 #define GLEW_STATIC /*!< Using GLEW in static mode */
+/// \cond
 #include <GL/glew.h>
+/// \endcond
 #endif
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.hpp>
 #else
+/// \cond
 #include <CL/cl.hpp>
+/// \endcond
 #endif
 
 #define GGbool cl_bool /*!< define a new type for cl_bool, not used in OpenCL */

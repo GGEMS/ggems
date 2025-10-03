@@ -35,9 +35,11 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+/// \cond
 #include <cstdint>
 #include <string>
 #include <vector>
+/// \endcond
 
 #include "GGEMS/global/GGEMSExport.hh"
 

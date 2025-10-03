@@ -40,8 +40,19 @@
 */
 enum GGEMSEventInfo : GGint
 {
+  /*!
+    \brief START event flag
+  */
   START = 0,
+
+  /*!
+    \brief END event flag
+  */
   END,
+
+  /*!
+    \brief ELAPSED event flag
+  */
   ELAPSED
 };
 

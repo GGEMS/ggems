@@ -12,9 +12,10 @@
 
 #ifdef OPENGL_VISUALIZATION
 
+/// \cond
 #include <filesystem>
+/// \endcond
 
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 #include "GGEMS/graphics/GGEMSOpenGLAxis.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
@@ -410,6 +411,10 @@ void GGEMSOpenGLManager::InitGL(void)
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW window dimensions: " << window_width_ << "x" << window_height_ << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * MSAA factor: " << msaa_ << GGendl;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSOpenGLManager::InitializeDisplayedParticles(GGsize const& number_of_sources)
 {
@@ -935,10 +940,10 @@ void GGEMSOpenGLManager::InitShaders(std::string const& vertex_shader_source, st
 
 void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
 {
-  GLint sucess = 0;
+  GLint success = 0;
   glCompileShader(shader);
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &sucess);
-  if(sucess == GL_FALSE) {
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if(success == GL_FALSE) {
     GLint max_length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
 

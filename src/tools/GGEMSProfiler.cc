@@ -28,7 +28,9 @@
   \date Tuesday March 16, 2021
 */
 
+/// \cond
 #include <mutex>
+/// \endcond
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
@@ -69,9 +71,9 @@ void GGEMSProfiler::Callback(cl_event event, GGint event_command_exec_status, vo
   if (event_command_exec_status == CL_COMPLETE) {
     GGEMSProfiler* p = reinterpret_cast<GGEMSProfiler*>(user_data);
     // Call back Function has to be thread safe!!!
-    mutex.lock();
+    ::mutex.lock();
     p->AddProfilerItem(event);
-    mutex.unlock();
+    ::mutex.unlock();
     clReleaseEvent(event);
   }
 }

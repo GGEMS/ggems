@@ -6,107 +6,46 @@ forum: <https://forum.ggems.fr>
 
 ## Description
 
-GGEMS is an advanced Monte Carlo simulation platform using CPU and GPU architecture targeting medical applications (imaging and particle therapy). This code is based on the well-validated Geant4 physics model and capable to be executed in both CPU and GPU devices using the OpenCL library.
+GGEMS is an advanced Monte Carlo simulation platform using the OpenCL library managing CPU and GPU architecture. GGEMS is fully developed in C++ and accessible via Python command line. Well-validated Geant4 physic models are used in GGEMS and implemented using OpenCL. The aim of GGEMS is to provide a fast simulation platform for imaging application (CT/CBCT for moment) and particle therapy. To favor speed of computation, GGEMS is not a very generic platform as Geant4 or GATE. For very realistic simulation with lot of information results, Geant4 and GATE are still recommended.
 
-Features:
+GGEMS features:
 * Photon particle tracking
-* Multithreaded CPU (Intel, AMD not tested)
-* GPU (NVIDIA, Intel, AMD not tested)
+* Multithreaded CPU
+* GPU (NVIDIA or Intel HD Graphics)
 * Multi devices (GPUs+CPU) approach
 * Single or double float precision for dosimetry application
 * External X-ray source
-* Navigation in simple box volume or voxelized volume
+* Voxelized source
+* Navigation in simple box volume, voxelized volume or meshed volume
 * Flat or curved detector for CBCT/CT application
-* OpenGL visualization
-* Dosimetry application (photon)
-* TLE (Track Length Estimator) method for dosimetry
+* Visualisation using OpenGL
 
 ## Requirements
 
-GGEMS is a multiplatform application using OpenCL.
+GGEMS is a multi-architecture application using OpenCL.
 
-OpenCL v1.2 or more must be installed on your system.
+OpenCL v3.0 must be installed on your system. This OpenCL version could be downloaded from CUDA Toolkit 12.6.
 
-Supported operating system:
+Supported and tested operating system:
 
-* Windows
-* Linux
+* Windows 11
+* Ubuntu 24.04 LTS
 
 Tested compilers:
 
-* gcc 7/8/9 on Linux
-* clang from version 9 to 13 on Linux and Windows
-* Visual C++ 2022 on Windows
+* GNU Compiler Collection (GCC) Version 13.3 for Linux
+* Clang version 18.1.3 for Linux
+* Visual C/C++ Compiler Version 19.44 or 19.50 for x64 for Windows
 
 ## Installation
 
-To install GGEMS, please follow the procedure here: <https://doc.ggems.fr/v1.2/building_and_installing.html>
-
-## Installation using Python
-
-On Windows or Linux system, GGEMS can be installed using a single python command:
+GEMS can be install on Linux or Windows system using setuptools. Simply use the following command in the GGEMS directory:
 
 ```console
-foo@bar~: python setup.py build_ext --generator=Ninja --opengl=ON --examples=ON install
+foo@bar~: python setup.py build_ext --opengl=ON install
 ```
 
-By default, the options 'opengl' and 'examples' are set to 'OFF'. In the previous command line, the 'Ninja' generator is activated, a defaut navigator is selected if this option is not used.
-
-# GGEMS using Docker for Linux users
-
-A docker image for GGEMS version 1.2 is available here:
-
-```console
-foo@bar~: docker pull ggems/ggems:v1.2.1
-```
-
-### Important
-
-To use the docker image on your linux machine, the nvidia driver must be installed as well as the 'nvidia-container' library. To install 'nvidia-container' run the following commands:
-
-```console
-foo@bar~: sudo apt install curl
-foo@bar~: curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-foo@bar~: sudo apt update
-foo@bar~: sudo apt-get install -y nvidia-container-toolkit
-```
-
-To test the docker image, run this command:
-
-```console
-foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2.1 nvidia-smi
-Sun Oct 20 14:26:23 2024       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 555.52.04              Driver Version: 555.52.04      CUDA Version: 12.5     |
-|-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA GeForce GTX 980 Ti      Off |   00000000:01:00.0 Off |                  N/A |
-| 20%   34C    P8             17W /  260W |       2MiB /   6144MiB |      0%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-                                                                                         
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|  No running processes found                                                             |
-+-----------------------------------------------------------------------------------------+
-```
-
-Running CT scanner example in docker image:
-
-```console
-foo@bar~: docker run -it --rm --gpus all ggems/ggems:v1.2.1
-foo@bar~: cd examples/2_CT_Scanner
-foo@bar~: python ct_scanner.py
-```
+For more details, please read the installation recommendation <https://doc.ggems.fr/v1.3/building_and_installing.html>
 
 ## Copyright
 

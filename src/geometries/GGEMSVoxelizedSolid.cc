@@ -89,6 +89,16 @@ GGEMSVoxelizedSolid::~GGEMSVoxelizedSolid(void)
 {
   GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid erasing..." << GGendl;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (solid_data_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(solid_data_[i], sizeof(GGEMSVoxelizedSolidData), i);
+    }
+    delete[] solid_data_;
+    solid_data_ = nullptr;
+  }
+
   GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid erased!!!" << GGendl;
 }
 
@@ -237,7 +247,7 @@ void GGEMSVoxelizedSolid::PrintInfos(void) const
     GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << GGendl;
     GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "GGEMSVoxelizedSolid Infos:" << GGendl;
     GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "--------------------------" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "Material on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "Voxelized solid on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
     GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Dimension: " << solid_data_device->number_of_voxels_xyz_.s[0] << " " << solid_data_device->number_of_voxels_xyz_.s[1] << " " << solid_data_device->number_of_voxels_xyz_.s[2] << GGendl;
     GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Number of voxels: " << solid_data_device->number_of_voxels_ << GGendl;
     GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Size of voxels: (" << solid_data_device->voxel_sizes_xyz_.s[0] /mm << "x" << solid_data_device->voxel_sizes_xyz_.s[1]/mm << "x" << solid_data_device->voxel_sizes_xyz_.s[2]/mm << ") mm3" << GGendl;

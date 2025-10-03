@@ -109,13 +109,13 @@ GGEMSSolid::~GGEMSSolid(void)
     label_data_ = nullptr;
   }
 
-  if (solid_data_) {
+  /*if (solid_data_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
       opencl_manager.Deallocate(solid_data_[i], sizeof(GGEMSSolidBoxData), i);
     }
     delete[] solid_data_;
     solid_data_ = nullptr;
-  }
+  }*/
 
   GGcout("GGEMSSolid", "~GGEMSSolid", 3) << "GGEMSSolid erased!!!" << GGendl;
 }
@@ -133,9 +133,19 @@ void GGEMSSolid::EnableTracking(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::AddKernelOption(std::string const& option)
+void GGEMSSolid::EnableTLE(void)
 {
   kernel_option_ += " -DTLE";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolid::AddKernelOption(std::string const& option)
+{
+  kernel_option_ += " ";
+  kernel_option_ += option;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -207,6 +217,16 @@ void GGEMSSolid::SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const
   if (opengl_solid_)
     opengl_solid_->SetZUpdateAngle(update_angle_z);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolid::SetPositionOpenGL(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z)
+{
+  if (opengl_solid_)
+    opengl_solid_->SetPosition(position_x, position_y, position_z);
+}
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,11 +236,6 @@ void GGEMSSolid::SetZUpdateAngleOpenGL(GLfloat const& update_angle_z) const
 void GGEMSSolid::SetPosition(GGfloat3 const& position_xyz)
 {
   geometry_transformation_->SetTranslation(position_xyz);
-
-  #ifdef OPENGL_VISUALIZATION
-  if (opengl_solid_)
-    opengl_solid_->SetPosition(position_xyz.s[0], position_xyz.s[1], position_xyz.s[2]);
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

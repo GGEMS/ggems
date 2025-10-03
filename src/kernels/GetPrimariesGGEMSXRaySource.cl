@@ -32,11 +32,10 @@
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/maths/GGEMSReferentialTransformation.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
-#include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
-  \fn kernel void get_primaries_ggems_xray_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf, GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
+  \fn kernel void get_primaries_ggems_xray_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf, GGint const number_of_energy_bins, GGchar const is_interp, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
   \param particle_id_limit - particle id limit
   \param primary_particle - buffer of primary particles
   \param random - buffer for random number
@@ -44,6 +43,7 @@
   \param energy_spectrum - energy spectrum
   \param cdf - cumulative derivative function
   \param number_of_energy_bins - number of energy bins
+  \param is_interp - linear interpolation of energy or not
   \param aperture - source aperture
   \param focal_spot_size - focal spot size of xray-source
   \param matrix_transformation - matrix storing information about axis
@@ -57,6 +57,7 @@ kernel void get_primaries_ggems_xray_source(
   global GGfloat const* energy_spectrum,
   global GGfloat const* cdf,
   GGint const number_of_energy_bins,
+  GGchar const is_interp,
   GGfloat const aperture,
   GGfloat3 const focal_spot_size,
   global GGfloat44 const* matrix_transformation
@@ -102,16 +103,24 @@ kernel void get_primaries_ggems_xray_source(
   // Apply transformation (local to global frame)
   global_position = LocalToGlobalPosition(matrix_transformation, &global_position);
 
-  // Getting a random energy
-  GGfloat rndm_for_energy = KissUniform(random, global_id);
-
-  // Get index in cdf
-  GGint index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins, 0, 0);
+  GGint index_for_energy = 0;
+  GGfloat rndm_for_energy = 0.0f;
+  // For non monoenergy
+  if (number_of_energy_bins != 1) {
+    rndm_for_energy = KissUniform(random, global_id);
+    index_for_energy = BinarySearch(rndm_for_energy, cdf, number_of_energy_bins+1);
+  }
 
   // Setting the energy for particles
-  primary_particle->E_[global_id] = (index_for_energy == number_of_energy_bins - 1) ?
+  primary_particle->E_[global_id] = (!is_interp) ?
     energy_spectrum[index_for_energy] :
-    LinearInterpolation(cdf[index_for_energy], energy_spectrum[index_for_energy], cdf[index_for_energy + 1], energy_spectrum[index_for_energy + 1], rndm_for_energy);
+    LinearInterpolation(
+      cdf[index_for_energy],
+      energy_spectrum[index_for_energy],
+      cdf[index_for_energy + 1],
+      energy_spectrum[index_for_energy + 1],
+      rndm_for_energy
+    );
 
   // Then set the mandatory field to create a new particle
   primary_particle->px_[global_id] = global_position.x;
