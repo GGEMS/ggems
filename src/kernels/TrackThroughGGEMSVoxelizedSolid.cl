@@ -129,19 +129,24 @@ kernel void track_through_ggems_voxelized_solid(
   GGfloat3 voxel_size = voxelized_solid_data->voxel_sizes_xyz_;
   GGint3 number_of_voxels = voxelized_solid_data->number_of_voxels_xyz_;
 
+  // Index of the current voxel. It is computed once from the position and then updated by stepping, never recomputed from the position,
+  // so that no tolerance snapping is needed inside the voxelized solid
+  GGint3 voxel_id = convert_int3((local_position - border_min) / voxel_size);
+  voxel_id = clamp(voxel_id, (GGint3)(0, 0, 0), number_of_voxels - (GGint3)(1, 1, 1));
+
+  // Straight segment followed by the particle: origin and current curvilinear abscissa along it
+  GGfloat3 segment_origin = local_position;
+  GGfloat segment_t = 0.0f;
+
+  // Direction of the voxel index increment on each axis: +1, -1 or 0 (particle parallel to the voxel faces of this axis)
+  GGint3 voxel_step = (GGint3)(
+    (local_direction.x > 0.0f) ? 1 : ((local_direction.x < 0.0f) ? -1 : 0),
+    (local_direction.y > 0.0f) ? 1 : ((local_direction.y < 0.0f) ? -1 : 0),
+    (local_direction.z > 0.0f) ? 1 : ((local_direction.z < 0.0f) ? -1 : 0)
+  );
+
   // Track particle until out of solid
   do {
-    // Get index of voxelized phantom, x, y, z
-    GGint3 voxel_id = convert_int3((local_position - border_min) / voxel_size);
-
-    if (voxel_id.x >= number_of_voxels.x ||
-        voxel_id.y >= number_of_voxels.y ||
-        voxel_id.z >= number_of_voxels.z) {
-      primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
-      primary_particle->solid_id_[global_id] = -1; // Out of world
-      break;
-    }
-
     // Get the material that compose this volume
     GGuchar material_id = label_data[voxel_id.x + voxel_id.y * number_of_voxels.x + voxel_id.z * number_of_voxels.x * number_of_voxels.y];
 
@@ -154,31 +159,35 @@ kernel void track_through_ggems_voxelized_solid(
     GGfloat3 voxel_border_min = border_min + convert_float3(voxel_id)*voxel_size;
     GGfloat3 voxel_border_max = voxel_border_min + voxel_size;
 
-    // Get safety position of particle to be sure particle is inside voxel
-    TransportGetSafetyInsideAABB(
-      &local_position,
-      voxel_border_min.x, voxel_border_max.x,
-      voxel_border_min.y, voxel_border_max.y,
-      voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
-    );
+    // Curvilinear abscissa, measured from the origin of the segment, at which the particle reaches the face of the current voxel on
+    // each axis. An axis parallel to the particle direction is never crossed
+    GGfloat3 t_axis;
+    if (local_direction.x != 0.0f) t_axis.x = ((local_direction.x > 0.0f ? voxel_border_max.x : voxel_border_min.x) - segment_origin.x) / local_direction.x;
+    else t_axis.x = OUT_OF_WORLD;
+    if (local_direction.y != 0.0f) t_axis.y = ((local_direction.y > 0.0f ? voxel_border_max.y : voxel_border_min.y) - segment_origin.y) / local_direction.y;
+    else t_axis.y = OUT_OF_WORLD;
+    if (local_direction.z != 0.0f) t_axis.z = ((local_direction.z > 0.0f ? voxel_border_max.z : voxel_border_min.z) - segment_origin.z) / local_direction.z;
+    else t_axis.z = OUT_OF_WORLD;
 
     // Get the distance to next boundary
-    GGfloat distance_to_next_boundary = ComputeDistanceToAABB(
-      &local_position, &local_direction,
-      voxel_border_min.x, voxel_border_max.x,
-      voxel_border_min.y, voxel_border_max.y,
-      voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
-    );
+    GGfloat t_exit = fmin(t_axis.x, fmin(t_axis.y, t_axis.z));
+    GGfloat distance_to_next_boundary = fmax(t_exit - segment_t, 0.0f);
 
-    // If distance to next boundary is inferior to distance to next interaction we move particle to boundary
+    // If distance to next boundary is inferior to distance to next interaction we move particle to boundary and step to the next voxel
     if (distance_to_next_boundary <= next_interaction_distance) {
-      next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
+      next_interaction_distance = distance_to_next_boundary;
       next_discrete_process = TRANSPORTATION;
       #if defined(DOSIMETRY)
       if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
       #endif
+      segment_t = t_exit;
+      // Exact equality is intended: if the particle crosses an edge or a corner of the voxel, the voxel index is incremented on all the axes concerned
+      if (t_axis.x == t_exit) voxel_id.x += voxel_step.x;
+      if (t_axis.y == t_exit) voxel_id.y += voxel_step.y;
+      if (t_axis.z == t_exit) voxel_id.z += voxel_step.z;
+    }
+    else {
+      segment_t += next_interaction_distance;
     }
 
     #if defined(GGEMS_TRACKING)
@@ -214,20 +223,22 @@ kernel void track_through_ggems_voxelized_solid(
     }
     #endif
 
-    // Moving particle to next position
-    local_position = local_position + local_direction*next_interaction_distance;
+    // Moving particle to next position, always from the origin of the segment so that the rounding errors do not accumulate
+    local_position = segment_origin + local_direction*segment_t;
 
-    // Get safety position of particle to be sure particle is outside voxel
-    TransportGetSafetyOutsideAABB(
-      &local_position,
-      voxel_border_min.x, voxel_border_max.x,
-      voxel_border_min.y, voxel_border_max.y,
-      voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
-    );
-
-    //  Checking if particle outside solid, still in local
-    if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, GEOMETRY_TOLERANCE)) {
+    // Checking if particle outside solid, still in local
+    if (voxel_id.x < 0 || voxel_id.x >= number_of_voxels.x ||
+        voxel_id.y < 0 || voxel_id.y >= number_of_voxels.y ||
+        voxel_id.z < 0 || voxel_id.z >= number_of_voxels.z) {
+      // Get safety position of particle to be sure particle is outside the solid
+      local_position += local_direction*GEOMETRY_TOLERANCE;
+      TransportGetSafetyOutsideAABB(
+        &local_position,
+        border_min.x, border_max.x,
+        border_min.y, border_max.y,
+        border_min.z, border_max.z,
+        GEOMETRY_TOLERANCE
+      );
       primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
       primary_particle->solid_id_[global_id] = -1; // Out of world
       break;
@@ -261,6 +272,15 @@ kernel void track_through_ggems_voxelized_solid(
       local_direction.x = primary_particle->dx_[global_id];
       local_direction.y = primary_particle->dy_[global_id];
       local_direction.z = primary_particle->dz_[global_id];
+
+      // The direction has changed, a new straight segment starts from the current position
+      segment_origin = local_position;
+      segment_t = 0.0f;
+      voxel_step = (GGint3)(
+        (local_direction.x > 0.0f) ? 1 : ((local_direction.x < 0.0f) ? -1 : 0),
+        (local_direction.y > 0.0f) ? 1 : ((local_direction.y < 0.0f) ? -1 : 0),
+        (local_direction.z > 0.0f) ? 1 : ((local_direction.z < 0.0f) ? -1 : 0)
+      );
 
       #if defined(OPENGL)
       if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
