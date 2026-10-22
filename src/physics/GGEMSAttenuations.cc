@@ -29,28 +29,29 @@
 */
 
 #include "GGEMS/physics/GGEMSAttenuations.hh"
-#include "GGEMS/physics/GGEMSMuDataConstants.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
-#include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+#include "GGEMS/physics/GGEMSCrossSections.hh"
+#include "GGEMS/physics/GGEMSMuDataConstants.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSAttenuations::GGEMSAttenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections)
-{
-  GGcout("GGEMSAttenuations", "GGEMSAttenuations", 3) << "GGEMSAttenuations creating..." << GGendl;
+GGEMSAttenuations::GGEMSAttenuations(GGEMSMaterials *materials,
+                                     GGEMSCrossSections *cross_sections) {
+  GGcout("GGEMSAttenuations", "GGEMSAttenuations", 3)
+      << "GGEMSAttenuations creating..." << GGendl;
 
   // Get the number of activated device
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager &opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
   // Allocating buffers
   energies_ = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
   mu_ = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
   mu_en_ = new GGfloat[GGEMSMuDataConstants::kMuNbEnergies];
-  mu_index_ = new GGint[GGEMSMuDataConstants::kMuNbElements];
+  mu_index_ = new GGint[GGEMSMuDataConstants::kMuNbElements + 1];
 
   materials_ = materials;
   cross_sections_ = cross_sections;
@@ -75,16 +76,17 @@ GGEMSAttenuations::GGEMSAttenuations(GGEMSMaterials* materials, GGEMSCrossSectio
     }
   }
 
-  GGcout("GGEMSAttenuations", "GGEMSAttenuations", 3) << "GGEMSAttenuations created!!!" << GGendl;
+  GGcout("GGEMSAttenuations", "GGEMSAttenuations", 3)
+      << "GGEMSAttenuations created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSAttenuations::~GGEMSAttenuations(void)
-{
-  GGcout("GGEMSAttenuations", "~GGEMSAttenuations", 3) << "GGEMSAttenuations erasing..." << GGendl;
+GGEMSAttenuations::~GGEMSAttenuations(void) {
+  GGcout("GGEMSAttenuations", "~GGEMSAttenuations", 3)
+      << "GGEMSAttenuations erasing..." << GGendl;
 
   if (energies_) {
     delete[] energies_;
@@ -111,18 +113,19 @@ GGEMSAttenuations::~GGEMSAttenuations(void)
     attenuations_host_ = nullptr;
   }
 
-  GGcout("GGEMSAttenuations", "~GGEMSAttenuations", 3) << "GGEMSAttenuations erased!!!" << GGendl;
+  GGcout("GGEMSAttenuations", "~GGEMSAttenuations", 3)
+      << "GGEMSAttenuations erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSAttenuations::Clean(void)
-{
-  GGcout("GGEMSAttenuations", "Clean", 3) << "GGEMSAttenuations cleaning..." << GGendl;
+void GGEMSAttenuations::Clean(void) {
+  GGcout("GGEMSAttenuations", "Clean", 3)
+      << "GGEMSAttenuations cleaning..." << GGendl;
 
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager &opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   if (mu_tables_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
@@ -132,32 +135,42 @@ void GGEMSAttenuations::Clean(void)
     mu_tables_ = nullptr;
   }
 
-  GGcout("GGEMSAttenuations", "Clean", 3) << "GGEMSAttenuations cleaned!!!" << GGendl;
+  GGcout("GGEMSAttenuations", "Clean", 3)
+      << "GGEMSAttenuations cleaned!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSAttenuations::Initialize(void)
-{
-  GGcout("GGEMSAttenuations", "Initialize", 1) << "Initializing attenuation tables..." << GGendl;
+void GGEMSAttenuations::Initialize(void) {
+  GGcout("GGEMSAttenuations", "Initialize", 1)
+      << "Initializing attenuation tables..." << GGendl;
 
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager &opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Loop over the device and storing value for each materials
-  mu_tables_ = new cl::Buffer*[number_activated_devices_];
+  mu_tables_ = new cl::Buffer *[number_activated_devices_];
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Allocating memory on OpenCL device
-    mu_tables_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMuMuEnData), d, CL_MEM_READ_WRITE, "GGEMSAttenuations");
+    mu_tables_[d] =
+        opencl_manager.Allocate(nullptr, sizeof(GGEMSMuMuEnData), d,
+                                CL_MEM_READ_WRITE, "GGEMSAttenuations");
 
     // Getting the OpenCL pointer on Mu tables
-    GGEMSMuMuEnData* mu_table_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMuMuEnData), d);
+    GGEMSMuMuEnData *mu_table_device =
+        opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(
+            mu_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ,
+            sizeof(GGEMSMuMuEnData), d);
 
-    cl::Buffer* particle_cs = cross_sections_->GetCrossSections(d);
-    GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), d);
+    cl::Buffer *particle_cs = cross_sections_->GetCrossSections(d);
+    GGEMSParticleCrossSections *particle_cs_device =
+        opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(
+            particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ,
+            sizeof(GGEMSParticleCrossSections), d);
 
-    mu_table_device->number_of_materials_ = static_cast<GGint>(particle_cs_device->number_of_materials_);
+    mu_table_device->number_of_materials_ =
+        static_cast<GGint>(particle_cs_device->number_of_materials_);
     mu_table_device->energy_max_ = ATTENUATION_ENERGY_MAX;
     mu_table_device->energy_min_ = ATTENUATION_ENERGY_MIN;
     mu_table_device->number_of_bins_ = ATTENUATION_TABLE_NUMBER_BINS;
@@ -165,14 +178,24 @@ void GGEMSAttenuations::Initialize(void)
     opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
 
     // Fill energy table with log scale
-    GGfloat slope = logf(mu_table_device->energy_max_ / mu_table_device->energy_min_);
+    GGfloat slope =
+        logf(mu_table_device->energy_max_ / mu_table_device->energy_min_);
     GGint i = 0;
     while (i < mu_table_device->number_of_bins_) {
-      mu_table_device->energy_bins_[i] = mu_table_device->energy_min_ * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->number_of_bins_)-1.0f)))*MeV;
+      mu_table_device->energy_bins_[i] =
+          mu_table_device->energy_min_ *
+          expf(slope *
+               (static_cast<GGfloat>(i) /
+                (static_cast<GGfloat>(mu_table_device->number_of_bins_) -
+                 1.0f))) *
+          MeV;
       ++i;
     }
 
-    GGEMSMaterialTables* materials_device =  opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(materials_->GetMaterialTables(d), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
+    GGEMSMaterialTables *materials_device =
+        opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(
+            materials_->GetMaterialTables(d), CL_TRUE,
+            CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
 
     // For each material and energy bin compute mu and muen
     GGint imat = 0;
@@ -181,49 +204,62 @@ void GGEMSAttenuations::Initialize(void)
     GGfloat energy, mu_over_rho, mu_en_over_rho, frac;
     while (imat < mu_table_device->number_of_materials_) {
       // for each energy bin
-      i=0;
+      i = 0;
       while (i < mu_table_device->number_of_bins_) {
         // absolute index to store data within the table
-        abs_index = imat*mu_table_device->number_of_bins_ + i;
+        abs_index = imat * mu_table_device->number_of_bins_ + i;
 
         // Energy value
         energy = mu_table_device->energy_bins_[i];
 
         // For each element of the material
-        mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
-        iZ=0;
+        mu_over_rho = 0.0f;
+        mu_en_over_rho = 0.0f;
+        iZ = 0;
         while (iZ < materials_device->number_of_chemical_elements_[imat]) {
           // Get Z and mass fraction
-          Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[imat] + iZ];
-          frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[imat] + iZ];
+          Z = materials_device->atomic_number_Z_
+                  [materials_device->index_of_chemical_elements_[imat] + iZ];
+          frac = materials_device->mass_fraction_
+                     [materials_device->index_of_chemical_elements_[imat] + iZ];
 
           // Get energy index
           mu_index_E = GGEMSMuDataConstants::kMuIndexEnergy[Z];
-          E_index = BinarySearch(energy, energies_, mu_index_E+GGEMSMuDataConstants::kMuNbEnergyBins[Z]);
+          E_index = BinarySearch(energy, energies_,
+                                 mu_index_E +
+                                     GGEMSMuDataConstants::kMuNbEnergyBins[Z]);
 
           // Get mu an mu_en from interpolation
-          if ( E_index == mu_index_E ) {
+          if (E_index == mu_index_E) {
             mu_over_rho += mu_[E_index];
             mu_en_over_rho += mu_en_[E_index];
-          }
-          else
-          {
-            mu_over_rho += frac * LinearInterpolation(energies_[E_index-1], mu_[E_index-1], energies_[E_index], mu_[E_index], energy);
-            mu_en_over_rho += frac * LinearInterpolation(energies_[E_index-1], mu_en_[E_index-1], energies_[E_index], mu_en_[E_index], energy);
+          } else {
+            mu_over_rho += frac * LinearInterpolation(
+                                      energies_[E_index - 1], mu_[E_index - 1],
+                                      energies_[E_index], mu_[E_index], energy);
+            mu_en_over_rho +=
+                frac * LinearInterpolation(
+                           energies_[E_index - 1], mu_en_[E_index - 1],
+                           energies_[E_index], mu_en_[E_index], energy);
           }
           ++iZ;
         }
 
         // Store values
-        mu_table_device->mu_[abs_index] = mu_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
-        mu_table_device->mu_en_[abs_index] = mu_en_over_rho * materials_device->density_of_material_[imat] / (g/cm3);
+        mu_table_device->mu_[abs_index] =
+            mu_over_rho * materials_device->density_of_material_[imat] /
+            (g / cm3);
+        mu_table_device->mu_en_[abs_index] =
+            mu_en_over_rho * materials_device->density_of_material_[imat] /
+            (g / cm3);
 
         ++i;
       } // E bin
       ++imat;
     }
     opencl_manager.ReleaseDeviceBuffer(mu_tables_[d], mu_table_device, d);
-    opencl_manager.ReleaseDeviceBuffer(materials_->GetMaterialTables(d), materials_device, d);
+    opencl_manager.ReleaseDeviceBuffer(materials_->GetMaterialTables(d),
+                                       materials_device, d);
   }
 
   // Copy data from device to RAM memory (optimization for python users)
@@ -234,26 +270,30 @@ void GGEMSAttenuations::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSAttenuations::LoadAttenuationsOnHost(void)
-{
-  GGcout("GGEMSAttenuations", "LoadAttenuationsOnHost", 1) << "Loading attenuations coefficient from OpenCL device to host (RAM)..." << GGendl;
+void GGEMSAttenuations::LoadAttenuationsOnHost(void) {
+  GGcout("GGEMSAttenuations", "LoadAttenuationsOnHost", 1)
+      << "Loading attenuations coefficient from OpenCL device to host (RAM)..."
+      << GGendl;
 
   // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager &opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer to data on OpenCL device
-  GGEMSMuMuEnData* attenuations_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[0], CL_TRUE, CL_MAP_READ, sizeof(GGEMSMuMuEnData), 0);
+  GGEMSMuMuEnData *attenuations_device =
+      opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(
+          mu_tables_[0], CL_TRUE, CL_MAP_READ, sizeof(GGEMSMuMuEnData), 0);
 
   attenuations_host_->number_of_bins_ = attenuations_device->number_of_bins_;
   attenuations_host_->energy_min_ = attenuations_device->energy_min_;
   attenuations_host_->energy_max_ = attenuations_device->energy_max_;
-  attenuations_host_->number_of_materials_ = attenuations_device->number_of_materials_;
+  attenuations_host_->number_of_materials_ =
+      attenuations_device->number_of_materials_;
 
-  for(GGint i = 0; i < ATTENUATION_TABLE_NUMBER_BINS; ++i) {
+  for (GGint i = 0; i < ATTENUATION_TABLE_NUMBER_BINS; ++i) {
     attenuations_host_->energy_bins_[i] = attenuations_device->energy_bins_[i];
   }
 
-  for(GGint i = 0; i < 256*ATTENUATION_TABLE_NUMBER_BINS; ++i) {
+  for (GGint i = 0; i < 256 * ATTENUATION_TABLE_NUMBER_BINS; ++i) {
     attenuations_host_->mu_[i] = attenuations_device->mu_[i];
     attenuations_host_->mu_en_[i] = attenuations_device->mu_en_[i];
   }
@@ -266,8 +306,9 @@ void GGEMSAttenuations::LoadAttenuationsOnHost(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSAttenuations::GetAttenuation(std::string const& material_name, GGfloat const& energy, std::string const& unit) const
-{
+GGfloat GGEMSAttenuations::GetAttenuation(std::string const &material_name,
+                                          GGfloat const &energy,
+                                          std::string const &unit) const {
   // Get min and max energy in the table, and number of bins
   GGfloat min_energy = attenuations_host_->energy_min_;
   GGfloat max_energy = attenuations_host_->energy_max_;
@@ -278,7 +319,9 @@ GGfloat GGEMSAttenuations::GetAttenuation(std::string const& material_name, GGfl
 
   if (e_MeV < min_energy || e_MeV > max_energy) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Problem energy: " << e_MeV << " " << unit << " is not in the range [" << min_energy << ", " << max_energy << "] MeV!!!" << std::endl;
+    oss << "Problem energy: " << e_MeV << " " << unit
+        << " is not in the range [" << min_energy << ", " << max_energy
+        << "] MeV!!!" << std::endl;
     GGEMSMisc::ThrowException("GGEMSAttenuations", "GetAttenuation", oss.str());
   }
 
@@ -286,15 +329,23 @@ GGfloat GGEMSAttenuations::GetAttenuation(std::string const& material_name, GGfl
   ptrdiff_t material_id = materials_->GetMaterialIndex(material_name);
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearch(e_MeV, attenuations_host_->energy_bins_, static_cast<GGint>(number_of_bins)));
+  GGsize energy_bin =
+      static_cast<GGsize>(BinarySearch(e_MeV, attenuations_host_->energy_bins_,
+                                       static_cast<GGint>(number_of_bins)));
 
   // Computing attenuation
   GGfloat energy_a = attenuations_host_->energy_bins_[energy_bin];
-  GGfloat energy_b = attenuations_host_->energy_bins_[energy_bin+1];
-  GGfloat attenuation_a = attenuations_host_->mu_[energy_bin + static_cast<GGsize>(number_of_bins*material_id)];
-  GGfloat attenuation_b = attenuations_host_->mu_[energy_bin+1 + static_cast<GGsize>(number_of_bins*material_id)];
+  GGfloat energy_b = attenuations_host_->energy_bins_[energy_bin + 1];
+  GGfloat attenuation_a =
+      attenuations_host_
+          ->mu_[energy_bin + static_cast<GGsize>(number_of_bins * material_id)];
+  GGfloat attenuation_b =
+      attenuations_host_
+          ->mu_[energy_bin + 1 +
+                static_cast<GGsize>(number_of_bins * material_id)];
 
-  GGfloat attenuation = LinearInterpolation(energy_a, attenuation_a, energy_b, attenuation_b, e_MeV);
+  GGfloat attenuation = LinearInterpolation(energy_a, attenuation_a, energy_b,
+                                            attenuation_b, e_MeV);
 
   return attenuation;
 }
@@ -303,8 +354,10 @@ GGfloat GGEMSAttenuations::GetAttenuation(std::string const& material_name, GGfl
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSAttenuations::GetEnergyAttenuation(std::string const& material_name, GGfloat const& energy, std::string const& unit) const
-{
+GGfloat
+GGEMSAttenuations::GetEnergyAttenuation(std::string const &material_name,
+                                        GGfloat const &energy,
+                                        std::string const &unit) const {
   // Get min and max energy in the table, and number of bins
   GGfloat min_energy = attenuations_host_->energy_min_;
   GGfloat max_energy = attenuations_host_->energy_max_;
@@ -315,23 +368,35 @@ GGfloat GGEMSAttenuations::GetEnergyAttenuation(std::string const& material_name
 
   if (e_MeV < min_energy || e_MeV > max_energy) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Problem energy: " << e_MeV << " " << unit << " is not in the range [" << min_energy << ", " << max_energy << "] MeV!!!" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSAttenuations", "GetEnergyAttenuation", oss.str());
+    oss << "Problem energy: " << e_MeV << " " << unit
+        << " is not in the range [" << min_energy << ", " << max_energy
+        << "] MeV!!!" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSAttenuations", "GetEnergyAttenuation",
+                              oss.str());
   }
 
   // Get id of material
   ptrdiff_t material_id = materials_->GetMaterialIndex(material_name);
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearch(e_MeV, attenuations_host_->energy_bins_, static_cast<GGint>(number_of_bins)));
+  GGsize energy_bin =
+      static_cast<GGsize>(BinarySearch(e_MeV, attenuations_host_->energy_bins_,
+                                       static_cast<GGint>(number_of_bins)));
 
   // Computing attenuation
   GGfloat energy_a = attenuations_host_->energy_bins_[energy_bin];
-  GGfloat energy_b = attenuations_host_->energy_bins_[energy_bin+1];
-  GGfloat energy_attenuation_a = attenuations_host_->mu_en_[energy_bin + static_cast<GGsize>(number_of_bins*material_id)];
-  GGfloat energy_attenuation_b = attenuations_host_->mu_en_[energy_bin+1 + static_cast<GGsize>(number_of_bins*material_id)];
+  GGfloat energy_b = attenuations_host_->energy_bins_[energy_bin + 1];
+  GGfloat energy_attenuation_a =
+      attenuations_host_
+          ->mu_en_[energy_bin +
+                   static_cast<GGsize>(number_of_bins * material_id)];
+  GGfloat energy_attenuation_b =
+      attenuations_host_
+          ->mu_en_[energy_bin + 1 +
+                   static_cast<GGsize>(number_of_bins * material_id)];
 
-  GGfloat energy_attenuation = LinearInterpolation(energy_a, energy_attenuation_a, energy_b, energy_attenuation_b, e_MeV);
+  GGfloat energy_attenuation = LinearInterpolation(
+      energy_a, energy_attenuation_a, energy_b, energy_attenuation_b, e_MeV);
 
   return energy_attenuation;
 }
@@ -340,17 +405,17 @@ GGfloat GGEMSAttenuations::GetEnergyAttenuation(std::string const& material_name
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSAttenuations* create_ggems_attenuations(GGEMSMaterials* materials, GGEMSCrossSections* cross_sections)
-{
-  return new(std::nothrow) GGEMSAttenuations(materials, cross_sections);
+GGEMSAttenuations *
+create_ggems_attenuations(GGEMSMaterials *materials,
+                          GGEMSCrossSections *cross_sections) {
+  return new (std::nothrow) GGEMSAttenuations(materials, cross_sections);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_ggems_attenuations(GGEMSAttenuations* attenuations)
-{
+void initialize_ggems_attenuations(GGEMSAttenuations *attenuations) {
   attenuations->Initialize();
 }
 
@@ -358,8 +423,9 @@ void initialize_ggems_attenuations(GGEMSAttenuations* attenuations)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat get_mu_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit)
-{
+GGfloat get_mu_ggems_attenuations(GGEMSAttenuations *attenuations,
+                                  char const *material_name,
+                                  GGfloat const energy, char const *unit) {
   return attenuations->GetAttenuation(material_name, energy, unit);
 }
 
@@ -367,8 +433,9 @@ GGfloat get_mu_ggems_attenuations(GGEMSAttenuations* attenuations, char const* m
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat get_mu_en_ggems_attenuations(GGEMSAttenuations* attenuations, char const* material_name, GGfloat const energy, char const* unit)
-{
+GGfloat get_mu_en_ggems_attenuations(GGEMSAttenuations *attenuations,
+                                     char const *material_name,
+                                     GGfloat const energy, char const *unit) {
   return attenuations->GetEnergyAttenuation(material_name, energy, unit);
 }
 
@@ -376,7 +443,6 @@ GGfloat get_mu_en_ggems_attenuations(GGEMSAttenuations* attenuations, char const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void clean_ggems_attenuations(GGEMSAttenuations* attenuations)
-{
+void clean_ggems_attenuations(GGEMSAttenuations *attenuations) {
   attenuations->Clean();
 }
