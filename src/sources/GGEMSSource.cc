@@ -56,13 +56,13 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   // Allocation of geometry transformation
   geometry_transformation_ = new GGEMSGeometryTransformation();
 
-  // Allocating memory for cdf and energy spectrum
-  energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
-  energy_cdf_ = new cl::Buffer*[number_activated_devices_];
-
-  // Get the number of activated device
+  // Get the number of activated devices before allocating device-dependent arrays
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  // Allocate and initialize energy buffers; FillEnergy() populates them later
+  energy_spectrum_ = new cl::Buffer*[number_activated_devices_]();
+  energy_cdf_ = new cl::Buffer*[number_activated_devices_]();
 
   // Storing a kernel for each device
   kernel_get_primaries_ = new cl::Kernel*[number_activated_devices_];
@@ -117,7 +117,9 @@ GGEMSSource::~GGEMSSource(void)
 
   if (energy_spectrum_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(energy_spectrum_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
+      if (energy_spectrum_[i] != nullptr) {
+        opencl_manager.Deallocate(energy_spectrum_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
+      }
     }
     delete[] energy_spectrum_;
     energy_spectrum_ = nullptr;
@@ -125,7 +127,9 @@ GGEMSSource::~GGEMSSource(void)
 
   if (energy_cdf_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(energy_cdf_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
+      if (energy_cdf_[i] != nullptr) {
+        opencl_manager.Deallocate(energy_cdf_[i], (number_of_energy_bins_+1)*sizeof(GGfloat), i);
+      }
     }
     delete[] energy_cdf_;
     energy_cdf_ = nullptr;
