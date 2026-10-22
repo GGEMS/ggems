@@ -29,9 +29,74 @@
 */
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
+#include "GGEMS/geometries/GGEMSGeometryConstants.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
+namespace {
+
+// Local representability check only; independent of placement and orientation.
+GGfloat ComputeVoxelizedGeometryTolerance(GGEMSVoxelizedSolidData const& data)
+{
+  auto reject = [](GGint axis, char const* reason) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Invalid local FP32 voxel geometry on axis " << axis << ": " << reason
+        << ". Use coarser voxels or a smaller local extent.";
+    GGEMSMisc::ThrowException("GGEMSVoxelizedSolid", "LoadVolumeImage", oss.str());
+  };
+
+  GGfloat min_voxel_size = std::numeric_limits<GGfloat>::max();
+  for (GGint j = 0; j < 3; ++j) {
+    GGint const n = data.number_of_voxels_xyz_.s[j];
+    GGfloat const h = data.voxel_sizes_xyz_.s[j];
+    // Adjacent integer indices must convert exactly to binary32.
+    if (n <= 0 || n > 16777216 || !std::isfinite(h) || h <= 0.0f) {
+      reject(j, "invalid voxel count or spacing");
+    }
+    min_voxel_size = std::min(min_voxel_size, h);
+  }
+
+  // Spacings and GEOMETRY_TOLERANCE are in GGEMS internal millimeters.
+  GGfloat const tolerance = std::min(GEOMETRY_TOLERANCE, 5.0e-04f * min_voxel_size);
+  // Do not depend on optional OpenCL support for subnormal arithmetic.
+  if (!std::isnormal(tolerance)) reject(-1, "tolerance is zero or subnormal");
+
+  GGfloat const infinity = std::numeric_limits<GGfloat>::infinity();
+  for (GGint j = 0; j < 3; ++j) {
+    GGint const n = data.number_of_voxels_xyz_.s[j];
+    GGfloat const h = data.voxel_sizes_xyz_.s[j];
+    GGfloat const lo = data.obb_geometry_.border_min_xyz_.s[j];
+    GGfloat const hi = data.obb_geometry_.border_max_xyz_.s[j];
+    if (!std::isfinite(lo) || !std::isfinite(hi) || !(lo < hi)) {
+      reject(j, "nonfinite or collapsed local extent");
+    }
+    // The kernel's last upper face can differ from hi. Monotonic face
+    // construction lets these endpoints bound all faces without a voxel scan.
+    GGfloat const last = lo + static_cast<GGfloat>(n - 1) * h;
+    GGfloat const last_upper = last + h;
+    GGfloat const magnitude = std::max({std::fabs(lo), std::fabs(hi), std::fabs(last_upper)});
+    GGfloat const spacing = std::nextafter(magnitude, infinity) - magnitude;
+    if (!std::isfinite(last_upper) || !std::isfinite(spacing) || tolerance < spacing ||
+        !std::isfinite(magnitude + tolerance) ||
+        !(magnitude - tolerance < magnitude && magnitude < magnitude + tolerance)) {
+      reject(j, "tolerance cannot resolve the largest local boundary");
+    }
+    // One local spacing on either side keeps the two tolerance bands distinct.
+    // The fixed relative factor also leaves h >= about 2000 local spacings.
+    if (!(h > 2.0f * (tolerance + spacing) &&
+          lo + tolerance < hi - tolerance && last + tolerance < hi - tolerance)) {
+      reject(j, "neighboring boundaries or tolerance bands are not distinct");
+    }
+  }
+  return tolerance;
+}
+
+} // namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -283,6 +348,18 @@ void GGEMSVoxelizedSolid::LoadVolumeImage(GGEMSMaterials* materials)
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     mhd_input_phantom.Read(volume_header_filename_, solid_data_[d], d);
+
+    // Initialize the per-solid policy before raw loading or any navigation.
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+    GGEMSVoxelizedSolidData* data = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), d);
+    try {
+      data->geometry_tolerance_ = ComputeVoxelizedGeometryTolerance(*data);
+    }
+    catch (...) {
+      opencl_manager.ReleaseDeviceBuffer(solid_data_[d], data, d);
+      throw;
+    }
+    opencl_manager.ReleaseDeviceBuffer(solid_data_[d], data, d);
   }
 
   // Get the name of raw file from mhd reader

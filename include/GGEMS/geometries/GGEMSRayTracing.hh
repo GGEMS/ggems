@@ -86,12 +86,13 @@ inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+  \fn inline void TransportGetSafetyInsideOBBWithTolerance(GGfloat3 const* position, global GGEMSOBB const* obb_data, GGfloat const tolerance)
   \param position - pointer on primary particle position
   \param obb_data - OBB data infos
+  \param tolerance - tolerance for geometry
   \brief Moving particle slightly inside a OBB solid
 */
-inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+inline void TransportGetSafetyInsideOBBWithTolerance(GGfloat3 const* position, global GGEMSOBB const* obb_data, GGfloat const tolerance)
 {
   // Get the position in local position
   GGfloat3 local_position = GlobalToLocalPosition(&obb_data->matrix_transformation_, position);
@@ -101,13 +102,19 @@ inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOB
     obb_data->border_min_xyz_.x, obb_data->border_max_xyz_.x,
     obb_data->border_min_xyz_.y, obb_data->border_max_xyz_.y,
     obb_data->border_min_xyz_.z, obb_data->border_max_xyz_.z,
-    GEOMETRY_TOLERANCE
+    tolerance
   );
 
   GGfloat3 new_position = LocalToGlobalPosition(&obb_data->matrix_transformation_, &local_position);
   position->x = new_position.x;
   position->y = new_position.y;
   position->z = new_position.z;
+}
+
+// Preserve the legacy tolerance for non-voxelized callers.
+inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+{
+  TransportGetSafetyInsideOBBWithTolerance(position, obb_data, GEOMETRY_TOLERANCE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,9 +177,9 @@ inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat cons
 */
 inline GGchar IsParticleInAABB(GGfloat3 const* position, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
 {
-  if (position->s0 < (x_min + GEOMETRY_TOLERANCE) || position->s0 > (x_max - GEOMETRY_TOLERANCE)) return FALSE;
-  if (position->s1 < (y_min + GEOMETRY_TOLERANCE) || position->s1 > (y_max - GEOMETRY_TOLERANCE)) return FALSE;
-  if (position->s2 < (z_min + GEOMETRY_TOLERANCE) || position->s2 > (z_max - GEOMETRY_TOLERANCE)) return FALSE;
+  if (position->s0 < (x_min + tolerance) || position->s0 > (x_max - tolerance)) return FALSE;
+  if (position->s1 < (y_min + tolerance) || position->s1 > (y_max - tolerance)) return FALSE;
+  if (position->s2 < (z_min + tolerance) || position->s2 > (z_max - tolerance)) return FALSE;
 
   return TRUE;
 }
@@ -182,13 +189,14 @@ inline GGchar IsParticleInAABB(GGfloat3 const* position, GGfloat const x_min, GG
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGuchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+  \fn inline GGchar IsParticleInOBBWithTolerance(GGfloat3 const* position, global GGEMSOBB const* obb_data, GGfloat const tolerance)
   \param position - pointer on primary particle
   \param obb_data - OBB data infos
+  \param tolerance - tolerance for geometry
   \return false if particle outside OBB object, and true if particle inside OBB object
   \brief Check if particle is inside or outside OBB object
 */
-inline GGchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+inline GGchar IsParticleInOBBWithTolerance(GGfloat3 const* position, global GGEMSOBB const* obb_data, GGfloat const tolerance)
 {
   // Get the position in local position
   GGfloat3 local_position = GlobalToLocalPosition(&obb_data->matrix_transformation_, position);
@@ -198,8 +206,14 @@ inline GGchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_dat
     obb_data->border_min_xyz_.x, obb_data->border_max_xyz_.x,
     obb_data->border_min_xyz_.y, obb_data->border_max_xyz_.y,
     obb_data->border_min_xyz_.z, obb_data->border_max_xyz_.z,
-    GEOMETRY_TOLERANCE
+    tolerance
   );
+}
+
+// Preserve the legacy tolerance for non-voxelized callers.
+inline GGchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+{
+  return IsParticleInOBBWithTolerance(position, obb_data, GEOMETRY_TOLERANCE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -302,14 +316,15 @@ inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* d
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data)
+  \fn inline GGfloat ComputeDistanceToOBBWithTolerance(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data, GGfloat const tolerance)
   \param position - pointer on position of primary particle
   \param direction - pointer on direction of primary particle
   \param obb_data - OBB data infos
+  \param tolerance - tolerance for geometry
   \return distance to OBB solid
   \brief Compute the distance between particle and OBB using Smits algorithm
 */
-inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data)
+inline GGfloat ComputeDistanceToOBBWithTolerance(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data, GGfloat const tolerance)
 {
   // Get the position in local position
   GGfloat3 local_position = GlobalToLocalPosition(&obb_data->matrix_transformation_, position);
@@ -321,8 +336,14 @@ inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* di
     obb_data->border_min_xyz_.x, obb_data->border_max_xyz_.x,
     obb_data->border_min_xyz_.y, obb_data->border_max_xyz_.y,
     obb_data->border_min_xyz_.z, obb_data->border_max_xyz_.z,
-    GEOMETRY_TOLERANCE
+    tolerance
   );
+}
+
+// Preserve the legacy tolerance for non-voxelized callers.
+inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data)
+{
+  return ComputeDistanceToOBBWithTolerance(position, direction, obb_data, GEOMETRY_TOLERANCE);
 }
 
 #endif
