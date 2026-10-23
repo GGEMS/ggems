@@ -128,6 +128,7 @@ kernel void track_through_ggems_voxelized_solid(
 
   GGfloat3 voxel_size = voxelized_solid_data->voxel_sizes_xyz_;
   GGint3 number_of_voxels = voxelized_solid_data->number_of_voxels_xyz_;
+  GGfloat const geometry_tolerance = voxelized_solid_data->geometry_tolerance_;
 
   // Track particle until out of solid
   do {
@@ -160,7 +161,7 @@ kernel void track_through_ggems_voxelized_solid(
       voxel_border_min.x, voxel_border_max.x,
       voxel_border_min.y, voxel_border_max.y,
       voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
+      geometry_tolerance
     );
 
     // Get the distance to next boundary
@@ -169,12 +170,12 @@ kernel void track_through_ggems_voxelized_solid(
       voxel_border_min.x, voxel_border_max.x,
       voxel_border_min.y, voxel_border_max.y,
       voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
+      geometry_tolerance
     );
 
     // If distance to next boundary is inferior to distance to next interaction we move particle to boundary
     if (distance_to_next_boundary <= next_interaction_distance) {
-      next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
+      next_interaction_distance = distance_to_next_boundary + geometry_tolerance;
       next_discrete_process = TRANSPORTATION;
       #if defined(DOSIMETRY)
       if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
@@ -223,11 +224,11 @@ kernel void track_through_ggems_voxelized_solid(
       voxel_border_min.x, voxel_border_max.x,
       voxel_border_min.y, voxel_border_max.y,
       voxel_border_min.z, voxel_border_max.z,
-      GEOMETRY_TOLERANCE
+      geometry_tolerance
     );
 
     //  Checking if particle outside solid, still in local
-    if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, GEOMETRY_TOLERANCE)) {
+    if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, geometry_tolerance)) {
       primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
       primary_particle->solid_id_[global_id] = -1; // Out of world
       break;

@@ -30,9 +30,12 @@
 
 /// \cond
 #include <vector>
+#include <cmath>
+#include <limits>
 /// \endcond
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
+#include "GGEMS/geometries/GGEMSGeometryConstants.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
 
@@ -141,6 +144,13 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   // Get pointer on OpenCL device
   GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), thread_index);
 
+  // This reader also serves voxelized sources, which retain the legacy policy.
+  solid_data_device->geometry_tolerance_ = GEOMETRY_TOLERANCE;
+  solid_data_device->number_of_voxels_xyz_ = {};
+  solid_data_device->voxel_sizes_xyz_ = {};
+  bool dimensions_read = false;
+  bool spacing_read = false;
+
   // Getting output directory
   std::size_t found_dir = image_mhd_header_filename.find_last_of("/\\");
   if (found_dir != std::string::npos) {
@@ -163,12 +173,10 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
 
     // Compare key and store data if valid
     if (!kKey.compare("DimSize")) {
-      iss >> solid_data_device->number_of_voxels_xyz_.s[0] >> solid_data_device->number_of_voxels_xyz_.s[1] >> solid_data_device->number_of_voxels_xyz_.s[2];
-      // Computing number of voxels
-      solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_.s[0] * solid_data_device->number_of_voxels_xyz_.s[1] * solid_data_device->number_of_voxels_xyz_.s[2];
+      dimensions_read = static_cast<bool>(iss >> solid_data_device->number_of_voxels_xyz_.s[0] >> solid_data_device->number_of_voxels_xyz_.s[1] >> solid_data_device->number_of_voxels_xyz_.s[2]);
     }
     else if (!kKey.compare("ElementSpacing")) {
-      iss >> solid_data_device->voxel_sizes_xyz_.s[0] >> solid_data_device->voxel_sizes_xyz_.s[1] >> solid_data_device->voxel_sizes_xyz_.s[2];
+      spacing_read = static_cast<bool>(iss >> solid_data_device->voxel_sizes_xyz_.s[0] >> solid_data_device->voxel_sizes_xyz_.s[1] >> solid_data_device->voxel_sizes_xyz_.s[2]);
     }
     else if (!kKey.compare("ElementType")) {
       iss >> mhd_data_type_;
@@ -182,27 +190,35 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   in_header_stream.close();
 
   // Checking the values
-  if (solid_data_device->number_of_voxels_xyz_.s[0] <= 0 || solid_data_device->number_of_voxels_xyz_.s[1] <= 0 || solid_data_device->number_of_voxels_xyz_.s[2] <= 0) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Dimension invalid for the key 'DimSize'!!! The values have to be > 0";
-    GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
+  if (!dimensions_read || !spacing_read) {
+    opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device, thread_index);
+    GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", "DimSize and ElementSpacing must each contain three valid values.");
   }
 
-  if (solid_data_device->voxel_sizes_xyz_.s[0] == 0.0f || solid_data_device->voxel_sizes_xyz_.s[1] == 0.0f || solid_data_device->voxel_sizes_xyz_.s[2] == 0.0f) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
-    GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
+  GGint number_of_voxels = 1;
+  for (GGsize i = 0; i < 3; ++i) {
+    GGint const n = solid_data_device->number_of_voxels_xyz_.s[i];
+    GGfloat const h = solid_data_device->voxel_sizes_xyz_.s[i];
+    if (n <= 0 || n > std::numeric_limits<GGint>::max() / number_of_voxels ||
+        !std::isfinite(h) || h <= 0.0f) {
+      opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device, thread_index);
+      GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", "DimSize must be positive with a total fitting GGint; ElementSpacing must be finite and positive (mm).");
+    }
+    number_of_voxels *= n;
   }
+  solid_data_device->number_of_voxels_ = number_of_voxels;
 
   if (mhd_data_type_.empty() && mhd_data_type_.compare("MET_DOUBLE") && mhd_data_type_.compare("MET_FLOAT") && mhd_data_type_.compare("MET_SHORT") && mhd_data_type_.compare("MET_USHORT") && mhd_data_type_.compare("MET_UCHAR") && mhd_data_type_.compare("MET_CHAR") && mhd_data_type_.compare("MET_UINT") && mhd_data_type_.compare("MET_INT")) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Value invalid for the key 'ElementType'!!! The value have to be 'MET_DOUBLE' or 'MET_FLOAT' or 'MET_SHORT' or 'MET_USHORT' or 'MET_UCHAR' or 'MET_CHAR' or 'MET_UINT' or 'MET_INT'";
+    opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device, thread_index);
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
   if (mhd_raw_file_.empty()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Value invalid for the key 'ElementDataFile'!!! A filename for raw data has to be given";
+    opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device, thread_index);
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
@@ -210,6 +226,10 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   for (GGsize i = 0; i < 3; ++i) {
     solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -static_cast<GGfloat>(solid_data_device->number_of_voxels_xyz_.s[i]) * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
     solid_data_device->obb_geometry_.border_max_xyz_.s[i] = static_cast<GGfloat>(solid_data_device->number_of_voxels_xyz_.s[i]) * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
+    if (!std::isfinite(solid_data_device->obb_geometry_.border_max_xyz_.s[i])) {
+      opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device, thread_index);
+      GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", "Voxel-grid extent overflows FP32 (mm).");
+    }
   }
 
   // Release the pointer

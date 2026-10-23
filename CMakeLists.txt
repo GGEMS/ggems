@@ -88,6 +88,15 @@ set(OPENCL_SDK_BUILD_CLINFO
 set(BUILD_TESTING
     OFF
     CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES
+    OFF
+    CACHE BOOL "" FORCE)
+set(BUILD_DOCS
+    OFF
+    CACHE BOOL "" FORCE)
+set(ENABLE_OPENCL_LAYERINFO
+    OFF
+    CACHE BOOL "" FORCE)
 
 add_subdirectory(external/OpenCL-SDK)
 

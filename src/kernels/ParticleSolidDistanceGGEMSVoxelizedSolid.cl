@@ -72,8 +72,10 @@ kernel void particle_solid_distance_ggems_voxelized_solid(
     primary_particle->dz_[global_id]
   };
 
+  GGfloat const geometry_tolerance = voxelized_solid_data->geometry_tolerance_;
+
   // Check if particle inside voxelized navigator, if yes distance is 0.0 and not need to compute particle - solid distance
-  if (IsParticleInOBB(&position, &voxelized_solid_data->obb_geometry_)) {
+  if (IsParticleInOBBWithTolerance(&position, &voxelized_solid_data->obb_geometry_, geometry_tolerance)) {
     #ifdef GGEMS_TRACKING
     if (global_id == primary_particle->particle_tracking_id) {
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_voxelized_solid] --------------------------------------------------------------------------------\n");
@@ -89,7 +91,7 @@ kernel void particle_solid_distance_ggems_voxelized_solid(
   }
 
   // Compute distance between particles and voxelized navigator
-  GGfloat distance = ComputeDistanceToOBB(&position, &direction, &voxelized_solid_data->obb_geometry_);
+  GGfloat distance = ComputeDistanceToOBBWithTolerance(&position, &direction, &voxelized_solid_data->obb_geometry_, geometry_tolerance);
 
   // Check distance value with previous value. Store the minimum value
   if (distance < primary_particle->particle_solid_distance_[global_id]) {

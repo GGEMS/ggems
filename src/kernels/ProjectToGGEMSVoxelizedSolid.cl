@@ -104,12 +104,13 @@ kernel void project_to_ggems_voxelized_solid(
 
   // Distance to current navigator and geometry tolerance
   GGfloat distance = primary_particle->particle_solid_distance_[global_id];
+  GGfloat const geometry_tolerance = voxelized_solid_data->geometry_tolerance_;
 
   // Moving the particle slightly inside the volume
-  position += direction*(distance+GEOMETRY_TOLERANCE);
+  position += direction*(distance+geometry_tolerance);
 
   // Correcting the particle position if not totally inside due to float tolerance
-  TransportGetSafetyInsideOBB(&position, &voxelized_solid_data->obb_geometry_);
+  TransportGetSafetyInsideOBBWithTolerance(&position, &voxelized_solid_data->obb_geometry_, geometry_tolerance);
 
   // Set new value for particles
   primary_particle->px_[global_id] = position.x;
