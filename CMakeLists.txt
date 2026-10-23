@@ -68,7 +68,7 @@ endif()
 # Name of the project and define the language
 project(
   GGEMS
-  VERSION 1.3
+  VERSION 1.3.1
   HOMEPAGE_URL ggems.fr
   LANGUAGES CXX)
 
